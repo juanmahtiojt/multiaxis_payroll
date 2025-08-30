@@ -1,0 +1,492 @@
+<?php
+include_once "functions.php";
+include 'config.php'; // add your DB connection here
+
+session_start();
+require 'vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($_FILES['attendance_file']['error'] == UPLOAD_ERR_OK) {
+        $fileTmpPath = $_FILES['attendance_file']['tmp_name'];
+
+        try {
+            $spreadsheet = IOFactory::load($fileTmpPath);
+            $sheet = $spreadsheet->getActiveSheet();
+
+            $employeeData = [];
+            $highestRow = $sheet->getHighestRow();
+            $startRow = 10;
+
+            while ($startRow <= $highestRow) {
+                $idNo = trim($sheet->getCell('E' . $startRow)->getFormattedValue());
+
+                // Skip empty or malformed rows
+                if (empty($idNo) || !is_numeric($idNo)) {
+                    $startRow++;
+                    continue;
+                }
+
+                $department = $sheet->getCell('L' . $startRow)->getFormattedValue();
+                $name = $sheet->getCell('E' . ($startRow + 2))->getFormattedValue();  // Be careful: E+2 might not always be the name
+
+                // Initialize data holders
+                $dates = [];
+                $amIn = [];
+                $amOut = [];
+
+                // Read up to 7 days of attendance
+                $attendanceStart = $startRow + 7;
+
+                for ($i = 0; $i < 7; $i++) {
+                    $currentRow = $attendanceStart + ($i * 2);  // Every 2 rows (e.g., actual + remarks)
+
+                    // Skip if we're past the sheet
+                    if ($currentRow > $highestRow) break;
+
+                    $dateVal = $sheet->getCell('C' . $currentRow)->getFormattedValue();
+                    $amInVal = $sheet->getCell('E' . $currentRow)->getFormattedValue();
+                    $amOutVal = $sheet->getCell('G' . $currentRow)->getFormattedValue();
+
+                    // Stop early if date is empty (assume end of data)
+                    if (empty($dateVal)) break;
+
+                    $dates[] = $dateVal;
+                    $amIn[] = $amInVal;
+                    $amOut[] = $amOutVal;
+                }
+
+                $employeeData[] = [
+                    'id_no' => $idNo,
+                    'department' => $department,
+                    'name' => $name,
+                    'dates' => $dates,
+                    'am_in' => $amIn,
+                    'am_out' => $amOut,
+                ];
+
+                // Find the next ID No to move to next employee
+                $nextRow = $startRow + 1;
+                while ($nextRow <= $highestRow) {
+                    $nextId = trim($sheet->getCell('E' . $nextRow)->getFormattedValue());
+                    if (!empty($nextId) && is_numeric($nextId)) {
+                        break;
+                    }
+                    $nextRow++;
+                }
+
+                $startRow = $nextRow;
+            }
+
+            // Set session variables for activity logging
+            $_SESSION['attendance_uploaded'] = true;
+            $_SESSION['uploaded_records_count'] = count($employeeData);
+
+            $_SESSION['attendance_data'] = $employeeData;
+            header('Location: employee_attendance.php');
+            exit;
+
+        } catch (Exception $e) {
+            $_SESSION['upload_error'] = 'Error loading file: ' . $e->getMessage();
+            header('Location: employee_attendance.php');
+            exit;
+        }
+    } else {
+        $_SESSION['upload_error'] = 'Error uploading the file.';
+        header('Location: employee_attendance.php');
+        exit;
+    }
+}
+?>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Attendance | Crystal Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #475569;
+            --accent-color: #06b6d4;
+            --light-bg: #f8fafc;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --gradient-bg: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+        }
+        
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--gradient-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            color: var(--secondary-color);
+        }
+
+        .page-container {
+            width: 100%;
+            max-width: 550px;
+        }
+
+        .upload-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            width: 100%;
+            box-shadow: var(--box-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-header-stripe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: var(--primary-color);
+        }
+
+        .upload-card h2 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+        }
+        
+        .upload-card p.lead {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-upload-container {
+            border: 2px dashed #cbd5e1;
+            border-radius: var(--border-radius);
+            padding: 2rem 1rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background-color: #f8fafc;
+        }
+        
+        .file-upload-container:hover, .file-upload-container.dragging {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+        
+        .file-upload-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload-text {
+            font-weight: 500;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .file-upload-help {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        
+        .selected-file {
+            display: none;
+            background-color: #f0f9ff;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-top: 1rem;
+            align-items: center;
+        }
+        
+        .selected-file-icon {
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            margin-right: 0.75rem;
+        }
+        
+        .selected-file-name {
+            font-weight: 500;
+            color: var(--secondary-color);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex-grow: 1;
+        }
+        
+        .selected-file-clear {
+            color: #94a3b8;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        .selected-file-clear:hover {
+            color: #ef4444;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #cbd5e1;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        #file-input {
+            display: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-icon {
+            margin-right: 0.5rem;
+        }
+
+        .footer-text {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 1.5rem;
+        }
+        
+        .footer-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .alert-icon {
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+        }
+        
+        .alert-danger {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        
+        .loader {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(37, 99, 235, 0.1);
+            border-left-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .upload-card {
+                padding: 1.5rem;
+            }
+            
+            .file-upload-container {
+                padding: 1.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    <div class="upload-card">
+        <div class="card-header-stripe"></div>
+        <h2><i class="fas fa-file-import me-2"></i>Attendance Import</h2>
+        <p class="lead">Upload Crystal Report attendance data for processing and analysis</p>
+
+        <?php if (isset($_SESSION['upload_error'])): ?>
+            <div class="alert alert-danger fade show" role="alert">
+                <i class="fas fa-exclamation-circle alert-icon"></i>
+                <?= $_SESSION['upload_error']; unset($_SESSION['upload_error']); ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" enctype="multipart/form-data" id="upload-form">
+            <div class="file-upload-container" id="drop-area">
+                <input type="file" name="attendance_file" id="file-input" accept=".xlsx,.xls" required>
+                <div class="file-upload-icon">
+                    <i class="fas fa-file-excel"></i>
+                </div>
+                <div class="file-upload-text">Drag & drop an Excel file or click to browse</div>
+                <div class="file-upload-help">Only Excel files exported from Crystal Reports are supported</div>
+                
+                <div class="selected-file" id="selected-file">
+                    <i class="fas fa-file-excel selected-file-icon"></i>
+                    <div class="selected-file-name" id="file-name"></div>
+                    <i class="fas fa-times selected-file-clear" id="clear-file"></i>
+                </div>
+            </div>
+            
+            <div class="loader" id="loader">
+                <div class="spinner"></div>
+            </div>
+            
+            <div class="d-grid">
+                <button class="btn btn-primary" type="submit" id="submit-btn">
+ <input type="hidden" name="source" value="employee_attendance.php">
+                    <i class="fas fa-upload btn-icon"></i>Process Attendance Data
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="footer-text">
+        Need help? <a href="#" class="footer-link">View documentation</a> or <a href="#" class="footer-link">contact support</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropArea = document.getElementById('drop-area');
+        const fileInput = document.getElementById('file-input');
+        const fileName = document.getElementById('file-name');
+        const selectedFile = document.getElementById('selected-file');
+        const clearFile = document.getElementById('clear-file');
+        const uploadForm = document.getElementById('upload-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const loader = document.getElementById('loader');
+        
+        // Open file dialog when clicking on drop area
+        dropArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // Handle file selection
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        // Handle drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+        
+        dropArea.addEventListener('drop', handleDrop, false);
+        
+        // Handle clear button
+        clearFile.addEventListener('click', (e) => {
+            e.stopPropagation();
+            clearFileSelection();
+            window.location.href = "employee_attendance_monthly.php"; // Go back to monthly page
+        });
+
+        
+        // Handle form submission
+        uploadForm.addEventListener('submit', () => {
+            if (fileInput.files.length > 0) {
+                submitBtn.disabled = true;
+                loader.style.display = 'flex';
+            }
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        function highlight() {
+            dropArea.classList.add('dragging');
+        }
+        
+        function unhighlight() {
+            dropArea.classList.remove('dragging');
+        }
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        }
+        
+        function handleFileSelect() {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                
+                // Check if the file is an Excel file
+                if (file.name.match(/\.(xlsx|xls)$/)) {
+                    fileName.textContent = file.name;
+                    selectedFile.style.display = 'flex';
+                } else {
+                    alert('Please select a valid Excel file (.xlsx or .xls)');
+                    clearFileSelection();
+                }
+            }
+        }
+        
+        function clearFileSelection() {
+            fileInput.value = '';
+            selectedFile.style.display = 'none';
+        }
+    });
+</script>
+</body>
+</html>

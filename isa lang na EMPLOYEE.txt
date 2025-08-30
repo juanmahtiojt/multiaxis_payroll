@@ -1,0 +1,106 @@
+<?php
+require 'vendor/autoload.php'; // Ensure PhpSpreadsheet is installed via Composer
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
+if (isset($_POST['submit'])) {
+    if ($_FILES['attendance_file']['error'] == UPLOAD_ERR_OK) {
+        // Get file path
+        $fileTmpPath = $_FILES['attendance_file']['tmp_name'];
+
+        try {
+            // Load the uploaded Excel file
+            $spreadsheet = IOFactory::load($fileTmpPath);
+            $sheet = $spreadsheet->getActiveSheet();
+            
+            // Start processing the data
+            $employeeData = [];
+            $row = 10; // Start from row 10 (first employee block)
+
+            while (true) {
+                // Check if the ID No. cell has a value (indicating an employee block)
+                $idNo = $sheet->getCell('E' . $row)->getValue();
+                if (empty($idNo)) {
+                    break; // No more employees, stop processing
+                }
+
+                // Get ID, Department, Name
+                $department = $sheet->getCell('L' . $row)->getValue();
+                $name = $sheet->getCell('E' . ($row + 2))->getValue(); // Name is on row + 2
+
+                // Get attendance data for the employee
+                $dates = [];
+                $amIn = [];
+                $amOut = [];
+
+                // Process dates, AM IN, AM OUT for rows 17, 19, 21, 23, 25, 27, 29
+                for ($i = 17; $i <= 29; $i += 2) {
+                    // Get Date, AM IN, AM OUT
+                    $dates[] = $sheet->getCell('C' . $i)->getValue();
+                    $amIn[] = $sheet->getCell('E' . $i)->getValue();
+                    $amOut[] = $sheet->getCell('G' . $i)->getValue();
+                }
+
+                // Store the data for this employee
+                $employeeData[] = [
+                    'id_no' => $idNo,
+                    'department' => $department,
+                    'name' => $name,
+                    'dates' => $dates,
+                    'am_in' => $amIn,
+                    'am_out' => $amOut,
+                ];
+
+                // Check if next employee block exists by checking ID No. on the next block
+                $nextIdNo = $sheet->getCell('E' . ($row + 22))->getValue(); // Check for ID in the next block (row 31+)
+                if (empty($nextIdNo)) {
+                    break; // No more employees, stop processing
+                }
+
+                // Move to the next employee block (Row 31 and beyond)
+                $row += 22; // Skip to the next block (Row 31)
+            }
+
+            // Display the extracted data
+            echo '<h3>Extracted Attendance Data</h3>';
+            echo '<table border="1">';
+            echo '<tr><th>ID No.</th><th>Department</th><th>Name</th><th>Date</th><th>AM IN</th><th>AM OUT</th></tr>';
+            foreach ($employeeData as $employee) {
+                foreach ($employee['dates'] as $key => $date) {
+                    echo '<tr>';
+                    echo '<td>' . $employee['id_no'] . '</td>';
+                    echo '<td>' . $employee['department'] . '</td>';
+                    echo '<td>' . $employee['name'] . '</td>';
+                    echo '<td>' . $date . '</td>';
+                    echo '<td>' . $employee['am_in'][$key] . '</td>';
+                    echo '<td>' . $employee['am_out'][$key] . '</td>';
+                    echo '</tr>';
+                }
+            }
+            echo '</table>';
+
+        } catch (Exception $e) {
+            echo 'Error loading file: ' . $e->getMessage();
+        }
+    } else {
+        echo 'Error uploading the file.';
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload and Extract Attendance</title>
+</head>
+<body>
+    <h2>Upload Crystal Reports Attendance Excel File</h2>
+    <form action="upload_crystal_attendance.php" method="post" enctype="multipart/form-data">
+        <label for="attendance_file">Upload Excel File:</label>
+        <input type="file" name="attendance_file" id="attendance_file" required>
+        <input type="submit" name="submit" value="Upload">
+    </form>
+</body>
+</html>
