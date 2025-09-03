@@ -121,6 +121,7 @@ function processWeekly($spreadsheet) {
  */
 function processMonthly($spreadsheet) {
     $sheet = $spreadsheet->getActiveSheet();
+    $highestRow = $sheet->getHighestRow();
     $employeeData = [];
     $startRow = 10;
 
@@ -135,8 +136,8 @@ function processMonthly($spreadsheet) {
         $amIn = [];
         $amOut = [];
         $attendanceStart = $startRow + 7;
-
-        for ($i = 0; $i < 31; $i++) {
+        
+        for ($i = 0; $i < 18; $i++) {
             $currentRow = $attendanceStart + ($i * 2);
             $cellObj = $sheet->getCell('C' . $currentRow);
             $rawValue = $cellObj->getValue();
@@ -172,7 +173,17 @@ function processMonthly($spreadsheet) {
             'am_out' => $amOut,
         ];
 
-        $startRow += 67;
+        // added for show all in table
+        $nextRow = $startRow + 1;
+        while ($nextRow <= $highestRow) {
+            $nextId = trim($sheet->getCell('E' . $nextRow)->getFormattedValue());
+            if (!empty($nextId) && is_numeric($nextId)) {
+                break;
+            }
+            $nextRow++;
+        }
+
+        $startRow = $nextRow;
     }
 
     return $employeeData;

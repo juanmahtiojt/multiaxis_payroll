@@ -640,7 +640,7 @@ function getPayslipsByDate($conn, $date, $archived = 0) {
                                                         <strong>Date Range:</strong> <?php echo date('M d, Y', strtotime($payslip['start_date'])); ?> - <?php echo date('M d, Y', strtotime($payslip['end_date'])); ?>
                                                     </div>
                                                     <div class="info-item">
-                                                        <strong>Net Pay:</strong> ₱<?php echo number_format($payslip['basic_salary'] - ($payslip['sss_premium'] + $payslip['sss_loan'] + $payslip['pagibig_premium'] + $payslip['pagibig_loan'] + $payslip['philhealth'] + $payslip['cash_advance']), 2); ?>
+                                                        <strong>Net Pay:</strong> ₱<?php echo number_format($payslip['basic_salary'] + $payslip['total_earnings'] - ($payslip['sss_premium'] + $payslip['sss_loan'] + $payslip['pagibig_premium'] + $payslip['pagibig_loan'] + $payslip['philhealth'] + $payslip['cash_advance']), 2); ?>
                                                     </div>
                                                     <div class="info-item">
                                                         <strong>Archived:</strong> <?php echo $payslip['formatted_date']; ?>
