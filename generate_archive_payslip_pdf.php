@@ -222,26 +222,26 @@ table.grid td {
 
 .report-header {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
     padding: 10px;
     background: #f8f9fa;
     border-radius: 5px;
 }
 
 .report-title {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: bold;
     color: #2c3e50;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
 }
 
 .report-date {
-    font-size: 14px;
+    font-size: 12px;
     color: #666;
 }
 
 .report-count {
-    font-size: 12px;
+    font-size: 10px;
     color: #888;
 }
 .signature-section {
@@ -261,11 +261,7 @@ table.grid td {
 </style>
 </head>
 <body>
-    <div class="report-header">
-        <div class="report-title">Payslip Report</div>
-        <div class="report-date">Generated on: ' . date('F j, Y', strtotime($generation_date)) . '</div>
-        <div class="report-count">Total Payslips: ' . count($payslips) . '</div>
-    </div>';
+    ';
 
         // $count = 0;
         // $totalPayslips = count($payslips);

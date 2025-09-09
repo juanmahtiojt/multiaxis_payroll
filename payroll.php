@@ -492,7 +492,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <div class="nav-section">
             <div class="nav-section-title">Payroll</div>
             <a href="payroll.php"
-                class="<?= in_array($current_page, ['payroll.php', 'enter_payroll.php', 'weekly_employees.php', 'semi-monthly_employees.php']) ? 'active' : '' ?>">
+                class="<?= in_array($current_page, ['payroll.php', 'enter_payroll.php', 'weekly_employees.php', 'semi-monthly_employees.php', 'enter_weekly_payroll.php', 'enter_payroll.php','enter_semimonthly_payroll.php']) ? 'active' : '' ?>">
                 <i class="fas fa-money-bill-wave"></i> Payroll
             </a>
             <a href="reports.php" class="<?php echo ($current_page == 'reports.php') ? 'active' : ''; ?>">

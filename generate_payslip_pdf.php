@@ -97,12 +97,18 @@ body {
 
 /* Container for 2 payslips per page */
 .payslip-container {
-    width: 100%;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 5mm;
     page-break-after: always;
+}
+
+table.grid {
+    width: 90%;
+    border-collapse: separate;
+    border-spacing: 5mm 5mm; 
+}
+
+table.grid td {
+    width: 50%;
+    vertical-align: top;
 }
 
 .payslip {
@@ -110,13 +116,12 @@ body {
     border: 1px solid #dee2e6;
     border-radius: 6px;
     padding: 8px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    height: 110mm; 
     page-break-inside: avoid;
-    break-inside: avoid;
-    height: 125mm;
-    display: flex;
-    flex-direction: column;
-}
+    width: 65mm;
+}}
+
 
 .payslip-header {
     text-align: center;
@@ -131,6 +136,7 @@ body {
     color: #2c3e50;
     margin-bottom: 1px;
 }
+
 .company-logo {
     max-width: 90px; 
     max-height: 65px; 
@@ -138,7 +144,6 @@ body {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
     background-color: #fff;
-
 }
 
 .payslip-title {
@@ -252,84 +257,89 @@ body {
     font-family: monospace;
     font-weight: 500;
 }
+    .signature-section {
+    margin-top: 2px;
+    margin-left: -80px;
+    font-size: 6px;
+    color: #666;
+    text-align:center;
+}
+
+.signature-line {
+    border-top: 1px solid #333;
+    width: 100px;
+    margin: 3px auto;
+}
 </style>
 </head>
 <body>
 ';
 
-        $count = 0;
+       $count = 0;
         $totalPayslips = count($payslip_result);
-        
-        // Start the payslip container
-        $html .= '<div class="payslip-container">';
-        
+
+        $html .= '<table class="grid" style="width:100%; border-spacing:5mm;">'; // Start first page
+
         foreach ($payslip_result as $row) {
+
+            if ($count % 2 == 0) {
+                $html .= '<tr>'; // Start new row every 2 payslips
+            }
+
             // Calculate overtime & totals
             $overtimePay = $row['overtime_pay'];
             if ((empty($overtimePay) || $overtimePay == 0) && $row['overtime_hours'] > 0 && $row['overtime_rate'] > 0) {
                 $overtimePay = $row['overtime_hours'] * $row['overtime_rate'];
             }
             $totalEarnings = $row['basic_salary'] + $overtimePay;
-            $totalDeductions = 
-                $row['sss_premium'] + $row['sss_loan'] + $row['pagibig_premium'] + 
-                $row['pagibig_loan'] + $row['philhealth'] + $row['cash_advance'] + 
+            $totalDeductions =
+                $row['sss_premium'] + $row['sss_loan'] + $row['pagibig_premium'] +
+                $row['pagibig_loan'] + $row['philhealth'] + $row['cash_advance'] +
                 $row['late_deduction'] + $row['absent_deduction'] + $row['undertime_deduction'];
             $netPay = $totalEarnings - $totalDeductions;
 
-            // Start a new container for every 2 payslips
-            if ($count % 2 == 0 && $count > 0) {
-                $html .= '</div><div class="payslip-container">';
-            } elseif ($count == 0) {
-                $html .= '<div class="payslip-container">';
-            }
+            // Logo
             $logoPath = __DIR__ . "/my_project/images/MULTI-removebg-preview.png";
-            $logoData = base64_encode(file_get_contents($logoPath));
-            $logoSrc = 'data:image/png;base64,' . $logoData;
-
-            $html .= '
-            <div class="payslip">
-                <div class="payslip-header">
-                    <img src="' . $logoSrc . '" alt="Company Logo" class="company-logo">
-                    <div class="company-name">Multi Axis Handlers & Tech Inc</div>
-                    <div class="payslip-title">PAYSLIP</div>
-                </div>
-                            
-                <div class="employee-info">
-                    <p><strong>Employee ID:</strong> ' . htmlspecialchars($row['employee_id']) . '</p>
-                    <p><strong>Name:</strong> ' . htmlspecialchars($row['name']) . '</p>
-                    <p><strong>Department:</strong> ' . htmlspecialchars($row['department']) . '</p>
-                    <p><strong>Pay Period:</strong> ' . ucfirst(htmlspecialchars($selected_period)) . '</p>
-                    <p><strong>Date Range:</strong> ' . date('M d, Y', strtotime($start_date)) . ' - ' . date('M d, Y', strtotime($end_date)) . '</p>
-                </div>
-
-                <div class="pay-section">
-                    <h4>EARNINGS</h4>
-                    <table class="pay-table">
-                        <tr>
-                            <td>Basic Salary</td>
-                            <td>P' . number_format($row['basic_salary'], 2) . '</td>
-                        </tr>';
-            
-            if ($row['overtime_hours'] > 0) {
-                $html .= '
-                        <tr>
-                            <td>Overtime (' . $row['overtime_hours'] . ' hrs)</td>
-                            <td>P' . number_format($overtimePay, 2) . '</td>
-                        </tr>';
+            if (file_exists($logoPath)) {
+                $logoData = base64_encode(file_get_contents($logoPath));
+                $logoSrc = 'data:image/png;base64,' . $logoData;
+            } else {
+                $logoSrc = '';
             }
-            
-            $html .= '
-                        <tr>
-                            <td><strong>Total Earnings</strong></td>
-                            <td><strong>P' . number_format($totalEarnings, 2) . '</strong></td>
-                        </tr>
-                    </table>
-                </div>  
 
-                <div class="pay-section">
-                    <h4>DEDUCTIONS</h4>
-                    <table class="pay-table">';
-            
+            // Payslip cell
+            $html .= '<td style="width:50%; vertical-align:top;">
+        <div class="payslip" style="border:1px solid #dee2e6; border-radius:6px; padding:8px; height:110mm; box-sizing:border-box;">
+            <div class="payslip-header">
+                <img src="' . $logoSrc . '" alt="Company Logo" class="company-logo">
+                <div class="company-name">Multi Axis Handlers & Tech Inc</div>
+                <div class="payslip-title">PAYSLIP</div>
+            </div>
+            <div class="employee-info">
+                <p><strong>Employee ID:</strong> ' . htmlspecialchars($row['employee_id']) . '</p>
+                <p><strong>Name:</strong> ' . htmlspecialchars($row['name']) . '</p>
+                <p><strong>Department:</strong> ' . htmlspecialchars($row['department']) . '</p>
+                <p><strong>Pay Period:</strong> ' . ucfirst(htmlspecialchars($row['pay_period'])) . '</p>
+                <p><strong>Date Range:</strong> ' . date('M d, Y', strtotime($row['start_date'])) . ' - ' . date('M d, Y', strtotime($row['end_date'])) . '</p>
+            </div>
+
+            <div class="pay-section">
+                <h4>EARNINGS</h4>
+                <table class="pay-table">
+                    <tr><td>Basic Salary</td><td>P' . number_format($row['basic_salary'], 2) . '</td></tr>';
+
+            if ($row['overtime_hours'] > 0) {
+                $html .= '<tr><td>Overtime (' . $row['overtime_hours'] . ' hrs)</td><td>P' . number_format($overtimePay, 2) . '</td></tr>';
+            }
+
+            $html .= '<tr><td><strong>Total Earnings</strong></td><td><strong>P' . number_format($totalEarnings, 2) . '</strong></td></tr>
+                </table>
+            </div>  
+
+            <div class="pay-section">
+                <h4>DEDUCTIONS</h4>
+                <table class="pay-table">';
+
             $deductions = [
                 'SSS Premium' => $row['sss_premium'],
                 'SSS Loan' => $row['sss_loan'],
@@ -341,35 +351,45 @@ body {
                 'Absent Deduction' => $row['absent_deduction'],
                 'Undertime Deduction' => $row['undertime_deduction']
             ];
-            
+
             foreach ($deductions as $desc => $amount) {
                 if ($amount > 0) {
-                    $html .= '
-                        <tr>
-                            <td>' . $desc . '</td>
-                            <td>P' . number_format($amount, 2) . '</td>
-                        </tr>';
+                    $html .= '<tr><td>' . $desc . '</td><td>P' . number_format($amount, 2) . '</td></tr>';
                 }
             }
-            
-            $html .= '
-                        <tr>
-                            <td><strong>Total Deductions</strong></td>
-                            <td><strong>P' . number_format($totalDeductions, 2) . '</strong></td>
-                        </tr>
-                    </table>
-                </div>
 
-                <div class="summary-section">
-                </div>
-                <p><strong>NET PAY: P' . number_format($netPay, 2) . '</strong></p>
-            </div>';
-            
+            $html .= '<tr><td><strong>Total Deductions</strong></td><td><strong>P' . number_format($totalDeductions, 2) . '</strong></td></tr>
+                </table>
+            </div>
+
+            <p><strong>NET PAY: P' . number_format($netPay, 2) . '</strong></p>
+        </div>
+        <div class="signature-section">
+            <p>This is a computer-generated payslip.</p>
+            <p>Generated on: ' . date('F j, Y') . '</p>
+            <div class="signature-line"></div>
+            <p>Employee Signature</p>
+        </div>
+    </td>';
+
+            if ($count % 2 == 1) {
+                $html .= '</tr>'; // Close row every 2 payslips
+            }
+
+            // Force page break after every 4 payslips
+            if (($count + 1) % 4 == 0 && ($count + 1) < $totalPayslips) {
+                $html .= '</table><div style="page-break-after: always;"></div><table style="width:100%; border-spacing:5mm;">';
+            }
+
             $count++;
         }
-        
-        // Close the final container
-        $html .= '</div></body></html>';
+
+        // If the last row has only 1 payslip, close it
+        if ($count % 2 != 0) {
+            $html .= '<td></td></tr>';
+        }
+
+        $html .= '</table>'; // Close table
 
         // Generate PDF
         $dompdf->loadHtml($html);

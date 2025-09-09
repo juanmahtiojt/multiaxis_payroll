@@ -372,7 +372,7 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
         <i class="fas fa-bars"></i>
     </button>
 
-    <div class="sidebar" id="sidebar">
+       <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <img src="my_project/images/MULTI-removebg-preview.png" class="sidebar-logo" alt="Company Logo">
             <div class="company-name">Multi Axis Handlers & Tech Inc</div>
@@ -409,7 +409,7 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
         <div class="nav-section">
             <div class="nav-section-title">Payroll</div>
             <a href="payroll.php"
-                class="<?= in_array($current_page, ['payroll.php', 'enter_payroll.php', 'weekly_employees.php', 'semi-monthly_employees.php']) ? 'active' : '' ?>">
+                class="<?= in_array($current_page, ['payroll.php', 'enter_payroll.php', 'weekly_employees.php', 'semi-monthly_employees.php', 'enter_weekly_payroll.php', 'enter_payroll.php','enter_semimonthly_payroll.php']) ? 'active' : '' ?>">
                 <i class="fas fa-money-bill-wave"></i> Payroll
             </a>
             <a href="reports.php" class="<?php echo ($current_page == 'reports.php') ? 'active' : ''; ?>">
@@ -436,8 +436,6 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
         <div class="sidebar-footer">
             © <?php echo date('Y'); ?> Multi Axis Handlers & Tech Inc.
         </div>
-
-    </div>
 
     </div>
 

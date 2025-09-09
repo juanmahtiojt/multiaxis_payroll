@@ -365,62 +365,78 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_weekly_employee'])
 </head>
 <body>
     <!-- Sidebar Overlay for Mobile -->
+    <!-- Sidebar Overlay for Mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
-    <!-- Mobile Menu Toggle Button -->
-    <button class="menu-toggle" id="menuToggle">
-        <i class="fas fa-bars"></i>
-    </button>
-    
+
+    <!-- Improved Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <img src="my_project/images/MULTI-removebg-preview.png" class="sidebar-logo" alt="Company Logo">
             <div class="company-name">Multi Axis Handlers & Tech Inc</div>
         </div>
-        
+
+        <!-- MAIN NAVIGATION -->
         <div class="nav-section">
-            <div class="nav-section-title">Main Navigation</div>
-            <a href="dashboard.php" class="<?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
+            <div class="nav-section-title">Main</div>
+            <a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">
                 <i class="fas fa-home"></i> Dashboard
             </a>
             <?php if ($role === 'admin') : ?>
-                <a href="add_user.php" class="<?php echo ($current_page == 'add_user.php') ? 'active' : ''; ?>">
+                <a href="add_user.php" class="<?= ($current_page == 'add_user.php') ? 'active' : '' ?>">
                     <i class="fas fa-user-plus"></i> Employees
                 </a>
             <?php endif; ?>
-            <a href="employee_attendance_monthly.php" class="<?php echo ($current_page == 'employee_attendance_monthly.php') ? 'active' : ''; ?>">
-                <i class="fas fa-clipboard-check"></i> Attendance 
-            </a>
+        </div>
 
+        <!-- ATTENDANCE -->
+        <div class="nav-section">
+            <div class="nav-section-title">Attendance</div>
+            <a href="employee_attendance_monthly.php" class="<?= ($current_page == 'employee_attendance_monthly.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-alt"></i> Monthly Attendance
             </a>
-            <a href="enter_weekly_payroll.php" class="<?php echo ($current_page == 'enter_weekly_payroll.php') ? 'active' : ''; ?>">
-                <i class="fas fa-dollar-sign"></i> Payroll
+            <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-week"></i> Weekly Attendance
+            </a>
+            <a href="attendance_summary_report.php" class="<?= ($current_page == 'attendance_summary_report.php') ? 'active' : '' ?>">
+                <i class="fas fa-clipboard-list"></i> Attendance Summary
             </a>
         </div>
-        
+
+        <!-- PAYROLL -->
         <div class="nav-section">
-            <div class="nav-section-title">Payroll Management</div>
+            <div class="nav-section-title">Payroll</div>
+            <a href="payroll.php" class="<?= ($current_page == 'payroll.php') ? 'active' : '' ?>">
+                <i class="fas fa-money-bill-wave"></i> Payroll
+            </a>
             <a href="reports.php" class="<?php echo ($current_page == 'reports.php') ? 'active' : ''; ?>">
                 <i class="fas fa-chart-bar"></i> Deductions
             </a>
-            <a href="attendance_summary_report.php" class="<?php echo ($current_page == 'attendance_summary_report.php') ? 'active' : ''; ?>">
-            <i class="fas fa-clock"></i> Attendance Summary
-            </a>
             <a href="view_payslips.php" class="<?= ($current_page == 'view_payslips.php') ? 'active' : '' ?>">
-                <i class="fas fa-file-alt"></i> View Payslips
+                <i class="fas fa-file-invoice-dollar"></i> View Payslips
+            </a>
+            <a href="payslip_archive.php" class="<?= ($current_page == 'payslip_archive.php') ? 'active' : '' ?>">
+                <i class="fas fa-archive"></i> Payslip Archive
             </a>
         </div>
-        
+
+        <!-- OTHER -->
         <div class="nav-section">
-            <a href="login.php" class="<?php echo ($current_page == 'login.php') ? 'active' : ''; ?>">
+            <div class="nav-section-title">Other</div>
+            <a href="about.php" class="<?= ($current_page == 'about.php') ? 'active' : '' ?>">
+                <i class="fas fa-info-circle"></i> About
+            </a>
+            <a href="logout.php" class="<?= ($current_page == 'logout.php') ? 'active' : '' ?>">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </div>
-        
         <div class="sidebar-footer">
-            © <?php echo date('Y'); ?> Multi Axis Handlers & Tech Inc.
-        </div>
+        © <?php echo date('Y'); ?> Multi Axis Handlers & Tech Inc.
     </div>
+
+    </div>
+
+    </div>
+
 
     <div class="main-content">
         <div class="container-box">

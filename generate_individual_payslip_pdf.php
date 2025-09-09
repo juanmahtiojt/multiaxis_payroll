@@ -110,7 +110,7 @@ body {
 table.grid {
     width: 90%;
     border-collapse: separate;
-    border-spacing: 5mm 5mm; 
+    border-spacing: 5mm 5mm; /* gap between payslips */
 }
 
 table.grid td {
@@ -124,10 +124,10 @@ table.grid td {
     border-radius: 6px;
     padding: 8px;
     box-sizing: border-box;
-    height: 110mm; 
+    height: 110mm; /* ensures 2 rows fit per page */
     page-break-inside: avoid;
     width: 65mm;
-}}
+}
 
 
 .payslip-header {
@@ -153,24 +153,20 @@ table.grid td {
     background-color: #fff;
 }
 
-
 .payslip-title {
-    font-size: 12px;
+    font-size: 10px;
     font-weight: bold;
     color: #34495e;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
 }
 
 .employee-info {
-    margin-bottom: 10px;
-    background: #f8f9fa;
-    padding: 6px;
-    border-radius: 3px;
+    margin-bottom: 6px;
 }
 
 .employee-info p {
-    margin: 2px 0;
-    font-size: 9px;
+    margin: 1px 0;
+    font-size: 8px;
 }
 
 .employee-info strong {
@@ -178,14 +174,14 @@ table.grid td {
 }
 
 .pay-section {
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .pay-section h4 {
-    font-size: 11px;
+    font-size: 9px;
     font-weight: bold;
     color: #2c3e50;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     border-bottom: 1px solid #ecf0f1;
     padding-bottom: 2px;
 }
@@ -193,25 +189,23 @@ table.grid td {
 .pay-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
 }
 
 .pay-table td {
-    padding: 2px 0;
-    font-size: 9px;
+    padding: 1px 0;
+    font-size: 8px;
 }
 
 .pay-table .description {
     text-align: left;
     color: #555;
-    padding-left: 5px;
 }
 
 .pay-table .amount {
     text-align: right;
     font-family: monospace;
     font-weight: 500;
-    padding-right: 5px;
 }
 
 .pay-table .subtotal {
@@ -220,35 +214,59 @@ table.grid td {
     border-top: 1px solid #bdc3c7;
     padding-top: 2px;
 }
-
 .summary-section {
-    margin-top: 15px;
-    padding-top: 10px;
+    margin-top: auto;
+    padding-top: 5px;
     border-top: 1px solid #2c3e50;
-    background: #f8f9fa;
-    padding: 10px;
-    border-radius: 3px;
+    
 }
 
 .net-pay-row {
-    display: flex;
+    display: flex;git add
     justify-content: space-between;
     align-items: center;
-    padding: 5px 0;
+    padding: 3px 0;
+    background-color: #f8f9fa;
+    border-radius: 3px;
+    margin-top: 3px;
 }
 
 .net-pay-label {
-    font-size: 11px;
+    font-size: 9px;
     font-weight: bold;
     color: #2c3e50;
 }
 
 .net-pay-amount {
-    font-size: 12px;
+    font-size: 10px;
     font-weight: bold;
-    color: #27ae60;
+    color:  #27ae60;;
 }
 
+.report-header {
+    text-align: center;
+    margin-bottom: 5px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+
+.report-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 2px;
+}
+
+.report-date {
+    font-size: 12px;
+    color: #666;
+}
+
+.report-count {
+    font-size: 10px;
+    color: #888;
+}
 .signature-section {
     margin-top: 2px;
     margin-left: -80px;
@@ -261,7 +279,7 @@ table.grid td {
     border-top: 1px solid #333;
     width: 100px;
     margin: 3px auto;
-
+}
 </style>
 </head>
 <body>
