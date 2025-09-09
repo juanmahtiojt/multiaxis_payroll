@@ -8,6 +8,8 @@ if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit();
 }
+ini_set('memory_limit', '512M'); // or 1G if needed
+
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -242,6 +244,20 @@ table.grid td {
     font-size: 12px;
     color: #888;
 }
+.signature-section {
+    margin-top: 2px;
+    margin-left: -80px;
+    font-size: 6px;
+    color: #666;
+    text-align:center;
+}
+
+.signature-line {
+    border-top: 1px solid #333;
+    width: 100px;
+    margin: 3px auto;
+}
+
 </style>
 </head>
 <body>
@@ -461,6 +477,12 @@ table.grid td {
 
             <p><strong>NET PAY: P' . number_format($netPay, 2) . '</strong></p>
         </div>
+        <div class="signature-section">
+            <p>This is a computer-generated payslip.</p>
+            <p>Generated on: ' . date('F j, Y') . '</p>
+            <div class="signature-line"></div>
+            <p>Employee Signature</p>
+        </div>
     </td>';
 
             if ($count % 2 == 1) {
@@ -472,7 +494,7 @@ table.grid td {
                 $html .= '</table><div style="page-break-after: always;"></div><table style="width:100%; border-spacing:5mm;">';
             }
 
-            $count++; // ✅ increment count here
+            $count++;
         }
 
         // If the last row has only 1 payslip, close it

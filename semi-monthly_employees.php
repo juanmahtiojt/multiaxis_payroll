@@ -16,13 +16,13 @@ $employee = null;
 $employee_details = null;
 if (isset($_GET['id_no'])) {
     $id_no = $_GET['id_no'];
-    
+
     // Get rate info from daily_rate table
     $stmt = $conn->prepare("SELECT * FROM daily_rate WHERE id_no = ? AND pay_schedule = 'semi-monthly'");
     $stmt->bind_param("s", $id_no);
     $stmt->execute();
     $employee = $stmt->get_result()->fetch_assoc();
-    
+
     // Get employee details from employees table
     $stmt = $conn->prepare("SELECT * FROM employees WHERE id_no = ?");
     $stmt->bind_param("s", $id_no);
@@ -36,6 +36,7 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,7 +44,12 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background-color: #d6eaf8;
             display: flex;
@@ -66,12 +72,14 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
             box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
             z-index: 1030;
         }
+
         .sidebar-header {
             padding: 20px 15px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 10px;
+            margin-bottom: 2px;
         }
+
         .sidebar-logo {
             width: 200px;
             height: 200px;
@@ -79,6 +87,7 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
             margin-bottom: -30px;
             margin-top: -50px;
         }
+
         .company-name {
             font-size: 20px;
             font-weight: 600;
@@ -87,54 +96,58 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
             opacity: 0.95;
             line-height: 1.3;
         }
+
         .nav-section {
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
+
         .nav-section-title {
             padding: 8px 20px;
-            font-size: 12px;
+            font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: rgba(255, 255, 255, 0.5);
             font-weight: 600;
         }
+
         .sidebar a {
             display: flex;
             align-items: center;
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
-            padding: 12px 20px;
-            font-size: 15px;
+            padding: 10px 20px;
+            font-size: 13px;
             transition: all 0.2s;
             border-left: 3px solid transparent;
         }
+
         .sidebar a i {
             margin-right: 12px;
             width: 24px;
             text-align: center;
-            font-size: 18px;
+            font-size: 15px;
         }
+
         .sidebar a:hover {
             background-color: rgba(255, 255, 255, 0.08);
             color: white;
             border-left-color: rgba(93, 173, 226, 0.5);
         }
+
         .sidebar a.active {
             background-color: rgba(93, 173, 226, 0.15);
             color: white;
             border-left-color: #5dade2;
             font-weight: 500;
         }
+
         .sidebar-footer {
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding: 15px;
             font-size: 12px;
             text-align: center;
             color: rgba(255, 255, 255, 0.5);
-            margin-top: 10px;
-            position: absolute;
-            bottom: 0;
-            width: 100%;
+            margin-top: 2px;
         }
 
         /* Main Content Styles */
@@ -148,7 +161,7 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
             min-height: 100vh;
             box-sizing: border-box;
         }
-        
+
         .container-box {
             background: white;
             padding: 30px;
@@ -167,7 +180,8 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
             margin-bottom: 30px;
         }
 
-        th, td {
+        th,
+        td {
             padding: 10px;
             border: 1px solid #ccc;
             text-align: left;
@@ -208,12 +222,12 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
             padding: 10px 20px;
             font-size: 1em;
         }
-        
+
         h2 {
             color: #2c3e50;
             margin-bottom: 20px;
         }
-        
+
         /* Mobile Menu Toggle Button */
         .menu-toggle {
             display: none;
@@ -228,9 +242,9 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
             padding: 8px 12px;
             font-size: 18px;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
-        
+
         /* Sidebar Overlay for Mobile */
         .sidebar-overlay {
             display: none;
@@ -239,83 +253,87 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.5);
             z-index: 1025;
         }
 
         /* Media Queries for Responsiveness */
         @media (max-width: 991.98px) {
+
             /* Styles for tablets and smaller devices */
             .container-box {
                 padding: 20px;
                 border-radius: 15px;
             }
-            
+
             h2 {
                 font-size: 1.5rem;
             }
-            
+
             .form-group {
                 flex: 1 1 250px;
             }
         }
 
         @media (max-width: 767.98px) {
+
             /* Styles for mobile devices */
             body {
                 overflow-y: auto;
             }
-            
+
             .menu-toggle {
                 display: block;
             }
-            
+
             .sidebar {
                 transform: translateX(-100%);
                 overflow-y: auto;
             }
-            
+
             .sidebar.active {
                 transform: translateX(0);
             }
-            
+
             .main-content {
                 margin-left: 0;
                 width: 100%;
                 padding: 20px;
             }
-            
+
             .container-box {
                 padding: 15px;
                 border-radius: 12px;
                 box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
             }
-            
+
             .form-section {
                 gap: 15px;
             }
-            
+
             .form-group {
                 flex: 1 1 100%;
             }
         }
 
         @media (max-width: 575.98px) {
+
             /* Styles for extra small devices */
             .main-content {
                 padding: 10px;
             }
-            
+
             .container-box {
                 padding: 15px 10px;
                 border-radius: 10px;
             }
-            
-            table th, table td {
+
+            table th,
+            table td {
                 padding: 8px 5px;
                 font-size: 0.9em;
             }
-            
+
             .submit-btn {
                 width: 100%;
             }
@@ -323,16 +341,19 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
 
         /* Print media styles */
         @media print {
-            .sidebar, .menu-toggle, .sidebar-overlay {
+
+            .sidebar,
+            .menu-toggle,
+            .sidebar-overlay {
                 display: none !important;
             }
-            
+
             .main-content {
                 margin-left: 0;
                 width: 100%;
                 padding: 10px;
             }
-            
+
             .container-box {
                 box-shadow: none;
                 height: auto;
@@ -341,68 +362,89 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
         }
     </style>
 </head>
+
 <body>
     <!-- Sidebar Overlay for Mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+
     <!-- Mobile Menu Toggle Button -->
     <button class="menu-toggle" id="menuToggle">
         <i class="fas fa-bars"></i>
     </button>
-    
+
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <img src="my_project/images/MULTI-removebg-preview.png" class="sidebar-logo" alt="Company Logo">
             <div class="company-name">Multi Axis Handlers & Tech Inc</div>
         </div>
-        
+
+        <!-- MAIN NAVIGATION -->
         <div class="nav-section">
-            <div class="nav-section-title">Main Navigation</div>
-            <a href="dashboard.php" class="<?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
+            <div class="nav-section-title">Main</div>
+            <a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">
                 <i class="fas fa-home"></i> Dashboard
             </a>
             <?php if ($role === 'admin') : ?>
-                <a href="add_user.php" class="<?php echo ($current_page == 'add_user.php') ? 'active' : ''; ?>">
+                <a href="add_user.php" class="<?= ($current_page == 'add_user.php') ? 'active' : '' ?>">
                     <i class="fas fa-user-plus"></i> Employees
                 </a>
             <?php endif; ?>
-            <a href="employee_attendance_monthly.php" class="<?php echo ($current_page == 'employee_attendance_monthly.php') ? 'active' : ''; ?>">
-                <i class="fas fa-clipboard-check"></i> Attendance
-            </a>
+        </div>
 
-            <a href="enter_semimonthly_payroll.php" class="<?php echo ($current_page == 'enter_semimonthly_payroll.php') ? 'active' : ''; ?>">
-                <i class="fas fa-dollar-sign"></i> Payroll
+        <!-- ATTENDANCE -->
+        <div class="nav-section">
+            <div class="nav-section-title">Attendance</div>
+            <a href="employee_attendance_monthly.php" class="<?= ($current_page == 'employee_attendance_monthly.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-alt"></i> Monthly Attendance
+            </a>
+            <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-week"></i> Weekly Attendance
+            </a>
+            <a href="attendance_summary_report.php" class="<?= ($current_page == 'attendance_summary_report.php') ? 'active' : '' ?>">
+                <i class="fas fa-clipboard-list"></i> Attendance Summary
             </a>
         </div>
-        
+
+        <!-- PAYROLL -->
         <div class="nav-section">
-            <div class="nav-section-title">Payroll Management</div>
+            <div class="nav-section-title">Payroll</div>
+            <a href="payroll.php"
+                class="<?= in_array($current_page, ['payroll.php', 'enter_payroll.php', 'weekly_employees.php', 'semi-monthly_employees.php']) ? 'active' : '' ?>">
+                <i class="fas fa-money-bill-wave"></i> Payroll
+            </a>
             <a href="reports.php" class="<?php echo ($current_page == 'reports.php') ? 'active' : ''; ?>">
                 <i class="fas fa-chart-bar"></i> Deductions
             </a>
-            <a href="attendance_summary_report.php" class="<?php echo ($current_page == 'attendance_summary_report.php') ? 'active' : ''; ?>">
-            <i class="fas fa-clock"></i> Attendance Summary
-            </a>
             <a href="view_payslips.php" class="<?= ($current_page == 'view_payslips.php') ? 'active' : '' ?>">
-                <i class="fas fa-file-alt"></i> View Payslips
+                <i class="fas fa-file-invoice-dollar"></i> View Payslips
+            </a>
+            <a href="payslip_archive.php" class="<?= ($current_page == 'payslip_archive.php') ? 'active' : '' ?>">
+                <i class="fas fa-archive"></i> Payslip Archive
             </a>
         </div>
-        
+
+        <!-- OTHER -->
         <div class="nav-section">
-            <a href="login.php" class="<?php echo ($current_page == 'login.php') ? 'active' : ''; ?>">
+            <div class="nav-section-title">Other</div>
+            <a href="about.php" class="<?= ($current_page == 'about.php') ? 'active' : '' ?>">
+                <i class="fas fa-info-circle"></i> About
+            </a>
+            <a href="logout.php" class="<?= ($current_page == 'logout.php') ? 'active' : '' ?>">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </div>
-        
         <div class="sidebar-footer">
             © <?php echo date('Y'); ?> Multi Axis Handlers & Tech Inc.
         </div>
+
+    </div>
+
     </div>
 
     <div class="main-content">
         <div class="container-box">
             <h2><i class="fas fa-money-bill-wave"></i> Payroll</h2>
-            
+
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead>
@@ -416,12 +458,12 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
                         </tr>
                     </thead>
                     <tbody>
-                    <?php
-                    // Only fetch fixed pay schedule employees
-                    $result = $conn->query("SELECT * FROM daily_rate WHERE pay_schedule = 'semi-monthly'");
-                    while ($row = $result->fetch_assoc()) {
-                        $semi_monthly_rate = $row['daily_rate'] * 15;
-                        echo "<tr>
+                        <?php
+                        // Only fetch fixed pay schedule employees
+                        $result = $conn->query("SELECT * FROM daily_rate WHERE pay_schedule = 'semi-monthly'");
+                        while ($row = $result->fetch_assoc()) {
+                            $semi_monthly_rate = $row['daily_rate'] * 15;
+                            echo "<tr>
                                 <td>{$row['id_no']}</td>
                                 <td>{$row['name']}</td>
                                 <td>{$row['department']}</td>
@@ -436,8 +478,8 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
                                     </form>
                                 </td>
                             </tr>";
-                    }
-                    ?>
+                        }
+                        ?>
                     </tbody>
                 </table>
             </div>
@@ -458,11 +500,11 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
                             <label>Department</label>
                             <input type="text" name="department" value="<?= $employee['department'] ?>" readonly class="prefilled form-control">
                         </div>
-                        
+
                         <?php
                         $semi_monthly_rate = $employee['daily_rate'] * 15;
                         ?>
-                        
+
                         <div class="form-group">
                             <label>Semi-Monthly Rate</label>
                             <input type="text" name="semi_monthly_rate" value="<?= number_format($semi_monthly_rate, 2) ?>" readonly class="prefilled form-control">
@@ -484,7 +526,7 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
                             <input type="date" name="end_date" required class="form-control">
                         </div>
 
-                        <?php 
+                        <?php
                         // Employee specific information fields
                         $employee_fields = [
                             "sss_no" => "SSS No.",
@@ -500,14 +542,14 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
                                     <input type='text' name='$field' value='$value' readonly class='prefilled form-control'>
                                 </div>";
                         }
-                        
+
                         // Basic pay is equal to semi-monthly rate
                         echo "<div class='form-group'>
                                 <label>Basic</label>
                                 <input type='number' name='basic' step='0.01' value='$semi_monthly_rate' readonly class='prefilled form-control'>
                             </div>";
-                        
-                         // Overtime and other pay fields
+
+                        // Overtime and other pay fields
                         $fixed_regular_rate = 125.00;
                         $fixed_sunday_rate = 150.00;
 
@@ -563,7 +605,7 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
                                     </div>";
                             }
                         }
-                        
+
                         // Deduction fields - pre-populated from employees table
                         $deduction_fields = [
                             "sss_premium" => "SSS Premium",
@@ -581,7 +623,7 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
                                     <input type='number' name='$field' step='0.01' value='$value' readonly class='prefilled form-control'>
                                 </div>";
                         }
-                        
+
                         // Time-related deductions
                         $time_fields = [
                             "late" => "Late",
@@ -595,7 +637,7 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
                                     <input type='number' name='$field' step='0.01' class='form-control'>
                                 </div>";
                         }
-                        
+
                         // Leave fields - pre-populated from employees table
                         $leave_fields = [
                             "leave_with_pay" => "Leave w/ PAY",
@@ -627,7 +669,7 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            
+
             if (menuToggle && sidebar && overlay) {
                 menuToggle.addEventListener('click', function() {
                     sidebar.classList.toggle('active');
@@ -637,12 +679,12 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
                         overlay.style.display = 'none';
                     }
                 });
-                
+
                 overlay.addEventListener('click', function() {
                     sidebar.classList.remove('active');
                     overlay.style.display = 'none';
                 });
-                
+
                 // Close sidebar on window resize if in mobile view
                 window.addEventListener('resize', function() {
                     if (window.innerWidth > 768) {
@@ -650,7 +692,7 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
                         overlay.style.display = 'none';
                     }
                 });
-                
+
                 // Handle sidebar links in mobile view
                 const sidebarLinks = document.querySelectorAll('.sidebar a');
                 sidebarLinks.forEach(link => {
@@ -667,39 +709,40 @@ $role = 'admin'; // Hardcoded for demo, adjust to use session logic in productio
         });
     </script>
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-    const hoursInput = document.getElementById('hours');
-    const rateInput = document.getElementById('rate');
-    const regularOtInput = document.getElementById('regular_ot');
+        document.addEventListener('DOMContentLoaded', () => {
+            const hoursInput = document.getElementById('hours');
+            const rateInput = document.getElementById('rate');
+            const regularOtInput = document.getElementById('regular_ot');
 
-    const sundayHoursInput = document.getElementById('sunday_hours');
-    const sundayRateInput = document.getElementById('sunday_rate');
-    const restDayPayInput = document.getElementById('rest_day_pay');
+            const sundayHoursInput = document.getElementById('sunday_hours');
+            const sundayRateInput = document.getElementById('sunday_rate');
+            const restDayPayInput = document.getElementById('rest_day_pay');
 
-    const totalOtPayInput = document.getElementById('overtime_pay');
+            const totalOtPayInput = document.getElementById('overtime_pay');
 
-    function calculate() {
-        const hours = parseFloat(hoursInput.value) || 0;
-        const rate = parseFloat(rateInput.value) || 0;
-        const regularOt = hours * rate;
-        regularOtInput.value = regularOt.toFixed(2);
+            function calculate() {
+                const hours = parseFloat(hoursInput.value) || 0;
+                const rate = parseFloat(rateInput.value) || 0;
+                const regularOt = hours * rate;
+                regularOtInput.value = regularOt.toFixed(2);
 
-        const sundayHours = parseFloat(sundayHoursInput.value) || 0;
-        const sundayRate = parseFloat(sundayRateInput.value) || 0;
-        const sundayOt = sundayHours * sundayRate;
-        restDayPayInput.value = sundayOt.toFixed(2);
+                const sundayHours = parseFloat(sundayHoursInput.value) || 0;
+                const sundayRate = parseFloat(sundayRateInput.value) || 0;
+                const sundayOt = sundayHours * sundayRate;
+                restDayPayInput.value = sundayOt.toFixed(2);
 
-        const totalOt = regularOt + sundayOt;
-        totalOtPayInput.value = totalOt.toFixed(2);
-    }
+                const totalOt = regularOt + sundayOt;
+                totalOtPayInput.value = totalOt.toFixed(2);
+            }
 
-    hoursInput.addEventListener('input', calculate);
-    sundayHoursInput.addEventListener('input', calculate);
+            hoursInput.addEventListener('input', calculate);
+            sundayHoursInput.addEventListener('input', calculate);
 
-    // Initial calculation
-    calculate();
-    });
+            // Initial calculation
+            calculate();
+        });
     </script>
 
 </body>
+
 </html>

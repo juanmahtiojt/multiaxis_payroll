@@ -32,7 +32,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Holiday & Overtime Payslips</title>
+    <title>Payslips</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -55,13 +55,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
             overflow: hidden;
             box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
             z-index: 1030;
+            transform: translateX(0);
         }
 
-        .sidebar-header {
+                .sidebar-header {
             padding: 20px 15px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 10px;
+            margin-bottom: 2px;
         }
 
         .sidebar-logo {
@@ -82,12 +83,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
         }
 
         .nav-section {
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
 
         .nav-section-title {
             padding: 8px 20px;
-            font-size: 12px;
+            font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: rgba(255, 255, 255, 0.5);
@@ -99,8 +100,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
             align-items: center;
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
-            padding: 12px 20px;
-            font-size: 15px;
+            padding: 10px 20px;
+            font-size: 13px;
             transition: all 0.2s;
             border-left: 3px solid transparent;
         }
@@ -109,7 +110,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             margin-right: 12px;
             width: 24px;
             text-align: center;
-            font-size: 18px;
+            font-size: 15px;
         }
 
         .sidebar a:hover {
@@ -131,7 +132,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             font-size: 12px;
             text-align: center;
             color: rgba(255, 255, 255, 0.5);
-            margin-top: 10px;
+            margin-top: 2px;
         }
 
         .main-content {
@@ -164,6 +165,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             border-radius: 10px;
             font-size: 14px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            max-width: 340px;
         }
 
         .payslip p {
@@ -359,63 +361,72 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <i class="fas fa-bars"></i>
     </button>
 
-    <div class="sidebar" id="sidebar">
+<div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <img src="my_project/images/MULTI-removebg-preview.png" class="sidebar-logo" alt="Company Logo">
             <div class="company-name">Multi Axis Handlers & Tech Inc</div>
         </div>
 
+        <!-- MAIN NAVIGATION -->
         <div class="nav-section">
-            <div class="nav-section-title">Main Navigation</div>
+            <div class="nav-section-title">Main</div>
+            <a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
             <?php if ($role === 'admin') : ?>
-                <a href="dashboard.php" class="<?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
-                    <i class="fas fa-home"></i> Dashboard
-                </a>
-                <a href="add_user.php" class="<?php echo ($current_page == 'add_user.php') ? 'active' : ''; ?>">
+                <a href="add_user.php" class="<?= ($current_page == 'add_user.php') ? 'active' : '' ?>">
                     <i class="fas fa-user-plus"></i> Employees
                 </a>
             <?php endif; ?>
-
-            <div class="attendance-group">
-                <div class="nav-section-title">
-                    <i class="fas fa-clipboard-check"></i> Attendance
-                </div>
-                <a href="employee_attendance_monthly.php" class="<?php echo ($current_page == 'employee_attendance_monthly.php') ? 'active' : ''; ?>">
-                    Monthly Attendance
-                </a>
-                <a href="employee_attendance.php" class="<?php echo ($current_page == 'employee_attendance.php') ? 'active' : ''; ?>">
-                    Weekly Attendance
-                </a>
-            </div>
         </div>
 
-
+        <!-- ATTENDANCE -->
         <div class="nav-section">
-            <div class="nav-section-title">Payroll Management</div>
+            <div class="nav-section-title">Attendance</div>
+            <a href="employee_attendance_monthly.php" class="<?= ($current_page == 'employee_attendance_monthly.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-alt"></i> Monthly Attendance
+            </a>
+            <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-week"></i> Weekly Attendance
+            </a>
+            <a href="attendance_summary_report.php" class="<?= ($current_page == 'attendance_summary_report.php') ? 'active' : '' ?>">
+                <i class="fas fa-clipboard-list"></i> Attendance Summary
+            </a>
+        </div>
+
+        <!-- PAYROLL -->
+        <div class="nav-section">
+            <div class="nav-section-title">Payroll</div>
+            <a href="payroll.php" class="<?= ($current_page == 'payroll.php') ? 'active' : '' ?>">
+                <i class="fas fa-money-bill-wave"></i> Payroll
+            </a>
             <a href="reports.php" class="<?php echo ($current_page == 'reports.php') ? 'active' : ''; ?>">
                 <i class="fas fa-chart-bar"></i> Deductions
             </a>
-            <a href="attendance_summary_report.php" class="<?php echo ($current_page == 'attendance_summary_report.php') ? 'active' : ''; ?>">
-                <i class="fas fa-clock"></i> Attendance Summary
-            </a>
             <a href="view_payslips.php" class="<?= ($current_page == 'view_payslips.php') ? 'active' : '' ?>">
-                <i class="fas fa-file-alt"></i> View Payslips
+                <i class="fas fa-file-invoice-dollar"></i> View Payslips
             </a>
             <a href="payslip_archive.php" class="<?= ($current_page == 'payslip_archive.php') ? 'active' : '' ?>">
                 <i class="fas fa-archive"></i> Payslip Archive
             </a>
-
-
         </div>
+
+        <!-- OTHER -->
         <div class="nav-section">
-            <a href="logout.php" class="<?php echo ($current_page == 'logout.php') ? 'active' : ''; ?>">
+            <div class="nav-section-title">Other</div>
+            <a href="about.php" class="<?= ($current_page == 'about.php') ? 'active' : '' ?>">
+                <i class="fas fa-info-circle"></i> About
+            </a>
+            <a href="logout.php" class="<?= ($current_page == 'logout.php') ? 'active' : '' ?>">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </div>
-
         <div class="sidebar-footer">
-            © <?php echo date('Y'); ?> Multi Axis Handlers & Tech Inc.
-        </div>
+        © <?php echo date('Y'); ?> Multi Axis Handlers & Tech Inc.
+    </div>
+
+    </div>
+
     </div>
 
     <div class="main-content">
@@ -442,20 +453,70 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
                             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                            $stmt = $conn->query("SELECT DISTINCT TRIM(LOWER(pay_period)) as pay_period FROM payroll_records");
+                            // Debug: Check if table exists and has data
+                            $count_stmt = $conn->query("SELECT COUNT(*) FROM payroll_records");
+                            $total_records = $count_stmt->fetchColumn();
+
+                            // Debug: Show all pay_period values (remove this after debugging)
+                            echo "<!-- Debug: Total records: $total_records -->";
+
+                            $debug_stmt = $conn->query("SELECT pay_period FROM payroll_records LIMIT 5");
+                            $sample_periods = $debug_stmt->fetchAll(PDO::FETCH_COLUMN);
+                            echo "<!-- Debug: Sample pay_periods: " . implode(', ', $sample_periods) . " -->";
+
+                            // Fixed query - handle NULL values properly
+                            $stmt = $conn->query("SELECT DISTINCT TRIM(LOWER(pay_period)) as pay_period 
+                                         FROM payroll_records 
+                                         WHERE pay_period IS NOT NULL 
+                                         AND TRIM(pay_period) != '' 
+                                         ORDER BY pay_period");
+
                             $db_periods = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
+                            // Debug output
+                            echo "<!-- Debug: Found periods: " . implode(', ', $db_periods) . " -->";
+                            echo "<!-- Debug: Allowed periods: " . implode(', ', $allowed_periods) . " -->";
+
+                            $selected_period = '';
+                            if (isset($_POST['payroll_period'])) {
+                                $selected_period = strtolower(trim($_POST['payroll_period']));
+                            } elseif (isset($_GET['payroll_period'])) {
+                                $selected_period = strtolower(trim($_GET['payroll_period']));
+                            }
+
+                            $options_generated = 0;
                             foreach ($db_periods as $period) {
-                                if (in_array($period, $allowed_periods)) {
-                                    $isSelected = (isset($_POST['payroll_period']) && $_POST['payroll_period'] === $period && !isset($_GET['uploaded']));
-                                    echo "<option value=\"$period\" " . ($isSelected ? 'selected' : '') . ">" . ucfirst($period) . "</option>";
+                                // More flexible matching - check if period contains allowed terms
+                                $period_clean = strtolower(trim($period));
+
+                                // Direct match first
+                                if (in_array($period_clean, $allowed_periods)) {
+                                    $isSelected = ($selected_period === $period_clean);
+                                    echo "<option value=\"$period_clean\" " . ($isSelected ? 'selected' : '') . ">" . ucwords($period_clean) . "</option>";
+                                    $options_generated++;
+                                }
+                                // Partial match for variations like "semi monthly" vs "semi-monthly"
+                                else {
+                                    foreach ($allowed_periods as $allowed) {
+                                        if (
+                                            str_contains($period_clean, str_replace('-', ' ', $allowed)) ||
+                                            str_contains($period_clean, str_replace(' ', '-', $allowed))
+                                        ) {
+                                            $isSelected = ($selected_period === $period_clean);
+                                            echo "<option value=\"$period_clean\" " . ($isSelected ? 'selected' : '') . ">" . ucwords($period_clean) . "</option>";
+                                            $options_generated++;
+                                            break;
+                                        }
+                                    }
                                 }
                             }
                         } catch (PDOException $e) {
                             echo "<option disabled>Error: " . $e->getMessage() . "</option>";
                         }
-                        ?>
 
+                        // Close connection
+                        $conn = null;
+                        ?>
                     </select>
                 </div>
                 <div class="col-md-4">
@@ -491,161 +552,158 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
         <div class="a4-page">
 
+        <?php
+$servername = "localhost";
+$username = "root";
+$password = "cvsuOJT@2025";
+$dbname = "multiaxis_payroll_system";
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $start_date = $_POST['start_date'];
+    $end_date = $_POST['end_date'];
+    
+    // Get the selected payroll period from the form
+    $selected_period = $_POST['payroll_period']; // Use the form value instead of auto-detection
 
+    try {
+        $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // First, let's see what pay_period values exist for debugging
+        $debug_stmt = $conn->prepare("SELECT DISTINCT pay_period FROM payroll_records WHERE pay_period IS NOT NULL");
+        $debug_stmt->execute();
+        $available_periods = $debug_stmt->fetchAll(PDO::FETCH_COLUMN);
+        echo "<!-- Available pay periods in DB: " . implode(', ', $available_periods) . " -->";
+        echo "<!-- Selected period from form: " . $selected_period . " -->";
+        
+        // Fetch payslip data where the date ranges overlap
+        $stmt = $conn->prepare("
+            SELECT 
+                employee_id, 
+                name, 
+                department, 
+                pay_period,
+                MIN(start_date) as start_date, 
+                MAX(end_date) as end_date,
+                SUM(basic_salary) as basic_salary,
+                SUM(overtime_hours) as overtime_hours,
+                SUM(overtime_pay) as overtime_pay,
+                AVG(overtime_rate) as overtime_rate,
+                MAX(sss_no) as sss_no,
+                MAX(philhealth_no) as philhealth_no,
+                MAX(pagibig_no) as pagibig_no,
+                MAX(tin_no) as tin_no,
+                SUM(sss_premium) as sss_premium,
+                SUM(sss_loan) as sss_loan,
+                SUM(pagibig_premium) as pagibig_premium,
+                SUM(pagibig_loan) as pagibig_loan,
+                SUM(philhealth) as philhealth,
+                SUM(cash_advance) as cash_advance,
+                SUM(late_deduction) as late_deduction,
+                SUM(absent_deduction) as absent_deduction,
+                SUM(undertime_deduction) as undertime_deduction,
+                SUM(leave_with_pay) as leave_with_pay,
+                SUM(leave_without_pay) as leave_without_pay
+            FROM payroll_records
+            WHERE TRIM(LOWER(pay_period)) = TRIM(LOWER(:pay_period))
+            AND start_date <= :end_date 
+            AND end_date >= :start_date
+            GROUP BY employee_id, name, department, pay_period
+            ORDER BY name ASC
+        ");
 
+        $stmt->bindParam(':pay_period', $selected_period);
+        $stmt->bindParam(':start_date', $start_date);
+        $stmt->bindParam(':end_date', $end_date);
+        $stmt->execute();
+        $payslip_result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        echo "<!-- Query returned " . count($payslip_result) . " results -->";
 
-
-
-            <?php
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                $start_date = $_POST['start_date'];
-                $end_date = $_POST['end_date'];
-
-                // Calculate date difference
-                $days = (strtotime($end_date) - strtotime($start_date)) / (60 * 60 * 24) + 1;
-
-                // Auto-detect payroll period
-                if ($days <= 7) {
-                    $selected_period = 'Weekly';
-                } elseif ($days >= 13 && $days <= 17) {
-                    $selected_period = 'Semi-Monthly';
-                } elseif ($days >= 28 && $days <= 31) {
-                    $selected_period = 'Fixed';
-                } else {
-                    $selected_period = 'Custom';
+        if (count($payslip_result) > 0) {
+            foreach ($payslip_result as $row) {
+                // Calculate overtime pay if missing
+                $overtimePay = $row['overtime_pay'];
+                if ((empty($overtimePay) || $overtimePay == 0) && $row['overtime_hours'] > 0 && $row['overtime_rate'] > 0) {
+                    $overtimePay = $row['overtime_hours'] * $row['overtime_rate'];
                 }
 
+                // Totals
+                $totalEarnings = $row['basic_salary'] + $overtimePay;
+                $totalDeductions =
+                    $row['sss_premium'] + $row['sss_loan'] +
+                    $row['pagibig_premium'] + $row['pagibig_loan'] +
+                    $row['philhealth'] + $row['cash_advance'] +
+                    $row['late_deduction'] + $row['absent_deduction'] +
+                    $row['undertime_deduction'];
+                $netPay = $totalEarnings - $totalDeductions;
+?>
 
-                try {
-                    // Fetch payslip data where the date ranges overlap - use DISTINCT to avoid duplicates
-                    $stmt = $conn->prepare("
-                    SELECT 
-                        employee_id, 
-                        name, 
-                        department, 
-                        :pay_period as pay_period,
-                        MIN(start_date) as start_date, 
-                        MAX(end_date) as end_date,
-                        SUM(basic_salary) as basic_salary,
-                        SUM(overtime_hours) as overtime_hours,
-                        SUM(overtime_pay) as overtime_pay,
-                        AVG(overtime_rate) as overtime_rate,
-                        MAX(sss_no) as sss_no,
-                        MAX(philhealth_no) as philhealth_no,
-                        MAX(pagibig_no) as pagibig_no,
-                        MAX(tin_no) as tin_no,
-                        SUM(sss_premium) as sss_premium,
-                        SUM(sss_loan) as sss_loan,
-                        SUM(pagibig_premium) as pagibig_premium,
-                        SUM(pagibig_loan) as pagibig_loan,
-                        SUM(philhealth) as philhealth,
-                        SUM(cash_advance) as cash_advance,
-                        SUM(late_deduction) as late_deduction,
-                        SUM(absent_deduction) as absent_deduction,
-                        SUM(undertime_deduction) as undertime_deduction,
-                        SUM(leave_with_pay) as leave_with_pay,
-                        SUM(leave_without_pay) as leave_without_pay
-                    FROM payroll_records
-                    WHERE pay_period = :pay_period
-                    AND start_date <= :end_date 
-                    AND end_date >= :start_date
-                    GROUP BY employee_id, name, department
-                    ORDER BY name ASC
-                ");
+                <div class="payslip">
+                    <p class="text-center fw-bold fs-5">Multi Axis Handlers & Tech Inc</p>
+                    <p><strong>Employee ID:</strong> <?= htmlspecialchars($row['employee_id']) ?></p>
+                    <p><strong>Employee Name:</strong> <?= htmlspecialchars($row['name']) ?></p>
+                    <p><strong>Department:</strong> <?= htmlspecialchars($row['department']) ?></p>
+                    <p><strong>Pay Period:</strong> <?= htmlspecialchars($selected_period) ?></p>
 
+                    <p><strong>Date Range:</strong> <?= htmlspecialchars($start_date) ?> to <?= htmlspecialchars($end_date) ?></p>
+                    <hr>
 
+                    <div class="row">
+                        <div class="col-6">
+                            <p><strong>Basic Salary:</strong> ₱<?= number_format($row['basic_salary'], 2) ?></p>
+                            <p><strong>Overtime Pay:</strong> ₱<?= number_format($overtimePay, 2) ?></p>
+                            <p><strong>Overtime Hours:</strong> <?= htmlspecialchars($row['overtime_hours']) ?> hrs</p>
+                            <p><strong>Overtime Rate:</strong> ₱<?= number_format($row['overtime_rate'], 2) ?></p>
+                        </div>
+                        <div class="col-6">
+                            <p><strong>SSS No:</strong> <?= htmlspecialchars($row['sss_no']) ?></p>
+                            <p><strong>PhilHealth No:</strong> <?= htmlspecialchars($row['philhealth_no']) ?></p>
+                            <p><strong>Pag-IBIG No:</strong> <?= htmlspecialchars($row['pagibig_no']) ?></p>
+                            <p><strong>TIN No:</strong> <?= htmlspecialchars($row['tin_no']) ?></p>
+                            <hr>
+                            <p><strong>SSS Premium:</strong> ₱<?= number_format($row['sss_premium'], 2) ?></p>
+                            <p><strong>SSS Loan:</strong> ₱<?= number_format($row['sss_loan'], 2) ?></p>
+                            <p><strong>Pag-IBIG Premium:</strong> ₱<?= number_format($row['pagibig_premium'], 2) ?></p>
+                            <p><strong>Pag-IBIG Loan:</strong> ₱<?= number_format($row['pagibig_loan'], 2) ?></p>
+                            <p><strong>PhilHealth:</strong> ₱<?= number_format($row['philhealth'], 2) ?></p>
+                            <p><strong>Cash Advance:</strong> ₱<?= number_format($row['cash_advance'], 2) ?></p>
+                        </div>
+                    </div>
 
-                    $stmt->bindParam(':pay_period', $selected_period);
-                    $stmt->bindParam(':start_date', $start_date);
-                    $stmt->bindParam(':end_date', $end_date);
-                    $stmt->execute();
-                    $payslip_result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <p><strong>Late Deduction:</strong> ₱<?= number_format($row['late_deduction'], 2) ?></p>
+                            <p><strong>Absent Deduction:</strong> ₱<?= number_format($row['absent_deduction'], 2) ?></p>
+                            <p><strong>Undertime Deduction:</strong> ₱<?= number_format($row['undertime_deduction'], 2) ?></p>
+                        </div>
+                        <div class="col-6">
+                            <p><strong>Leave with Pay:</strong> <?= htmlspecialchars($row['leave_with_pay']) ?> days</p>
+                            <p><strong>Leave without Pay:</strong> <?= htmlspecialchars($row['leave_without_pay']) ?> days</p>
+                        </div>
+                    </div>
 
-                    if (count($payslip_result) > 0) {
-                        foreach ($payslip_result as $row) {
-                            // 🔹 Calculate overtime pay if missing
-                            $overtimePay = $row['overtime_pay'];
-                            if ((empty($overtimePay) || $overtimePay == 0) && $row['overtime_hours'] > 0 && $row['overtime_rate'] > 0) {
-                                $overtimePay = $row['overtime_hours'] * $row['overtime_rate'];
-                            }
+                    <hr>
+                    <p class="fw-bold">Summary:</p>
+                    <p><strong>Total Earnings:</strong> ₱<?= number_format($totalEarnings, 2) ?></p>
+                    <p><strong>Total Deductions:</strong> ₱<?= number_format($totalDeductions, 2) ?></p>
+                    <p class="fw-bold fs-5"><strong>Net Pay:</strong> ₱<?= number_format($netPay, 2) ?></p>
+                </div>
 
-                            // 🔹 Totals
-                            $totalEarnings = $row['basic_salary'] + $overtimePay;
-                            $totalDeductions =
-                                $row['sss_premium'] + $row['sss_loan'] +
-                                $row['pagibig_premium'] + $row['pagibig_loan'] +
-                                $row['philhealth'] + $row['cash_advance'] +
-                                $row['late_deduction'] + $row['absent_deduction'] +
-                                $row['undertime_deduction'];
-                            $netPay = $totalEarnings - $totalDeductions;
-            ?>
-
-                            <div class="payslip">
-                                <p class="text-center fw-bold fs-5">Multi Axis Handlers & Tech Inc</p>
-                                <p><strong>Employee ID:</strong> <?= htmlspecialchars($row['employee_id']) ?></p>
-                                <p><strong>Employee Name:</strong> <?= htmlspecialchars($row['name']) ?></p>
-                                <p><strong>Department:</strong> <?= htmlspecialchars($row['department']) ?></p>
-                                <p><strong>Pay Period:</strong> <?= htmlspecialchars($selected_period) ?></p>
-
-                                <!-- 🔹 Show the SELECTED date range, not DB range -->
-                                <p><strong>Date Range:</strong> <?= htmlspecialchars($start_date) ?> to <?= htmlspecialchars($end_date) ?></p>
-                                <hr>
-
-                                <div class="row">
-                                    <div class="col-6">
-                                        <p><strong>Basic Salary:</strong> ₱<?= number_format($row['basic_salary'], 2) ?></p>
-                                        <p><strong>Overtime Pay:</strong> ₱<?= number_format($overtimePay, 2) ?></p>
-                                        <p><strong>Overtime Hours:</strong> <?= htmlspecialchars($row['overtime_hours']) ?> hrs</p>
-                                        <p><strong>Overtime Rate:</strong> ₱<?= number_format($row['overtime_rate'], 2) ?></p>
-                                    </div>
-                                    <div class="col-6">
-                                        <p><strong>SSS No:</strong> <?= htmlspecialchars($row['sss_no']) ?></p>
-                                        <p><strong>PhilHealth No:</strong> <?= htmlspecialchars($row['philhealth_no']) ?></p>
-                                        <p><strong>Pag-IBIG No:</strong> <?= htmlspecialchars($row['pagibig_no']) ?></p>
-                                        <p><strong>TIN No:</strong> <?= htmlspecialchars($row['tin_no']) ?></p>
-                                        <hr>
-                                        <p><strong>SSS Premium:</strong> ₱<?= number_format($row['sss_premium'], 2) ?></p>
-                                        <p><strong>SSS Loan:</strong> ₱<?= number_format($row['sss_loan'], 2) ?></p>
-                                        <p><strong>Pag-IBIG Premium:</strong> ₱<?= number_format($row['pagibig_premium'], 2) ?></p>
-                                        <p><strong>Pag-IBIG Loan:</strong> ₱<?= number_format($row['pagibig_loan'], 2) ?></p>
-                                        <p><strong>PhilHealth:</strong> ₱<?= number_format($row['philhealth'], 2) ?></p>
-                                        <p><strong>Cash Advance:</strong> ₱<?= number_format($row['cash_advance'], 2) ?></p>
-                                    </div>
-                                </div>
-
-                                <hr>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <p><strong>Late Deduction:</strong> ₱<?= number_format($row['late_deduction'], 2) ?></p>
-                                        <p><strong>Absent Deduction:</strong> ₱<?= number_format($row['absent_deduction'], 2) ?></p>
-                                        <p><strong>Undertime Deduction:</strong> ₱<?= number_format($row['undertime_deduction'], 2) ?></p>
-                                    </div>
-                                    <div class="col-6">
-                                        <p><strong>Leave with Pay:</strong> <?= htmlspecialchars($row['leave_with_pay']) ?> days</p>
-                                        <p><strong>Leave without Pay:</strong> <?= htmlspecialchars($row['leave_without_pay']) ?> days</p>
-                                    </div>
-                                </div>
-
-                                <hr>
-                                <p class="fw-bold">Summary:</p>
-                                <p><strong>Total Earnings:</strong> ₱<?= number_format($totalEarnings, 2) ?></p>
-                                <p><strong>Total Deductions:</strong> ₱<?= number_format($totalDeductions, 2) ?></p>
-                                <p class="fw-bold fs-5"><strong>Net Pay:</strong> ₱<?= number_format($netPay, 2) ?></p>
-                            </div>
-            <?php
-
-
-                            $namesForLog[] = $row['name'];
-                        }
-                    } else {
-                        echo '<div class="text-center w-100 text-muted fs-5"><p>No payslips available for the selected period.</p></div>';
-                    }
-                } catch (PDOException $e) {
-                    echo '<div class="text-center w-100 text-danger fs-5"><p>Error: ' . htmlspecialchars($e->getMessage()) . '</p></div>';
-                }
+<?php
             }
-            ?>
+        } else {
+            echo '<div class="text-center w-100 text-muted fs-5"><p>No payslips available for the selected period and date range.</p></div>';
+        }
+    } catch (PDOException $e) {
+        echo '<div class="text-center w-100 text-danger fs-5"><p>Error: ' . htmlspecialchars($e->getMessage()) . '</p></div>';
+    }
+    
+    // Close connection
+    $conn = null;
+}
+?>
 
         </div>
     </div>

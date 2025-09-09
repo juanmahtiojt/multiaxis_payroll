@@ -198,7 +198,7 @@ $saturdays = getSaturdays(date('Y'));
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Attendance</title>
+    <title>Deductions</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -230,8 +230,9 @@ $saturdays = getSaturdays(date('Y'));
             padding: 20px 15px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 10px;
+            margin-bottom: 2px;
         }
+
         .sidebar-logo {
             width: 200px;
             height: 200px;
@@ -239,6 +240,7 @@ $saturdays = getSaturdays(date('Y'));
             margin-bottom: -30px;
             margin-top: -50px;
         }
+
         .company-name {
             font-size: 20px;
             font-weight: 600;
@@ -247,51 +249,58 @@ $saturdays = getSaturdays(date('Y'));
             opacity: 0.95;
             line-height: 1.3;
         }
+
         .nav-section {
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
+
         .nav-section-title {
             padding: 8px 20px;
-            font-size: 12px;
+            font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: rgba(255, 255, 255, 0.5);
             font-weight: 600;
         }
+
         .sidebar a {
             display: flex;
             align-items: center;
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
-            padding: 12px 20px;
-            font-size: 15px;
+            padding: 10px 20px;
+            font-size: 13px;
             transition: all 0.2s;
             border-left: 3px solid transparent;
         }
+
         .sidebar a i {
             margin-right: 12px;
             width: 24px;
             text-align: center;
-            font-size: 18px;
+            font-size: 15px;
         }
+
         .sidebar a:hover {
             background-color: rgba(255, 255, 255, 0.08);
             color: white;
             border-left-color: rgba(93, 173, 226, 0.5);
         }
+
         .sidebar a.active {
             background-color: rgba(93, 173, 226, 0.15);
             color: white;
             border-left-color: #5dade2;
             font-weight: 500;
         }
+
         .sidebar-footer {
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding: 15px;
             font-size: 12px;
             text-align: center;
             color: rgba(255, 255, 255, 0.5);
-            margin-top: 10px;
+            margin-top: 2px;
         }
         
         /* Mobile Menu Toggle Button */
@@ -516,58 +525,72 @@ $saturdays = getSaturdays(date('Y'));
 </button>
 
 <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <img src="my_project/images/MULTI-removebg-preview.png" class="sidebar-logo" alt="Company Logo">
-        <div class="company-name">Multi Axis Handlers & Tech Inc</div>
-    </div>
-    
-    <div class="nav-section">
-        <div class="nav-section-title">Main Navigation</div>
-        <?php if ($role === 'admin') : ?>
-            <a href="dashboard.php" class="<?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
+        <div class="sidebar-header">
+            <img src="my_project/images/MULTI-removebg-preview.png" class="sidebar-logo" alt="Company Logo">
+            <div class="company-name">Multi Axis Handlers & Tech Inc</div>
+        </div>
+
+        <!-- MAIN NAVIGATION -->
+        <div class="nav-section">
+            <div class="nav-section-title">Main</div>
+            <a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">
                 <i class="fas fa-home"></i> Dashboard
             </a>
-            <a href="add_user.php" class="<?php echo ($current_page == 'add_user.php') ? 'active' : ''; ?>">
-                <i class="fas fa-user-plus"></i> Employees
-            </a>
-        <?php endif; ?>
+            <?php if ($role === 'admin') : ?>
+                <a href="add_user.php" class="<?= ($current_page == 'add_user.php') ? 'active' : '' ?>">
+                    <i class="fas fa-user-plus"></i> Employees
+                </a>
+            <?php endif; ?>
+        </div>
 
-        <div class="attendance-group">
-            <div class="nav-section-title">
-                <i class="fas fa-clipboard-check"></i> Attendance
-            </div>
-            <a href="employee_attendance_monthly.php" class="<?php echo ($current_page == 'employee_attendance_monthly.php') ? 'active' : ''; ?>">
-                Monthly Attendance
+        <!-- ATTENDANCE -->
+        <div class="nav-section">
+            <div class="nav-section-title">Attendance</div>
+            <a href="employee_attendance_monthly.php" class="<?= ($current_page == 'employee_attendance_monthly.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-alt"></i> Monthly Attendance
             </a>
-            <a href="employee_attendance.php" class="<?php echo ($current_page == 'employee_attendance.php') ? 'active' : ''; ?>">
-                Weekly Attendance
+            <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-week"></i> Weekly Attendance
+            </a>
+            <a href="attendance_summary_report.php" class="<?= ($current_page == 'attendance_summary_report.php') ? 'active' : '' ?>">
+                <i class="fas fa-clipboard-list"></i> Attendance Summary
             </a>
         </div>
-    </div>
 
-    <div class="nav-section">
-        <div class="nav-section-title">Payroll Management</div>
-        <a href="reports.php" class="<?php echo ($current_page == 'reports.php') ? 'active' : ''; ?>">
-            <i class="fas fa-chart-bar"></i> Deductions
-        </a>
-        <a href="attendance_summary_report.php" class="<?php echo ($current_page == 'attendance_summary_report.php') ? 'active' : ''; ?>">
-            <i class="fas fa-clock"></i> Attendance Summary
-        </a>
-        <a href="view_payslips.php" class="<?= ($current_page == 'view_payslips.php') ? 'active' : '' ?>">
-            <i class="fas fa-file-alt"></i> View Payslips
-        </a>
-    </div>
-    
-    <div class="nav-section">
-        <a href="logout.php" class="<?php echo ($current_page == 'logout.php') ? 'active' : ''; ?>">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-    </div>
-    
-    <div class="sidebar-footer">
+        <!-- PAYROLL -->
+        <div class="nav-section">
+            <div class="nav-section-title">Payroll</div>
+            <a href="payroll.php" class="<?= ($current_page == 'payroll.php') ? 'active' : '' ?>">
+                <i class="fas fa-money-bill-wave"></i> Payroll
+            </a>
+            <a href="reports.php" class="<?php echo ($current_page == 'reports.php') ? 'active' : ''; ?>">
+                <i class="fas fa-chart-bar"></i> Deductions
+            </a>
+            <a href="view_payslips.php" class="<?= ($current_page == 'view_payslips.php') ? 'active' : '' ?>">
+                <i class="fas fa-file-invoice-dollar"></i> View Payslips
+            </a>
+            <a href="payslip_archive.php" class="<?= ($current_page == 'payslip_archive.php') ? 'active' : '' ?>">
+                <i class="fas fa-archive"></i> Payslip Archive
+            </a>
+        </div>
+
+        <!-- OTHER -->
+        <div class="nav-section">
+            <div class="nav-section-title">Other</div>
+            <a href="about.php" class="<?= ($current_page == 'about.php') ? 'active' : '' ?>">
+                <i class="fas fa-info-circle"></i> About
+            </a>
+            <a href="logout.php" class="<?= ($current_page == 'logout.php') ? 'active' : '' ?>">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+        <div class="sidebar-footer">
         © <?php echo date('Y'); ?> Multi Axis Handlers & Tech Inc.
     </div>
-</div>
+
+    </div>
+
+    </div>
 
 <div class="main-content">
     <div class="container-fluid">

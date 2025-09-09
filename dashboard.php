@@ -1,4 +1,4 @@
-<?php 
+<?php
 session_start();
 include __DIR__ . "/config.php";  // Include database connection
 
@@ -48,6 +48,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,7 +56,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background-color: #f5f7fa;
             display: flex;
@@ -64,6 +70,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             position: relative;
         }
+
         /* Improved Sidebar Styles */
         .sidebar {
             width: 270px;
@@ -78,12 +85,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
             box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
             z-index: 1030;
         }
+
         .sidebar-header {
             padding: 20px 15px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 10px;
+            margin-bottom: 2px;
         }
+
         .sidebar-logo {
             width: 200px;
             height: 200px;
@@ -91,6 +100,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             margin-bottom: -30px;
             margin-top: -50px;
         }
+
         .company-name {
             font-size: 20px;
             font-weight: 600;
@@ -99,53 +109,60 @@ $current_page = basename($_SERVER['PHP_SELF']);
             opacity: 0.95;
             line-height: 1.3;
         }
+
         .nav-section {
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
+
         .nav-section-title {
             padding: 8px 20px;
-            font-size: 12px;
+            font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: rgba(255, 255, 255, 0.5);
             font-weight: 600;
         }
+
         .sidebar a {
             display: flex;
             align-items: center;
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
-            padding: 12px 20px;
-            font-size: 15px;
+            padding: 10px 20px;
+            font-size: 13px;
             transition: all 0.2s;
             border-left: 3px solid transparent;
         }
+
         .sidebar a i {
             margin-right: 12px;
             width: 24px;
             text-align: center;
-            font-size: 18px;
+            font-size: 15px;
         }
+
         .sidebar a:hover {
             background-color: rgba(255, 255, 255, 0.08);
             color: white;
             border-left-color: rgba(93, 173, 226, 0.5);
         }
+
         .sidebar a.active {
             background-color: rgba(93, 173, 226, 0.15);
             color: white;
             border-left-color: #5dade2;
             font-weight: 500;
         }
+
         .sidebar-footer {
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding: 15px;
             font-size: 12px;
             text-align: center;
             color: rgba(255, 255, 255, 0.5);
-            margin-top: 10px;
+            margin-top: 2px;
         }
-        
+
         /* Main Content Area */
         .main-content {
             margin-left: 270px;
@@ -156,6 +173,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             min-height: 100vh;
             background-color: #d6eaf8;
         }
+
         .container-box {
             background: white;
             padding: 30px;
@@ -167,6 +185,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             min-height: calc(85vh);
             overflow: auto;
         }
+
         .welcome-section {
             background: linear-gradient(135deg, #5dade2 0%, #3498db 100%);
             color: white;
@@ -175,7 +194,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             margin-bottom: 30px;
             box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
         }
-        
+
         /* Panel Styles */
         .user-count-panel {
             background-color: #ffffff;
@@ -192,17 +211,21 @@ $current_page = basename($_SERVER['PHP_SELF']);
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer; /* Add cursor pointer to indicate clickable */
+            cursor: pointer;
+            /* Add cursor pointer to indicate clickable */
         }
+
         .user-count-panel:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
         }
+
         .panel-content {
             display: flex;
             align-items: center;
             width: 100%;
         }
+
         .panel-icon {
             font-size: 22px;
             margin-right: 15px;
@@ -215,63 +238,77 @@ $current_page = basename($_SERVER['PHP_SELF']);
             color: white;
             flex-shrink: 0;
         }
+
         .panel-text {
             text-align: left;
             flex-grow: 1;
         }
+
         .panel-label {
             font-size: 14px;
             font-weight: 500;
             margin-bottom: 5px;
             color: #777;
         }
+
         .panel-count {
             font-size: 22px;
             font-weight: 700;
         }
-        
+
         /* Panel colors */
         .panel-admin {
             border-left-color: #2c3e50;
         }
+
         .panel-admin .panel-icon {
             background-color: #2c3e50;
         }
+
         .panel-employee {
             border-left-color: #3498db;
         }
+
         .panel-employee .panel-icon {
             background-color: #3498db;
         }
+
         .panel-holiday {
             border-left-color: #e74c3c;
         }
+
         .panel-holiday .panel-icon {
             background-color: #e74c3c;
         }
+
         .panel-fixed {
             border-left-color: #6f42c1;
         }
+
         .panel-fixed .panel-icon {
             background-color: #6f42c1;
         }
+
         .panel-weekly {
             border-left-color: #17a2b8;
         }
+
         .panel-weekly .panel-icon {
             background-color: #17a2b8;
         }
+
         .panel-semi {
             border-left-color: #fd7e14;
         }
+
         .panel-semi .panel-icon {
             background-color: #fd7e14;
         }
-        
+
         .panels-container {
             padding: 0 15px;
         }
-        
+
         /* Responsive Styles */
         .menu-toggle {
             display: none;
@@ -286,100 +323,119 @@ $current_page = basename($_SERVER['PHP_SELF']);
             padding: 8px 12px;
             font-size: 18px;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
-        
+
         /* Media Queries for Responsiveness */
         @media (max-width: 991.98px) {
             .user-count-panel {
                 min-height: 100px;
                 padding: 15px 10px;
             }
+
             .panel-icon {
                 width: 40px;
                 height: 40px;
                 font-size: 18px;
             }
+
             .panel-count {
                 font-size: 18px;
             }
+
             .panel-label {
                 font-size: 12px;
             }
+
             .welcome-section h2 {
                 font-size: 1.5rem;
             }
+
             .welcome-section p {
                 font-size: 1rem !important;
             }
         }
-        
+
         @media (max-width: 767.98px) {
             .menu-toggle {
                 display: block;
             }
+
             .sidebar {
                 width: 0;
                 padding: 0;
                 overflow-y: auto;
             }
+
             .sidebar.active {
                 width: 270px;
                 padding: 0;
             }
+
             .main-content {
                 margin-left: 0;
                 width: 100%;
                 padding: 15px;
             }
+
             .container-box {
                 padding: 20px 15px;
                 border-radius: 8px;
             }
+
             .welcome-section {
                 padding: 20px;
                 margin-bottom: 20px;
             }
+
             .welcome-section h2 {
                 font-size: 1.3rem;
             }
+
             .welcome-section p {
                 font-size: 0.9rem !important;
             }
         }
-        
+
         @media (max-width: 575.98px) {
             .main-content {
                 padding: 10px;
             }
+
             .container-box {
                 padding: 15px 10px;
             }
+
             .welcome-section {
                 padding: 15px;
                 margin-bottom: 15px;
             }
+
             .panels-container {
                 padding: 0 5px;
             }
+
             .user-count-panel {
                 margin-bottom: 15px;
                 min-height: 90px;
             }
+
             .panel-icon {
                 width: 35px;
                 height: 35px;
                 font-size: 16px;
                 margin-right: 10px;
             }
+
             .panel-count {
                 font-size: 16px;
             }
+
             .panel-label {
                 font-size: 11px;
             }
         }
-        
+
         /* Overlay for mobile sidebar */
         .sidebar-overlay {
             display: none;
@@ -388,105 +444,128 @@ $current_page = basename($_SERVER['PHP_SELF']);
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.5);
             z-index: 1025;
         }
-        
+
         @media print {
-            .sidebar, .menu-toggle, .sidebar-overlay {
+
+            .sidebar,
+            .menu-toggle,
+            .sidebar-overlay {
                 display: none !important;
             }
+
             .main-content {
                 margin-left: 0;
                 width: 100%;
             }
+
             .container-box {
                 box-shadow: none;
                 height: auto;
             }
         }
 
-.footer {
-  flex-shrink: 0;
-  background: linear-gradient(135deg, #1e5799 0%, #2989d8 50%, #207cca 100%);
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-}
+        .footer {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #1e5799 0%, #2989d8 50%, #207cca 100%);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
 
-.hover-link {
-  transition: all 0.2s ease;
-  padding: 3px 0;
-  display: inline-block;
-}
+        .hover-link {
+            transition: all 0.2s ease;
+            padding: 3px 0;
+            display: inline-block;
+        }
 
-.hover-link:hover {
-  transform: translateX(5px);
-  color: #f8f9fa !important;
-  text-shadow: 0 0 1px rgba(255,255,255,0.7);
-}
-</style>
+        .hover-link:hover {
+            transform: translateX(5px);
+            color: #f8f9fa !important;
+            text-shadow: 0 0 1px rgba(255, 255, 255, 0.7);
+        }
+    </style>
 
 </head>
+
 <body>
     <!-- Mobile Menu Toggle Button -->
     <button class="menu-toggle" id="menuToggle">
         <i class="fas fa-bars"></i>
     </button>
-    
+
     <!-- Sidebar Overlay for Mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+
     <!-- Improved Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <img src="my_project\images\MULTI-removebg-preview.png" class="sidebar-logo" alt="Company Logo">
+            <img src="my_project/images/MULTI-removebg-preview.png" class="sidebar-logo" alt="Company Logo">
             <div class="company-name">Multi Axis Handlers & Tech Inc</div>
         </div>
-        
+
+        <!-- MAIN NAVIGATION -->
         <div class="nav-section">
-            <div class="nav-section-title">Main Navigation</div>
-            <a href="dashboard.php" class="<?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
+            <div class="nav-section-title">Main</div>
+            <a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">
                 <i class="fas fa-home"></i> Dashboard
             </a>
             <?php if ($role === 'admin') : ?>
-                <a href="add_user.php" class="<?php echo ($current_page == 'add_user.php') ? 'active' : ''; ?>">
+                <a href="add_user.php" class="<?= ($current_page == 'add_user.php') ? 'active' : '' ?>">
                     <i class="fas fa-user-plus"></i> Employees
                 </a>
             <?php endif; ?>
-            <a href="employee_attendance_monthly.php" class="<?php echo ($current_page == 'employee_attendance_monthly.php') ? 'active' : ''; ?>">
-                <i class="fas fa-clipboard-check"></i> Attendance
+        </div>
+
+        <!-- ATTENDANCE -->
+        <div class="nav-section">
+            <div class="nav-section-title">Attendance</div>
+            <a href="employee_attendance_monthly.php" class="<?= ($current_page == 'employee_attendance_monthly.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-alt"></i> Monthly Attendance
+            </a>
+            <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-week"></i> Weekly Attendance
+            </a>
+            <a href="attendance_summary_report.php" class="<?= ($current_page == 'attendance_summary_report.php') ? 'active' : '' ?>">
+                <i class="fas fa-clipboard-list"></i> Attendance Summary
             </a>
         </div>
-        
+
+        <!-- PAYROLL -->
         <div class="nav-section">
-            <div class="nav-section-title">Payroll Management</div>
+            <div class="nav-section-title">Payroll</div>
+            <a href="payroll.php" class="<?= ($current_page == 'payroll.php') ? 'active' : '' ?>">
+                <i class="fas fa-money-bill-wave"></i> Payroll
+            </a>
             <a href="reports.php" class="<?php echo ($current_page == 'reports.php') ? 'active' : ''; ?>">
                 <i class="fas fa-chart-bar"></i> Deductions
             </a>
-            <a href="attendance_summary_report.php" class="<?php echo ($current_page == 'attendance_summary_report.php') ? 'active' : ''; ?>">
-                <i class="fas fa-clock"></i> Attendance Summary
-            </a>
             <a href="view_payslips.php" class="<?= ($current_page == 'view_payslips.php') ? 'active' : '' ?>">
-                <i class="fas fa-file-alt"></i> View Payslips
+                <i class="fas fa-file-invoice-dollar"></i> View Payslips
+            </a>
+            <a href="payslip_archive.php" class="<?= ($current_page == 'payslip_archive.php') ? 'active' : '' ?>">
+                <i class="fas fa-archive"></i> Payslip Archive
             </a>
         </div>
-        
+
+        <!-- OTHER -->
         <div class="nav-section">
-            <a href="about.php" class="<?php echo ($current_page == 'about.php') ? 'active' : ''; ?>">
+            <div class="nav-section-title">Other</div>
+            <a href="about.php" class="<?= ($current_page == 'about.php') ? 'active' : '' ?>">
                 <i class="fas fa-info-circle"></i> About
             </a>
-            <a href="help.php" class="<?php echo ($current_page == 'help.php') ? 'active' : ''; ?>">
-                <i class="fas fa-question-circle"></i> Help & Support
-            </a>
-            <a href="logout.php" class="<?php echo ($current_page == 'logout.php') ? 'active' : ''; ?>">
+            <a href="logout.php" class="<?= ($current_page == 'logout.php') ? 'active' : '' ?>">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </div>
-        
         <div class="sidebar-footer">
-            © <?php echo date('Y'); ?> Multi Axis Handlers & Tech Inc.
-        </div>
+        © <?php echo date('Y'); ?> Multi Axis Handlers & Tech Inc.
     </div>
-    
+
+    </div>
+
+    </div>
+
     <div class="main-content">
         <div class="container-box">
             <div class="welcome-section">
@@ -597,42 +676,42 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </div>
             </div>
         </div>
-<!-- Footer Navigation -->
-<footer class="footer mt-auto py-4 bg-gradient-primary text-white">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
-        <h5 class="text-uppercase mb-3 fw-bold">Navigation</h5>
-        <ul class="list-unstyled">
-          <li><a href="dashboard.php" class="text-white text-decoration-none hover-link">Dashboard</a></li>
-          <li><a href="add_user.php" class="text-white text-decoration-none hover-link">Employees</a></li>
-          <li><a href="employee_attendance.php" class="text-white text-decoration-none hover-link">Attendance</a></li>
-          <li><a href="reports.php" class="text-white text-decoration-none hover-link">Deductions</a></li>
-        </ul>
-      </div>
-      
-      <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
-        <h5 class="text-uppercase mb-3 fw-bold">Reports</h5>
-        <ul class="list-unstyled">
-          <li><a href="attendance_summary_report.php" class="text-white text-decoration-none hover-link">Summary</a></li>
-          <li><a href="view_payslips.php" class="text-white text-decoration-none hover-link">Payslips</a></li>
-          <li><a href="add_holiday.php" class="text-white text-decoration-none hover-link">Holidays</a></li>
-          <li><a href="enter_payroll.php" class="text-white text-decoration-none hover-link">Payroll</a></li>
-        </ul>
-      </div>
-      
-      <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
-        <h5 class="text-uppercase mb-3 fw-bold">Admin</h5>
-        <ul class="list-unstyled">
-          <li><a href="admin.php" class="text-white text-decoration-none hover-link">Admin</a></li>
-          <li><a href="add_employee.php" class="text-white text-decoration-none hover-link">Add Employee</a></li>
-          <li><a href="upload_excel.php" class="text-white text-decoration-none hover-link">Upload Excel</a></li>
-          <li><a href="logout.php" class="text-white text-decoration-none hover-link">Logout</a></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</footer>
+        <!-- Footer Navigation -->
+        <footer class="footer mt-auto py-4 bg-gradient-primary text-white">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                        <h5 class="text-uppercase mb-3 fw-bold">Navigation</h5>
+                        <ul class="list-unstyled">
+                            <li><a href="dashboard.php" class="text-white text-decoration-none hover-link">Dashboard</a></li>
+                            <li><a href="add_user.php" class="text-white text-decoration-none hover-link">Employees</a></li>
+                            <li><a href="employee_attendance.php" class="text-white text-decoration-none hover-link">Attendance</a></li>
+                            <li><a href="reports.php" class="text-white text-decoration-none hover-link">Deductions</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                        <h5 class="text-uppercase mb-3 fw-bold">Reports</h5>
+                        <ul class="list-unstyled">
+                            <li><a href="attendance_summary_report.php" class="text-white text-decoration-none hover-link">Summary</a></li>
+                            <li><a href="view_payslips.php" class="text-white text-decoration-none hover-link">Payslips</a></li>
+                            <li><a href="add_holiday.php" class="text-white text-decoration-none hover-link">Holidays</a></li>
+                            <li><a href="enter_payroll.php" class="text-white text-decoration-none hover-link">Payroll</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                        <h5 class="text-uppercase mb-3 fw-bold">Admin</h5>
+                        <ul class="list-unstyled">
+                            <li><a href="admin.php" class="text-white text-decoration-none hover-link">Admin</a></li>
+                            <li><a href="add_employee.php" class="text-white text-decoration-none hover-link">Add Employee</a></li>
+                            <li><a href="upload_excel.php" class="text-white text-decoration-none hover-link">Upload Excel</a></li>
+                            <li><a href="logout.php" class="text-white text-decoration-none hover-link">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer>
 
     </div>
 
@@ -644,7 +723,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            
+
             if (menuToggle && sidebar && overlay) {
                 menuToggle.addEventListener('click', function() {
                     sidebar.classList.toggle('active');
@@ -654,12 +733,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         overlay.style.display = 'none';
                     }
                 });
-                
+
                 overlay.addEventListener('click', function() {
                     sidebar.classList.remove('active');
                     overlay.style.display = 'none';
                 });
-                
+
                 // Close sidebar on window resize if in mobile view
                 window.addEventListener('resize', function() {
                     if (window.innerWidth > 768) {
@@ -667,7 +746,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         overlay.style.display = 'none';
                     }
                 });
-                
+
                 // Handle sidebar links in mobile view
                 const sidebarLinks = document.querySelectorAll('.sidebar a');
                 sidebarLinks.forEach(link => {
@@ -684,4 +763,5 @@ $current_page = basename($_SERVER['PHP_SELF']);
         });
     </script>
 </body>
+
 </html>

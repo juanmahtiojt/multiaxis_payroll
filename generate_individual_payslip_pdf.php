@@ -57,15 +57,24 @@ try {
     if (mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_assoc($result);
 
+        if (empty($row['created_ats'])) {
+            $createdAt = date('Y-m-d H:i:s');
+            $updateQuery = "UPDATE payroll_records SET created_ats = ? WHERE id = ?";
+            $updateStmt = $conn->prepare($updateQuery);
+            $updateStmt->bind_param("si", $createdAt, $row['id']);
+            $updateStmt->execute();
+            $row['created_ats'] = $createdAt; // so the PDF uses the same timestamp
+        }
+
         // Calculate overtime & totals
         $overtimePay = $row['overtime_pay'];
         if ((empty($overtimePay) || $overtimePay == 0) && $row['overtime_hours'] > 0 && $row['overtime_rate'] > 0) {
             $overtimePay = $row['overtime_hours'] * $row['overtime_rate'];
         }
         $totalEarnings = $row['basic_salary'] + $overtimePay;
-        $totalDeductions = 
-            $row['sss_premium'] + $row['sss_loan'] + $row['pagibig_premium'] + 
-            $row['pagibig_loan'] + $row['philhealth'] + $row['cash_advance'] + 
+        $totalDeductions =
+            $row['sss_premium'] + $row['sss_loan'] + $row['pagibig_premium'] +
+            $row['pagibig_loan'] + $row['philhealth'] + $row['cash_advance'] +
             $row['late_deduction'] + $row['absent_deduction'] + $row['undertime_deduction'];
         $netPay = $totalEarnings - $totalDeductions;
 
@@ -82,7 +91,7 @@ try {
 <style>
 @page {
     size: A4;
-    margin: 10mm;
+    margin: 5mm;
 }
 body {
     margin: 0;
@@ -94,39 +103,56 @@ body {
     background-color: #fff;
 }
 
+.payslip-container {
+    page-break-after: always;
+}
+
+table.grid {
+    width: 90%;
+    border-collapse: separate;
+    border-spacing: 5mm 5mm; 
+}
+
+table.grid td {
+    width: 50%;
+    vertical-align: top;
+}
+
 .payslip {
-    width: 100%;
-    max-width: 190mm;
-    margin: 0 auto;
     background: #fff;
     border: 1px solid #dee2e6;
-    border-radius: 4px;
-    padding: 12px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 8px;
+    box-sizing: border-box;
+    height: 110mm; 
     page-break-inside: avoid;
-}
+    width: 65mm;
+}}
+
 
 .payslip-header {
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
     border-bottom: 1px solid #2c3e50;
-    padding-bottom: 6px;
+    padding-bottom: 4px;
 }
 
 .company-name {
-    font-size: 14px;
+    font-size: 11px;
     font-weight: bold;
     color: #2c3e50;
-    margin-bottom: 3px;
+    margin-bottom: 1px;
 }
+
 .company-logo {
-    max-width: 70px; 
-    max-height: 50px; 
-    margin-bottom: 3px;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    max-width: 90px; 
+    max-height: 65px; 
+    margin-bottom: 4px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
     background-color: #fff;
 }
+
 
 .payslip-title {
     font-size: 12px;
@@ -224,17 +250,18 @@ body {
 }
 
 .signature-section {
-    margin-top: 20px;
-    text-align: center;
-    font-size: 8px;
+    margin-top: 2px;
+    margin-left: -80px;
+    font-size: 6px;
     color: #666;
+    text-align:center;
 }
 
 .signature-line {
     border-top: 1px solid #333;
-    width: 150px;
+    width: 100px;
     margin: 3px auto;
-}
+
 </style>
 </head>
 <body>
@@ -251,8 +278,8 @@ body {
             <p><strong>Department:</strong> ' . htmlspecialchars($row['department']) . '</p>
             <p><strong>Pay Period:</strong> ' . ucfirst(htmlspecialchars($row['pay_period'])) . '</p>
             <p><strong>Date Range:</strong> ' . date('M d, Y', strtotime($row['start_date'])) . ' - ' . date('M d, Y', strtotime($row['end_date'])) . '</p>
-           <p><strong>Generated Date:</strong> ' . 
-                (!empty($row['created_ats']) ? date('M d, Y', strtotime($row['created_ats'])) : "N/A") . 
+           <p><strong>Generated Date:</strong> ' .
+            (!empty($row['created_ats']) ? date('M d, Y', strtotime($row['created_ats'])) : "N/A") .
             '</p>
 
         </div>
@@ -265,7 +292,7 @@ body {
                     <td class="amount">P' . number_format((float)($row['basic_salary'] ?? 0), 2) . '</td>
 
                 </tr>';
-        
+
         if ($row['overtime_hours'] > 0) {
             $html .= '
                 <tr>
@@ -274,7 +301,7 @@ body {
 
                 </tr>';
         }
-        
+
         $html .= '
                 <tr>
                     <td class="description"><strong>Total Earnings</strong></td>
@@ -287,7 +314,7 @@ body {
         <div class="pay-section">
             <h4>DEDUCTIONS</h4>
             <table class="pay-table">';
-        
+
         $deductions = [
             'SSS Premium' => $row['sss_premium'],
             'SSS Loan' => $row['sss_loan'],
@@ -299,7 +326,7 @@ body {
             'Absent Deduction' => $row['absent_deduction'],
             'Undertime Deduction' => $row['undertime_deduction']
         ];
-        
+
         foreach ($deductions as $desc => $amount) {
             if ($amount > 0) {
                 $html .= '
@@ -310,7 +337,7 @@ body {
                 </tr>';
             }
         }
-        
+
         $html .= '
                 <tr>
                     <td class="description"><strong>Total Deductions</strong></td>
@@ -358,11 +385,9 @@ body {
     } else {
         echo 'No payslip found for the selected criteria.';
     }
-
 } catch (Exception $e) {
     echo 'Error: ' . $e->getMessage();
 }
 
 // Close database connection
 mysqli_close($conn);
-?>

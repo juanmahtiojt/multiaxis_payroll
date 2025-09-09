@@ -18,18 +18,18 @@ if (isset($_POST['action'])) {
     $page = basename(__FILE__);
     $ip_address = $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP';
     $timestamp = date('Y-m-d H:i:s');
-    
+
     if ($_POST['action'] == 'archive' && isset($_POST['payslip_ids'])) {
         $payslip_ids = $_POST['payslip_ids'];
         $count = count($payslip_ids);
-        
+
         // Log the archive action
         $activity = "Archived $count payslip(s)";
         $stmt = $conn->prepare("INSERT INTO activity_logs (username, activity, page, ip_address, timestamp) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("sssss", $username, $activity, $page, $ip_address, $timestamp);
         $stmt->execute();
         $stmt->close();
-        
+
         foreach ($payslip_ids as $id) {
             $stmt = $conn->prepare("UPDATE payroll_records SET archived = 1 WHERE id = ?");
             $stmt->bind_param("i", $id);
@@ -38,14 +38,14 @@ if (isset($_POST['action'])) {
     } elseif ($_POST['action'] == 'restore' && isset($_POST['payslip_ids'])) {
         $payslip_ids = $_POST['payslip_ids'];
         $count = count($payslip_ids);
-        
+
         // Log the restore action
         $activity = "Restored $count payslip(s)";
         $stmt = $conn->prepare("INSERT INTO activity_logs (username, activity, page, ip_address, timestamp) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("sssss", $username, $activity, $page, $ip_address, $timestamp);
         $stmt->execute();
         $stmt->close();
-        
+
         foreach ($payslip_ids as $id) {
             $stmt = $conn->prepare("UPDATE payroll_records SET archived = 0 WHERE id = ?");
             $stmt->bind_param("i", $id);
@@ -54,14 +54,14 @@ if (isset($_POST['action'])) {
     } elseif ($_POST['action'] == 'delete' && isset($_POST['payslip_ids'])) {
         $payslip_ids = $_POST['payslip_ids'];
         $count = count($payslip_ids);
-        
+
         // Log the delete action
         $activity = "Deleted $count payslip(s) permanently";
         $stmt = $conn->prepare("INSERT INTO activity_logs (username, activity, page, ip_address, timestamp) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("sssss", $username, $activity, $page, $ip_address, $timestamp);
         $stmt->execute();
         $stmt->close();
-        
+
         foreach ($payslip_ids as $id) {
             $stmt = $conn->prepare("DELETE FROM payroll_records WHERE id = ?");
             $stmt->bind_param("i", $id);
@@ -74,7 +74,7 @@ if (isset($_POST['action'])) {
         $stmt->bind_param("sssss", $username, $activity, $page, $ip_address, $timestamp);
         $stmt->execute();
         $stmt->close();
-        
+
         // Return success response for AJAX
         http_response_code(200);
         exit();
@@ -109,13 +109,14 @@ $active_query = "SELECT
 $active_result = mysqli_query($conn, $active_query);
 
 // Function to get payslips for a specific date
-function getPayslipsByDate($conn, $date, $archived = 0) {
+function getPayslipsByDate($conn, $date, $archived = 0)
+{
     $query = "SELECT pr.*, 
               DATE_FORMAT(COALESCE(pr.created_ats, pr.created_at), '%Y-%m-%d %H:%i') as formatted_date 
               FROM payroll_records pr 
               WHERE DATE(COALESCE(pr.created_ats, pr.created_at)) = ? AND pr.archived = ?
               ORDER BY pr.name ASC";
-    
+
     $stmt = $conn->prepare($query);
     $stmt->bind_param("si", $date, $archived);
     $stmt->execute();
@@ -127,6 +128,7 @@ function getPayslipsByDate($conn, $date, $archived = 0) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -154,12 +156,14 @@ function getPayslipsByDate($conn, $date, $archived = 0) {
             box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
             z-index: 1030;
         }
-        .sidebar-header {
+
+                .sidebar-header {
             padding: 20px 15px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 10px;
+            margin-bottom: 2px;
         }
+
         .sidebar-logo {
             width: 200px;
             height: 200px;
@@ -167,6 +171,7 @@ function getPayslipsByDate($conn, $date, $archived = 0) {
             margin-bottom: -30px;
             margin-top: -50px;
         }
+
         .company-name {
             font-size: 20px;
             font-weight: 600;
@@ -175,52 +180,60 @@ function getPayslipsByDate($conn, $date, $archived = 0) {
             opacity: 0.95;
             line-height: 1.3;
         }
+
         .nav-section {
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
+
         .nav-section-title {
             padding: 8px 20px;
-            font-size: 12px;
+            font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: rgba(255, 255, 255, 0.5);
             font-weight: 600;
         }
+
         .sidebar a {
             display: flex;
             align-items: center;
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
-            padding: 12px 20px;
-            font-size: 15px;
+            padding: 10px 20px;
+            font-size: 13px;
             transition: all 0.2s;
             border-left: 3px solid transparent;
         }
+
         .sidebar a i {
             margin-right: 12px;
             width: 24px;
             text-align: center;
-            font-size: 18px;
+            font-size: 15px;
         }
+
         .sidebar a:hover {
             background-color: rgba(255, 255, 255, 0.08);
             color: white;
             border-left-color: rgba(93, 173, 226, 0.5);
         }
+
         .sidebar a.active {
             background-color: rgba(93, 173, 226, 0.15);
             color: white;
             border-left-color: #5dade2;
             font-weight: 500;
         }
+
         .sidebar-footer {
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding: 15px;
             font-size: 12px;
             text-align: center;
             color: rgba(255, 255, 255, 0.5);
-            margin-top: 10px;
+            margin-top: 2px;
         }
+
         .main-content {
             margin-left: 270px;
             padding: 30px;
@@ -358,384 +371,426 @@ function getPayslipsByDate($conn, $date, $archived = 0) {
                 margin-left: 0;
                 padding: 15px;
             }
-            
+
             .sidebar {
                 transform: translateX(-100%);
             }
-            
+
             .sidebar.active {
                 transform: translateX(0);
             }
         }
     </style>
 </head>
+
 <body>
 
-<!-- Sidebar Overlay for Mobile -->
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-<!-- Mobile Menu Toggle Button -->
-<button class="menu-toggle" id="menuToggle">
-    <i class="fas fa-bars"></i>
-</button>
+    <!-- Mobile Menu Toggle Button -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
 
 <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <img src="my_project/images/MULTI-removebg-preview.png" class="sidebar-logo" alt="Company Logo">
-        <div class="company-name">Multi Axis Handlers & Tech Inc</div>
-    </div>
-    
-<div class="nav-section">
-    <div class="nav-section-title">Main Navigation</div>
-    <?php if ($role === 'admin') : ?>
-        <a href="dashboard.php" class="<?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
-            <i class="fas fa-home"></i> Dashboard
-        </a>
-        <a href="add_user.php" class="<?php echo ($current_page == 'add_user.php') ? 'active' : ''; ?>">
-            <i class="fas fa-user-plus"></i> Employees
-        </a>
-    <?php endif; ?>
-
-    <div class="attendance-group">
-        <div class="nav-section-title">
-            <i class="fas fa-clipboard-check"></i> Attendance
+        <div class="sidebar-header">
+            <img src="my_project/images/MULTI-removebg-preview.png" class="sidebar-logo" alt="Company Logo">
+            <div class="company-name">Multi Axis Handlers & Tech Inc</div>
         </div>
-        <a href="employee_attendance_monthly.php" class="<?php echo ($current_page == 'employee_attendance_monthly.php') ? 'active' : ''; ?>">
-            Monthly Attendance
-        </a>
-        <a href="employee_attendance.php" class="<?php echo ($current_page == 'employee_attendance.php') ? 'active' : ''; ?>">
-            Weekly Attendance
-        </a>
-    </div>
-</div>
 
+        <!-- MAIN NAVIGATION -->
+        <div class="nav-section">
+            <div class="nav-section-title">Main</div>
+            <a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <?php if ($role === 'admin') : ?>
+                <a href="add_user.php" class="<?= ($current_page == 'add_user.php') ? 'active' : '' ?>">
+                    <i class="fas fa-user-plus"></i> Employees
+                </a>
+            <?php endif; ?>
+        </div>
 
-    <div class="nav-section">
-        <div class="nav-section-title">Payroll Management</div>
-        <a href="reports.php" class="<?php echo ($current_page == 'reports.php') ? 'active' : ''; ?>">
-            <i class="fas fa-chart-bar"></i> Deductions
-        </a>
-        <a href="attendance_summary_report.php" class="<?php echo ($current_page == 'attendance_summary_report.php') ? 'active' : ''; ?>">
-            <i class="fas fa-clock"></i> Attendance Summary
-        </a>
-        <a href="view_payslips.php" class="<?= ($current_page == 'view_payslips.php') ? 'active' : '' ?>">
-            <i class="fas fa-file-alt"></i> View Payslips
-        </a>
-        <a href="payslip_archive_complete.php" class="<?= ($current_page == 'payslip_archive_complete.php') ? 'active' : '' ?>">
-            <i class="fas fa-archive"></i> Payslip Archive
-        </a>
+        <!-- ATTENDANCE -->
+        <div class="nav-section">
+            <div class="nav-section-title">Attendance</div>
+            <a href="employee_attendance_monthly.php" class="<?= ($current_page == 'employee_attendance_monthly.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-alt"></i> Monthly Attendance
+            </a>
+            <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-week"></i> Weekly Attendance
+            </a>
+            <a href="attendance_summary_report.php" class="<?= ($current_page == 'attendance_summary_report.php') ? 'active' : '' ?>">
+                <i class="fas fa-clipboard-list"></i> Attendance Summary
+            </a>
+        </div>
 
-        
-    </div>
-    <div class="nav-section">
-        <a href="logout.php" class="<?php echo ($current_page == 'logout.php') ? 'active' : ''; ?>">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-    </div>
-    
-    <div class="sidebar-footer">
+        <!-- PAYROLL -->
+        <div class="nav-section">
+            <div class="nav-section-title">Payroll</div>
+            <a href="payroll.php" class="<?= ($current_page == 'payroll.php') ? 'active' : '' ?>">
+                <i class="fas fa-money-bill-wave"></i> Payroll
+            </a>
+            <a href="reports.php" class="<?php echo ($current_page == 'reports.php') ? 'active' : ''; ?>">
+                <i class="fas fa-chart-bar"></i> Deductions
+            </a>
+            <a href="view_payslips.php" class="<?= ($current_page == 'view_payslips.php') ? 'active' : '' ?>">
+                <i class="fas fa-file-invoice-dollar"></i> View Payslips
+            </a>
+            <a href="payslip_archive.php" class="<?= ($current_page == 'payslip_archive.php') ? 'active' : '' ?>">
+                <i class="fas fa-archive"></i> Payslip Archive
+            </a>
+        </div>
+
+        <!-- OTHER -->
+        <div class="nav-section">
+            <div class="nav-section-title">Other</div>
+            <a href="about.php" class="<?= ($current_page == 'about.php') ? 'active' : '' ?>">
+                <i class="fas fa-info-circle"></i> About
+            </a>
+            <a href="logout.php" class="<?= ($current_page == 'logout.php') ? 'active' : '' ?>">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+        <div class="sidebar-footer">
         © <?php echo date('Y'); ?> Multi Axis Handlers & Tech Inc.
     </div>
-</div>
 
-<div class="main-content">
-    <div class="container-fluid">
-        <h1 class="mb-4">Payslip Archive</h1>
-        
-        <!-- Statistics -->
-        <div class="stats-card">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-number">
-                        <?php 
-                        $total_active = 0;
-                        mysqli_data_seek($active_result, 0);
-                        while($row = mysqli_fetch_assoc($active_result)) {
-                            $total_active += $row['payslip_count'];
-                        }
-                        mysqli_data_seek($active_result, 0);
-                        echo $total_active;
-                        ?>
+    </div>
+
+    </div>
+
+    <div class="main-content">
+        <div class="container-fluid">
+            <h1 class="mb-4">Payslip Archive</h1>
+
+            <!-- Statistics -->
+            <div class="stats-card">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">
+                            <?php
+                            $total_active = 0;
+                            mysqli_data_seek($active_result, 0);
+                            while ($row = mysqli_fetch_assoc($active_result)) {
+                                $total_active += $row['payslip_count'];
+                            }
+                            mysqli_data_seek($active_result, 0);
+                            echo $total_active;
+                            ?>
+                        </div>
+                        <div class="stat-label">Active Payslips</div>
                     </div>
-                    <div class="stat-label">Active Payslips</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">
-                        <?php 
-                        $total_archived = 0;
-                        mysqli_data_seek($archive_result, 0);
-                        while($row = mysqli_fetch_assoc($archive_result)) {
-                            $total_archived += $row['payslip_count'];
-                        }
-                        mysqli_data_seek($archive_result, 0);
-                        echo $total_archived;
-                        ?>
+                    <div class="stat-item">
+                        <div class="stat-number">
+                            <?php
+                            $total_archived = 0;
+                            mysqli_data_seek($archive_result, 0);
+                            while ($row = mysqli_fetch_assoc($archive_result)) {
+                                $total_archived += $row['payslip_count'];
+                            }
+                            mysqli_data_seek($archive_result, 0);
+                            echo $total_archived;
+                            ?>
+                        </div>
+                        <div class="stat-label">Archived Payslips</div>
                     </div>
-                    <div class="stat-label">Archived Payslips</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number"><?php echo $total_active + $total_archived; ?></div>
-                    <div class="stat-label">Total Payslips</div>
+                    <div class="stat-item">
+                        <div class="stat-number"><?php echo $total_active + $total_archived; ?></div>
+                        <div class="stat-label">Total Payslips</div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Active Payslips Section -->
-        <div class="archive-card">
-            <div class="archive-header">
-                <i class="fas fa-file-alt"></i> Active Payslips by Generation Date
-            </div>
-            <div class="archive-body">
-                <?php if (mysqli_num_rows($active_result) > 0): ?>
-                 <?php while ($date_group = mysqli_fetch_assoc($active_result)): ?>
-                    <?php 
-                        // Define safe formatted date for group
-                        $formatted_date = !empty($date_group['generation_date']) 
-                            ? date('F j, Y', strtotime($date_group['generation_date'])) 
-                            : "N/A";
-                    ?>
-                    <div class="mb-4">
-                        <h5 class="text-primary mb-3">
-                            <i class="fas fa-calendar-alt"></i> 
-                            Generated on: <?= $formatted_date ?>
-                            <span class="badge bg-secondary ms-2"><?= $date_group['payslip_count']; ?> payslips</span>
-                        </h5>
-                        
-                        <form method="POST" action="">
-                            <input type="hidden" name="action" value="archive">
-                            <div class="mb-3">
-                                <div class="checkbox-group mb-2">
-                                    <input type="checkbox" 
-                                        id="selectAllActive<?= $date_group['generation_date']; ?>" 
-                                        onchange="selectAll(this, 'payslip_ids[]')">
-                                    <label for="selectAllActive<?= $date_group['generation_date']; ?>" class="fw-bold">
-                                        <i class="fas fa-check-square"></i> Select All for This Date
-                                    </label>
-                                </div>
-                                <button type="submit" 
-                                        class="btn btn-primary btn-sm" 
-                                        onclick="return confirm('Archive all payslips for <?= $formatted_date ?>?')">
-                                    <i class="fas fa-archive"></i> Archive All for This Date
-                                </button>
-                                <a href="generate_archive_payslip_pdf.php?generation_date=<?= $date_group['generation_date']; ?>&archived=0" 
-                                class="btn btn-success btn-sm" target="_blank" 
-                                onclick="logPrintAction('batch', '<?= $date_group['generation_date']; ?>', <?= $date_group['payslip_count']; ?>)">
-                                    <i class="fas fa-file-pdf"></i> Generate PDF Report
-                                </a>
-                            </div>
-                            
-                            <div class="row">
-                                <?php 
-                                $payslips_for_date = getPayslipsByDate($conn, $date_group['generation_date'], 0);
-                                while ($payslip = mysqli_fetch_assoc($payslips_for_date)): 
-                                ?>
-                                    <div class="col-md-6 col-lg-4 mb-3">
-                                        <div class="payslip-card">
-                                            <div class="checkbox-group">
-                                                <input type="checkbox" name="payslip_ids[]" value="<?= $payslip['id']; ?>">
-                                                <label>Select <?= htmlspecialchars($payslip['name']); ?></label>
-                                            </div>
-                                            
-                                            <div class="payslip-info">
-                                                <div class="info-item">
-                                                    <strong>Employee:</strong> <?= htmlspecialchars($payslip['name']); ?>
+            <!-- Active Payslips Section -->
+            <div class="archive-card">
+                <div class="archive-header">
+                    <i class="fas fa-file-alt"></i> Active Payslips by Generation Date
+                </div>
+                <div class="archive-body">
+                    <?php if (mysqli_num_rows($active_result) > 0): ?>
+                        <?php while ($date_group = mysqli_fetch_assoc($active_result)): ?>
+                            <?php
+                            // Define safe formatted date for group
+                            $formatted_date = !empty($date_group['generation_date'])
+                                ? date('F j, Y', strtotime($date_group['generation_date']))
+                                : "N/A";
+                            ?>
+                            <div class="mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Generated on: <?= $formatted_date ?>
+                                    <span class="badge bg-secondary ms-2"><?= $date_group['payslip_count']; ?> payslips</span>
+                                </h5>
+
+                                <form method="POST" action="">
+                                    <input type="hidden" name="action" value="archive">
+                                    <div class="mb-3 date-group">
+                                        <div class="checkbox-group mb-2">
+                                            <input type="checkbox"
+                                                id="selectAllActive<?= $date_group['generation_date']; ?>"
+                                                onchange="selectAll(this, 'payslip_ids[]')">
+                                            <label for="selectAllActive<?= $date_group['generation_date']; ?>" class="fw-bold">
+                                                <i class="fas fa-check-square"></i> Select All for This Date
+                                            </label>
+                                        </div>
+                                        <button type="submit"
+                                            class="btn btn-primary btn-sm"
+                                            onclick="return confirm('Archive all payslips for <?= $formatted_date ?>?')">
+                                            <i class="fas fa-archive"></i> Archive All for This Date
+                                        </button>
+                                        <a href="generate_archive_payslip_pdf.php?generation_date=<?= $date_group['generation_date']; ?>&archived=0"
+                                            class="btn btn-success btn-sm" target="_blank"
+                                            onclick="logPrintAction('batch', '<?= $date_group['generation_date']; ?>', <?= $date_group['payslip_count']; ?>)">
+                                            <i class="fas fa-file-pdf"></i> Generate PDF Report
+                                        </a>
+
+
+                                        <div class="row">
+                                            <?php
+                                            $payslips_for_date = getPayslipsByDate($conn, $date_group['generation_date'], 0);
+                                            while ($payslip = mysqli_fetch_assoc($payslips_for_date)):
+                                            ?>
+                                                <div class="col-md-6 col-lg-4 mb-3">
+                                                    <div class="payslip-card">
+                                                        <div class="checkbox-group">
+                                                            <input type="checkbox" name="payslip_ids[]" value="<?= $payslip['id']; ?>">
+                                                            <label>Select <?= htmlspecialchars($payslip['name']); ?></label>
+                                                        </div>
+
+                                                        <div class="payslip-info">
+                                                            <div class="info-item">
+                                                                <strong>Employee:</strong> <?= htmlspecialchars($payslip['name']); ?>
+                                                            </div>
+                                                            <div class="info-item">
+                                                                <strong>Period:</strong> <?= ucfirst(htmlspecialchars($payslip['pay_period'])); ?>
+                                                            </div>
+                                                            <div class="info-item">
+                                                                <strong>Date Range:</strong>
+                                                                <?= date('M d, Y', strtotime($payslip['start_date'])); ?> -
+                                                                <?= date('M d, Y', strtotime($payslip['end_date'])); ?>
+                                                            </div>
+                                                            <div class="info-item">
+                                                                <strong>Net Pay:</strong> ₱<?= number_format(
+                                                                                                $payslip['basic_salary'] + $payslip['overtime_pay']
+                                                                                                    - ($payslip['sss_premium']
+                                                                                                        + $payslip['sss_loan']
+                                                                                                        + $payslip['pagibig_premium']
+                                                                                                        + $payslip['pagibig_loan']
+                                                                                                        + $payslip['philhealth']
+                                                                                                        + $payslip['cash_advance']
+                                                                                                        + $payslip['late_deduction']
+                                                                                                        + $payslip['absent_deduction']
+                                                                                                        + $payslip['undertime_deduction']
+                                                                                                    ),
+                                                                                                2
+                                                                                            ); ?>
+                                                            </div>
+                                                            <div class="info-item">
+                                                                <strong>Created:</strong> <?= $payslip['formatted_date']; ?>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="action-buttons">
+                                                            <a href="generate_individual_payslip_pdf.php?id=<?= $payslip['id']; ?>"
+                                                                class="btn btn-outline-success btn-sm" target="_blank">
+                                                                <i class="fas fa-file-pdf"></i> Individual PDF
+                                                            </a>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div class="info-item">
-                                                    <strong>Period:</strong> <?= ucfirst(htmlspecialchars($payslip['pay_period'])); ?>
-                                                </div>
-                                                <div class="info-item">
-                                                    <strong>Date Range:</strong> 
-                                                    <?= date('M d, Y', strtotime($payslip['start_date'])); ?> - 
-                                                    <?= date('M d, Y', strtotime($payslip['end_date'])); ?>
-                                                </div>
-                                                <div class="info-item">
-                                                    <strong>Net Pay:</strong> ₱<?= number_format(
-                                                        $payslip['basic_salary'] 
-                                                        - ($payslip['sss_premium'] 
-                                                        + $payslip['sss_loan'] 
-                                                        + $payslip['pagibig_premium'] 
-                                                        + $payslip['pagibig_loan'] 
-                                                        + $payslip['philhealth'] 
-                                                        + $payslip['cash_advance']), 
-                                                        2
-                                                    ); ?>
-                                                </div>
-                                                <div class="info-item">
-                                                    <strong>Created:</strong> <?= $payslip['formatted_date']; ?>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="action-buttons">
-                                                <a href="generate_individual_payslip_pdf.php?id=<?= $payslip['id']; ?>" 
-                                                class="btn btn-outline-success btn-sm" target="_blank">
-                                                    <i class="fas fa-file-pdf"></i> Individual PDF
-                                                </a>
-                                            </div>
+                                            <?php endwhile; ?>
                                         </div>
                                     </div>
-                                <?php endwhile; ?>
+                                </form>
                             </div>
-                        </form>
-                    </div>
-                <?php endwhile; ?>
+                        <?php endwhile; ?>
 
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="fas fa-folder-open"></i>
-                        <p>No active payslips to archive</p>
-                    </div>
-                <?php endif; ?>
+                    <?php else: ?>
+                        <div class="empty-state">
+                            <i class="fas fa-folder-open"></i>
+                            <p>No active payslips to archive</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
-        </div>
 
-        <!-- Archived Payslips Section -->
-        <div class="archive-card">
-            <div class="archive-header">
-                <i class="fas fa-archive"></i> Archived Payslips by Generation Date
-            </div>
-            <div class="archive-body">
-                <?php if (mysqli_num_rows($archive_result) > 0): ?>
-                    <?php while ($date_group = mysqli_fetch_assoc($archive_result)): ?>
-                        <div class="mb-4">
-                            <h5 class="text-primary mb-3">
-                                <i class="fas fa-calendar-alt"></i> 
-                                Generated on: <?php echo date('F j, Y', strtotime($date_group['generation_date'])); ?>
-                                <span class="badge bg-secondary ms-2"><?php echo $date_group['payslip_count']; ?> payslips</span>
-                            </h5>
-                            
-                            <form method="POST" action="">
-                                <div class="mb-3">
-                                    <button type="submit" name="action" value="restore" class="btn btn-warning btn-sm" onclick="return confirm('Restore payslips for <?php echo $date_group['formatted_date']; ?>?')">
-                                        <i class="fas fa-undo"></i> Restore / Restore All
-                                    </button>
-                                    <button type="submit" name="action" value="delete" class="btn btn-danger btn-sm" onclick="return confirm('Permanently delete all payslips for <?php echo $date_group['formatted_date']; ?>?')">
-                                        <i class="fas fa-trash"></i> Delete All for This Date
-                                    </button>
-                                    <a href="generate_archive_payslip_pdf.php?generation_date=<?php echo $date_group['generation_date']; ?>&archived=1" 
-                                       class="btn btn-success btn-sm" target="_blank" onclick="logPrintAction('batch', '<?php echo $date_group['generation_date']; ?>', <?php echo $date_group['payslip_count']; ?>)">
-                                        <i class="fas fa-file-pdf"></i> Generate PDF Report
-                                    </a>
-                                </div>
-                                
-                                <div class="row">
-                                    <?php 
-                                    $payslips_for_date = getPayslipsByDate($conn, $date_group['generation_date'], 1);
-                                    while ($payslip = mysqli_fetch_assoc($payslips_for_date)): 
-                                    ?>
-                                        <div class="col-md-6 col-lg-4 mb-3">
-                                            <div class="payslip-card">
-                                                <div class="checkbox-group">
-                                                    <input type="checkbox" name="payslip_ids[]" value="<?php echo $payslip['id']; ?>">
-                                                    <label>Select <?php echo htmlspecialchars($payslip['name']); ?></label>
-                                                </div>
-                                                
-                                                <div class="payslip-info">
-                                                    <div class="info-item">
-                                                        <strong>Employee:</strong> <?php echo htmlspecialchars($payslip['name']); ?>
+            <!-- Archived Payslips Section -->
+            <div class="archive-card">
+                <div class="archive-header">
+                    <i class="fas fa-archive"></i> Archived Payslips by Generation Date
+                </div>
+                <div class="archive-body">
+                    <?php if (mysqli_num_rows($archive_result) > 0): ?>
+                        <?php while ($date_group = mysqli_fetch_assoc($archive_result)): ?>
+                            <div class="mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Generated on: <?php echo date('F j, Y', strtotime($date_group['generation_date'])); ?>
+                                    <span class="badge bg-secondary ms-2"><?php echo $date_group['payslip_count']; ?> payslips</span>
+                                </h5>
+
+                                <form method="POST" action="">
+                                    <div class="mb-3 date-group">
+                                        
+
+                                        <button type="submit" name="action" value="restore" class="btn btn-warning btn-sm" onclick="return confirm('Restore payslips for <?php echo $date_group['formatted_date']; ?>?')">
+                                            <i class="fas fa-undo"></i> Restore / Restore All
+                                        </button>
+                                        <button type="submit" name="action" value="delete" class="btn btn-danger btn-sm" onclick="return confirm('Permanently delete all payslips for <?php echo $date_group['formatted_date']; ?>?')">
+                                            <i class="fas fa-trash"></i> Delete All for This Date
+                                        </button>
+                                        <a href="generate_archive_payslip_pdf.php?generation_date=<?php echo $date_group['generation_date']; ?>&archived=1"
+                                            class="btn btn-success btn-sm" target="_blank" onclick="logPrintAction('batch', '<?php echo $date_group['generation_date']; ?>', <?php echo $date_group['payslip_count']; ?>)">
+                                            <i class="fas fa-file-pdf"></i> Generate PDF Report
+                                        </a>
+                                        <div></div>
+
+                                        <div class="checkbox-group mb-2">
+                                            <input type="checkbox"
+                                                id="selectAllActive<?= $date_group['generation_date']; ?>"
+                                                onchange="selectAll(this, 'payslip_ids[]')">
+                                            <label for="selectAllActive<?= $date_group['generation_date']; ?>" class="fw-bold">
+                                                <i class="fas fa-check-square"></i> Select All for This Date
+                                            </label>
+                                        </div>
+                                    
+
+                                    <div class="row">
+                                        <?php
+                                        $payslips_for_date = getPayslipsByDate($conn, $date_group['generation_date'], 1);
+                                        while ($payslip = mysqli_fetch_assoc($payslips_for_date)):
+                                        ?>
+                                            <div class="col-md-6 col-lg-4 mb-3">
+                                                <div class="payslip-card">
+                                                    <div class="checkbox-group">
+                                                        <input type="checkbox" name="payslip_ids[]" value="<?php echo $payslip['id']; ?>">
+                                                        <label>Select <?php echo htmlspecialchars($payslip['name']); ?></label>
                                                     </div>
-                                                    <div class="info-item">
-                                                        <strong>Period:</strong> <?php echo ucfirst(htmlspecialchars($payslip['pay_period'])); ?>
+
+                                                    <div class="payslip-info">
+                                                        <div class="info-item">
+                                                            <strong>Employee:</strong> <?php echo htmlspecialchars($payslip['name']); ?>
+                                                        </div>
+                                                        <div class="info-item">
+                                                            <strong>Period:</strong> <?php echo ucfirst(htmlspecialchars($payslip['pay_period'])); ?>
+                                                        </div>
+                                                        <div class="info-item">
+                                                            <strong>Date Range:</strong> <?php echo date('M d, Y', strtotime($payslip['start_date'])); ?> - <?php echo date('M d, Y', strtotime($payslip['end_date'])); ?>
+                                                        </div>
+                                                        <div class="info-item">
+                                                            <strong>Net Pay:</strong> ₱<?= number_format(
+                                                                                                $payslip['basic_salary'] + $payslip['overtime_pay']
+                                                                                                    - ($payslip['sss_premium']
+                                                                                                        + $payslip['sss_loan']
+                                                                                                        + $payslip['pagibig_premium']
+                                                                                                        + $payslip['pagibig_loan']
+                                                                                                        + $payslip['philhealth']
+                                                                                                        + $payslip['cash_advance']
+                                                                                                        + $payslip['late_deduction']
+                                                                                                        + $payslip['absent_deduction']
+                                                                                                        + $payslip['undertime_deduction']
+                                                                                                    ),
+                                                                                                2
+                                                                                            ); ?>
+                                                        <div class="info-item">
+                                                            <strong>Archived:</strong> <?php echo $payslip['formatted_date']; ?>
+                                                        </div>
                                                     </div>
-                                                    <div class="info-item">
-                                                        <strong>Date Range:</strong> <?php echo date('M d, Y', strtotime($payslip['start_date'])); ?> - <?php echo date('M d, Y', strtotime($payslip['end_date'])); ?>
+
+                                                    <div class="action-buttons">
+                                                        <a href="generate_individual_payslip_pdf.php?id=<?php echo $payslip['id']; ?>"
+                                                            class="btn btn-outline-success btn-sm" target="_blank">
+                                                            <i class="fas fa-file-pdf"></i> Individual PDF
+                                                        </a>
                                                     </div>
-                                                    <div class="info-item">
-                                                        <strong>Net Pay:</strong> ₱<?php echo number_format($payslip['basic_salary'] + $payslip['total_earnings'] - ($payslip['sss_premium'] + $payslip['sss_loan'] + $payslip['pagibig_premium'] + $payslip['pagibig_loan'] + $payslip['philhealth'] + $payslip['cash_advance']), 2); ?>
-                                                    </div>
-                                                    <div class="info-item">
-                                                        <strong>Archived:</strong> <?php echo $payslip['formatted_date']; ?>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="action-buttons">
-                                                    <a href="generate_individual_payslip_pdf.php?id=<?php echo $payslip['id']; ?>" 
-                                                       class="btn btn-outline-success btn-sm" target="_blank">
-                                                        <i class="fas fa-file-pdf"></i> Individual PDF
-                                                    </a>
                                                 </div>
                                             </div>
-                                        </div>
-                                    <?php endwhile; ?>
-                                </div>
+                                        <?php endwhile; ?>
+                                    </div>
+                            </div>
                             </form>
-                        </div>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <div class="empty-state">
-                        <i class="fas fa-archive"></i>
-                        <p>No archived payslips found</p>
-                    </div>
-                <?php endif; ?>
+                </div>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <div class="empty-state">
+                <i class="fas fa-archive"></i>
+                <p>No archived payslips found</p>
+            </div>
+        <?php endif; ?>
             </div>
         </div>
     </div>
-</div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Select all checkboxes
-    function selectAll(source, name) {
-        checkboxes = document.getElementsByName(name);
-        for(var i=0, n=checkboxes.length;i<n;i++) {
-            checkboxes[i].checked = source.checked;
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Select all checkboxes
+        function selectAll(source, name) {
+            let container = source.closest('.date-group');
+            let checkboxes = container.querySelectorAll(`input[name="${name}"]`);
+            checkboxes.forEach(cb => cb.checked = source.checked);
         }
-    }
 
-    // Log print actions
-    function logPrintAction(type, identifier, count) {
-        const username = '<?php echo $_SESSION['user']; ?>';
-        const page = '<?php echo basename(__FILE__); ?>';
-        const ip_address = '<?php echo $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP'; ?>';
-        
-        let activity = '';
-        if (type === 'batch') {
-            activity = `Generated batch PDF report for ${count} payslip(s) dated ${identifier}`;
-        } else if (type === 'individual') {
-            activity = `Generated individual PDF payslip for employee: ${identifier}`;
+
+
+        // Log print actions
+        function logPrintAction(type, identifier, count) {
+            const username = '<?php echo $_SESSION['user']; ?>';
+            const page = '<?php echo basename(__FILE__); ?>';
+            const ip_address = '<?php echo $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP'; ?>';
+
+            let activity = '';
+            if (type === 'batch') {
+                activity = `Generated batch PDF report for ${count} payslip(s) dated ${identifier}`;
+            } else if (type === 'individual') {
+                activity = `Generated individual PDF payslip for employee: ${identifier}`;
+            }
+
+            // Send AJAX request to log the print action
+            fetch('payslip_archive.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=log_print&activity=${encodeURIComponent(activity)}`
+            });
         }
-        
-        // Send AJAX request to log the print action
-        fetch('payslip_archive.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `action=log_print&activity=${encodeURIComponent(activity)}`
-        });
-    }
 
-    // Sidebar toggle functionality for mobile view
-    document.addEventListener('DOMContentLoaded', function() {
-        const menuToggle = document.getElementById('menuToggle');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        
-        if (menuToggle && sidebar && overlay) {
-            menuToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('active');
-                if (sidebar.classList.contains('active')) {
-                    overlay.style.display = 'block';
-                } else {
-                    overlay.style.display = 'none';
-                }
-            });
-            
-            overlay.addEventListener('click', function() {
-                sidebar.classList.remove('active');
-                overlay.style.display = 'none';
-            });
-            
-            window.addEventListener('resize', function() {
-                if (window.innerWidth > 768) {
+        // Sidebar toggle functionality for mobile view
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            if (menuToggle && sidebar && overlay) {
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    if (sidebar.classList.contains('active')) {
+                        overlay.style.display = 'block';
+                    } else {
+                        overlay.style.display = 'none';
+                    }
+                });
+
+                overlay.addEventListener('click', function() {
                     sidebar.classList.remove('active');
                     overlay.style.display = 'none';
-                }
-            });
-        }
-    });
-</script>
+                });
+
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 768) {
+                        sidebar.classList.remove('active');
+                        overlay.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
 
 </body>
+
 </html>
 <?php
 // Close database connection
