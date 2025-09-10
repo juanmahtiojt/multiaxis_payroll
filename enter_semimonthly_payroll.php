@@ -3,7 +3,7 @@
 $host = "localhost";
 $username = "root";
 $password = "cvsuOJT@2025"; // Change this if you have a password
-$dbname = "multiaxis_payroll_system";
+$dbname = "mathipms";
 
 $conn = new mysqli($host, $username, $password, $dbname);
 if ($conn->connect_error) {

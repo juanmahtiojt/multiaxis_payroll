@@ -19,7 +19,7 @@ $id_no = $_GET['id'];
 $original_id = $id_no; // Store the original ID for reference
 
 // Fetch employee data
-$employee_query = "SELECT * FROM multiaxis_payroll_system.daily_rate WHERE id_no = ?";
+$employee_query = "SELECT * FROM mathipms.daily_rate WHERE id_no = ?";
 $stmt = $conn->prepare($employee_query);
 $stmt->bind_param("s", $id_no);
 $stmt->execute();
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($new_id_no && $name && $department && $daily_rate > 0 && $pay_schedule) {
         // Check if the ID is being changed and if the new ID already exists
         if ($new_id_no !== $original_id) {
-            $check_query = "SELECT COUNT(*) as count FROM multiaxis_payroll_system.daily_rate WHERE id_no = ?";
+            $check_query = "SELECT COUNT(*) as count FROM mathipms.daily_rate WHERE id_no = ?";
             $check_stmt = $conn->prepare($check_query);
             $check_stmt->bind_param("s", $new_id_no);
             $check_stmt->execute();
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = "❌ Employee ID already exists. Please choose a different ID.";
             } else {
                 // ID is being changed and is unique, perform update with new ID
-                $update_query = "UPDATE multiaxis_payroll_system.daily_rate 
+                $update_query = "UPDATE mathipms.daily_rate 
                                 SET id_no = ?, name = ?, department = ?, daily_rate = ?, pay_schedule = ? 
                                 WHERE id_no = ?";
                 $stmt = $conn->prepare($update_query);
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             // ID is not being changed, perform regular update
-            $update_query = "UPDATE multiaxis_payroll_system.daily_rate 
+            $update_query = "UPDATE mathipms.daily_rate 
                             SET name = ?, department = ?, daily_rate = ?, pay_schedule = ? 
                             WHERE id_no = ?";
             $stmt = $conn->prepare($update_query);

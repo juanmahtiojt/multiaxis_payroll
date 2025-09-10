@@ -39,7 +39,7 @@ try {
     $servername = "localhost";
     $username = "root";
     $password = "cvsuOJT@2025";
-    $dbname = "multiaxis_payroll_system";
+    $dbname = "mathipms";
     
     $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

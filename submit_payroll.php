@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$db = 'multiaxis_payroll_system';
+$db = 'mathipms';
 $user = 'root';
 $pass = 'cvsuOJT@2025'; // update this if needed
 $conn = new mysqli($host, $user, $pass, $db);

@@ -501,9 +501,21 @@ unset($_SESSION['upload_error']);
 
                                                     if ($inTime && $outTime) {
                                                         $interval = $inTime->diff($outTime);
-                                                        $workedHours = $interval->h + $interval->i / 60;
-                                                        $workedHours -= 1; // deduct 1 hour for lunch
-                                                        $hoursWorked = number_format($workedHours, 2) . ' hrs';
+                                                        $totalMinutes = ($interval->d * 24 * 60) + ($interval->h * 60) + $interval->i;
+                                                        $totalMinutes -= 60;
+                                                        $totalMinutes = max(0, $totalMinutes);
+
+                                                        $totalMinutes = max(0, $totalMinutes);
+
+                                                        // Convert to hours and minutes
+                                                        $hoursPart = floor($totalMinutes / 60);
+                                                        $minutesPart = $totalMinutes % 60;
+
+                                                        // Display as "7 hrs 20 mins"
+                                                        $hoursWorked = "{$hoursPart}hrs {$minutesPart}mins";
+
+                                                        // You can still keep decimal version if needed for undertime/overtime
+                                                        $workedHours = $totalMinutes / 60;
                                                     } else {
                                                         $absent = 'Absent';
                                                     }

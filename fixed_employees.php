@@ -15,7 +15,7 @@ $current_page = 'dashboard.php'; // Make Dashboard active by default
 
 try {
     // Database connection
-    $pdo = new PDO("mysql:host=localhost;dbname=multiaxis_payroll_system", 'root', ''); // Change to your actual DB credentials
+    $pdo = new PDO("mysql:host=localhost;dbname=mathipms", 'root', ''); // Change to your actual DB credentials
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Fetch fixed employees data

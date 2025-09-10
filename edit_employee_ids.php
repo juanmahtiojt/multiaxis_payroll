@@ -28,7 +28,7 @@ if (empty($id)) {
 // Fetch employee data
 $query = "SELECT dr.id_no, dr.name, dr.department, 
           e.sss_no, e.pagibig_no, e.tin_no, e.philhealth_no 
-          FROM multiaxis_payroll_system.daily_rate dr
+          FROM mathipms.daily_rate dr
           LEFT JOIN employees e ON dr.id_no = e.id_no
           WHERE dr.id_no = ?";
 $stmt = mysqli_prepare($conn, $query);

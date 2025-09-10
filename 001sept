@@ -1,0 +1,43 @@
+ALTER TABLE your_table_name
+ADD UNIQUE unique_all_columns (
+    batch_id,
+    employee_id,
+    name,
+    department,
+    pay_period,
+    start_date,
+    end_date,
+    basic_salary,
+    overtime_pay,
+    overtime_hours,
+    overtime_rate,
+    rest_day_pay,
+    regular_holiday_pay,
+    regular_ot_pay,
+    special_holiday_pay,
+    late_deduction,
+    absent_deduction,
+    undertime_deduction,
+    total_earnings,
+    total_deductions,
+    net_pay,
+    archived,
+    created_ats,
+    sss_no,
+    pagibig_no,
+    tin_no,
+    philhealth_no,
+    thirteenth_month_pay,
+    sss_premium,
+    sss_loan,
+    pagibig_premium,
+    pagibig_loan,
+    philhealth,
+    cash_advance,
+    leave_with_pay,
+    leave_without_pay,
+    available_leave
+);
+
+
+ALTER TABLE payroll_records ADD UNIQUE unique_all_columns ( batch_id, employee_id, name, department, pay_period, start_date, end_date, basic_salary, total_earnings, total_deductions, net_pay );

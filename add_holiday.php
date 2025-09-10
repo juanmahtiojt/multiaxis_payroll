@@ -20,7 +20,7 @@ if (isset($_GET['edit']) && !empty($_GET['edit'])) {
     $edit_stmt = $conn->prepare("SELECT holiday_date, description, holiday_type, regular_rate, overtime_rate, 
                                 restdayholiday_regular, restdayholiday_overtime, restdayholiday_special, 
                                 restdayspecialholiday_overtime 
-                                FROM multiaxis_payroll_system.holidays WHERE holiday_date = ?");
+                                FROM mathipms.holidays WHERE holiday_date = ?");
     $edit_stmt->bind_param("s", $edit_date);
     $edit_stmt->execute();
     $edit_result = $edit_stmt->get_result();
@@ -56,12 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // If the date was changed, delete old entry and create new one
         if ($original_date != $holiday_date) {
-            $delete_stmt = $conn->prepare("DELETE FROM multiaxis_payroll_system.holidays WHERE holiday_date = ?");
+            $delete_stmt = $conn->prepare("DELETE FROM mathipms.holidays WHERE holiday_date = ?");
             $delete_stmt->bind_param("s", $original_date);
             $delete_stmt->execute();
             $delete_stmt->close();
 
-            $stmt = $conn->prepare("INSERT INTO multiaxis_payroll_system.holidays 
+            $stmt = $conn->prepare("INSERT INTO mathipms.holidays 
                                   (holiday_date, description, holiday_type, regular_rate, overtime_rate,
                                    restdayholiday_regular, restdayholiday_overtime, restdayholiday_special, 
                                    restdayspecialholiday_overtime) 
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
         } else {
             // Just update the existing record
-            $stmt = $conn->prepare("UPDATE multiaxis_payroll_system.holidays 
+            $stmt = $conn->prepare("UPDATE mathipms.holidays 
                                   SET description = ?, holiday_type = ?, regular_rate = ?, overtime_rate = ?,
                                   restdayholiday_regular = ?, restdayholiday_overtime = ?, restdayholiday_special = ?,
                                   restdayspecialholiday_overtime = ? 
@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } else {
         // Insert new holiday
-        $stmt = $conn->prepare("INSERT INTO multiaxis_payroll_system.holidays 
+        $stmt = $conn->prepare("INSERT INTO mathipms.holidays 
                               (holiday_date, description, holiday_type, regular_rate, overtime_rate,
                                restdayholiday_regular, restdayholiday_overtime, restdayholiday_special, 
                                restdayspecialholiday_overtime) 
@@ -150,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $query = "SELECT holiday_date, description, holiday_type, regular_rate, overtime_rate, 
           restdayholiday_regular, restdayholiday_overtime, restdayholiday_special, 
           restdayspecialholiday_overtime 
-          FROM multiaxis_payroll_system.holidays ORDER BY holiday_date";
+          FROM mathipms.holidays ORDER BY holiday_date";
 $result = $conn->query($query);
 ?>
 

@@ -14,7 +14,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     $id_no = $_GET['id'];
 
     // Prepare and execute the delete query
-    $stmt = $conn->prepare("DELETE FROM multiaxis_payroll_system.daily_rate WHERE id_no = ?");
+    $stmt = $conn->prepare("DELETE FROM mathipms.daily_rate WHERE id_no = ?");
     $stmt->bind_param("s", $id_no);
 
     if ($stmt->execute()) {

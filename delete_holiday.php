@@ -10,7 +10,7 @@ if (!isset($_SESSION['user']) || $_SESSION['role'] !== 'admin') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['holiday_date'])) {
     $holiday_date = $_POST['holiday_date'];
 
-    $stmt = $conn->prepare("DELETE FROM multiaxis_payroll_system.holidays WHERE holiday_date = ?");
+    $stmt = $conn->prepare("DELETE FROM mathipms.holidays WHERE holiday_date = ?");
     $stmt->bind_param("s", $holiday_date);
 
     if ($stmt->execute()) {

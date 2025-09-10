@@ -783,20 +783,30 @@ $saturdays = getSaturdays(date('Y'));
 
                                                     if ($inTime && $outTime) {
                                                         $interval = $inTime->diff($outTime);
-                                                        $workedHours = $interval->h + $interval->i / 60;
+                                                        $totalMinutes = ($interval->d * 24 * 60) + ($interval->h * 60) + $interval->i;
 
                                                         // Subtract 1 hour for lunch if not Saturday, Sunday, or holiday
                                                         if (!$isSaturday && !$isHoliday && !$isSunday) {
-                                                            $workedHours -= 1;
+                                                            $totalMinutes -= 60;
                                                         }
 
                                                         // Subtract 1 hour if it's a holiday
                                                         if ($isHoliday) {
-                                                            $workedHours -= 1;
+                                                            $totalMinutes -= 60;
                                                         }
+                                                        $totalMinutes = max(0, $totalMinutes);
 
-                                                        $workedHours = max(0, $workedHours);
-                                                        $hoursWorked = number_format($workedHours, 2) . ' hrs';
+                                                        $totalMinutes = max(0, $totalMinutes);
+
+                                                        // Convert to hours and minutes
+                                                        $hoursPart = floor($totalMinutes / 60);
+                                                        $minutesPart = $totalMinutes % 60;
+
+                                                        // Display as "7 hrs 20 mins"
+                                                        $hoursWorked = "{$hoursPart}hrs {$minutesPart}mins";
+
+                                                        // You can still keep decimal version if needed for undertime/overtime
+                                                        $workedHours = $totalMinutes / 60;
 
                                                         if ($workedHours > 0) {
                                                             // Set status based on day type

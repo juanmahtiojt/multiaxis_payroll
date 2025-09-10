@@ -445,7 +445,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         $servername = "localhost";
                         $username = "root";
                         $password = "cvsuOJT@2025";
-                        $dbname = "multiaxis_payroll_system";
+                        $dbname = "mathipms";
 
                         $allowed_periods = ["hourly", "daily", "weekly", "semi-monthly", "monthly", "fixed", "15th"];
 
@@ -556,7 +556,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 $servername = "localhost";
 $username = "root";
 $password = "cvsuOJT@2025";
-$dbname = "multiaxis_payroll_system";
+$dbname = "mathipms";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $start_date = $_POST['start_date'];

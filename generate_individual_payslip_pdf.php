@@ -269,7 +269,7 @@ table.grid td {
 }
 .signature-section {
     margin-top: 2px;
-    margin-left: -80px;
+    margin-left: -10px;
     font-size: 6px;
     color: #666;
     text-align:center;

@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $daily_rate = floatval($_POST['daily_rate']);
     
     if ($id_no && $name && $department && $daily_rate > 0) {
-        $stmt = $conn->prepare("INSERT INTO multiaxis_payroll_system.daily_rate (id_no, name, department, daily_rate) VALUES (?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO mathipms.daily_rate (id_no, name, department, daily_rate) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("sssd", $id_no, $name, $department, $daily_rate);
         
         if ($stmt->execute()) {
