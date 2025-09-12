@@ -440,6 +440,17 @@ unset($_SESSION['upload_error']);
                     <?php if ($uploadError): ?>
                         <div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($uploadError) ?></div>
                     <?php endif; ?>
+                    <!-- Duplication Error -->
+                    <?php
+                    if (isset($_SESSION['duplicate_warnings'])) {
+                        echo '<div class="alert alert-warning">';
+                        foreach ($_SESSION['duplicate_warnings'] as $msg) {
+                            echo '<p>' . htmlspecialchars($msg) . '</p>';
+                        }
+                        echo '</div>';
+                        unset($_SESSION['duplicate_warnings']);
+                    }
+                    ?>
 
                     <!-- Attendance Table with Sticky Headers -->
                     <?php if (!empty($employeeData)): ?>
