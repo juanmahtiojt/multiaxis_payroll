@@ -882,7 +882,7 @@ try {
                                 $totalAbsences++;
                             }
                         }
-                    }
+                    
 
                     // Check if payroll record already exists for this employee and pay period
                     $checkSql = "SELECT COUNT(*) as count FROM payroll_records WHERE employee_id = ? AND start_date = ? AND end_date = ?";
@@ -921,7 +921,7 @@ try {
             ?, ?, ?, NOW(), NOW()
         )");
 
-                    // $overtime_rate = $overtimeMultiplier; // Using the last overtime multiplier as default
+                    $overtime_rate = $overtimeMultiplier; // Using the last overtime multiplier as default
 
                     $stmt->bind_param(
                         "sssssssdddddddddddssssdddddddiiiddd",
@@ -973,8 +973,11 @@ try {
                         }
                     }
                 }
+            
                 // Skip the rest of the loop for this employee since weekly is handled above
-                continue 2; // Continue outer foreach for next employee
+                continue 3; // Continue outer foreach for next employee
+            }
+            
 
             case 'semi-monthly':
                 $pay_period = "Semi-Monthly";
@@ -983,11 +986,11 @@ try {
                 $yearMonth = $firstDate->format('Y-m');
 
                 if ($day <= 15) {
-                    // First half: 1st to 15th
+                    // First half: 1st to 11th
                     $startDate = $yearMonth . '-01';
                     $endDate = $yearMonth . '-15';
                 } else {
-                    // Second half: 16th to last day of month
+                    // Second half: 12th to last day of month
                     $startDate = $yearMonth . '-16';
                     $endDateObj = new DateTime($yearMonth . '-01');
                     $endDateObj->modify('last day of this month');

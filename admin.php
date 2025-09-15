@@ -218,12 +218,14 @@ $user_result = mysqli_query($conn, $user_query);
             box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
             z-index: 1030;
         }
+
         .sidebar-header {
             padding: 20px 15px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 10px;
+            margin-bottom: 2px;
         }
+
         .sidebar-logo {
             width: 200px;
             height: 200px;
@@ -231,6 +233,7 @@ $user_result = mysqli_query($conn, $user_query);
             margin-bottom: -30px;
             margin-top: -50px;
         }
+
         .company-name {
             font-size: 20px;
             font-weight: 600;
@@ -239,52 +242,60 @@ $user_result = mysqli_query($conn, $user_query);
             opacity: 0.95;
             line-height: 1.3;
         }
+
         .nav-section {
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
+
         .nav-section-title {
             padding: 8px 20px;
-            font-size: 12px;
+            font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: rgba(255, 255, 255, 0.5);
             font-weight: 600;
         }
+
         .sidebar a {
             display: flex;
             align-items: center;
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
-            padding: 12px 20px;
-            font-size: 15px;
+            padding: 10px 20px;
+            font-size: 13px;
             transition: all 0.2s;
             border-left: 3px solid transparent;
         }
+
         .sidebar a i {
             margin-right: 12px;
             width: 24px;
             text-align: center;
-            font-size: 18px;
+            font-size: 15px;
         }
+
         .sidebar a:hover {
             background-color: rgba(255, 255, 255, 0.08);
             color: white;
             border-left-color: rgba(93, 173, 226, 0.5);
         }
+
         .sidebar a.active {
             background-color: rgba(93, 173, 226, 0.15);
             color: white;
             border-left-color: #5dade2;
             font-weight: 500;
         }
+
         .sidebar-footer {
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding: 15px;
             font-size: 12px;
             text-align: center;
             color: rgba(255, 255, 255, 0.5);
-            margin-top: 10px;
+            margin-top: 2px;
         }
+
 
         /* Mobile Menu Toggle Button */
         .menu-toggle {
@@ -475,47 +486,66 @@ $user_result = mysqli_query($conn, $user_query);
             <img src="my_project/images/MULTI-removebg-preview.png" class="sidebar-logo" alt="Company Logo">
             <div class="company-name">Multi Axis Handlers & Tech Inc</div>
         </div>
-        
+
+        <!-- MAIN NAVIGATION -->
         <div class="nav-section">
-            <div class="nav-section-title">Main Navigation</div>
-            <a href="dashboard.php" class="<?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
+            <div class="nav-section-title">Main</div>
+            <a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">
                 <i class="fas fa-home"></i> Dashboard
             </a>
             <?php if ($role === 'admin') : ?>
-                <a href="add_user.php" class="<?php echo ($current_page == 'add_user.php') ? 'active' : ''; ?>">
+                <a href="add_user.php" class="<?= ($current_page == 'add_user.php') ? 'active' : '' ?>">
                     <i class="fas fa-user-plus"></i> Employees
                 </a>
-                <a href="admin.php" class="<?php echo ($current_page == 'admin.php') ? 'active' : ''; ?>">
-                    <i class="fas fa-users-cog"></i> User Management
-                </a>
             <?php endif; ?>
-            <a href="employee_attendance.php" class="<?php echo ($current_page == 'employee_attendance.php') ? 'active' : ''; ?>">
-                <i class="fas fa-clipboard-check"></i> Attendance
+        </div>
+
+        <!-- ATTENDANCE -->
+        <div class="nav-section">
+            <div class="nav-section-title">Attendance</div>
+            <a href="upload_excel_monthly.php" class="<?= in_array($current_page, ['employee_attendace.php', 'employee_attendace_monthly.php', 'employee_attendace_semi-monthly.php']) ? 'active' : '' ?>">
+                <i class="fas fa-calendar-alt"></i> Upload Attendance
+            </a>
+            <!-- <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-week"></i> Weekly Attendance
+            </a> -->
+            <a href="attendance_summary_report.php" class="<?= ($current_page == 'attendance_summary_report.php') ? 'active' : '' ?>">
+                <i class="fas fa-clipboard-list"></i> Attendance Summary
             </a>
         </div>
-        
+
+        <!-- PAYROLL -->
         <div class="nav-section">
-            <div class="nav-section-title">Payroll Management</div>
+            <div class="nav-section-title">Payroll</div>
+            <a href="payroll.php"
+                class="<?= in_array($current_page, ['payroll.php', 'enter_payroll.php', 'weekly_employees.php', 'semi-monthly_employees.php', 'enter_weekly_payroll.php', 'enter_payroll.php', 'enter_semimonthly_payroll.php']) ? 'active' : '' ?>">
+                <i class="fas fa-money-bill-wave"></i> Payroll
+            </a>
             <a href="reports.php" class="<?php echo ($current_page == 'reports.php') ? 'active' : ''; ?>">
                 <i class="fas fa-chart-bar"></i> Deductions
             </a>
-            <a href="attendance_summary_report.php" class="<?php echo ($current_page == 'attendance_summary_report.php') ? 'active' : ''; ?>">
-                <i class="fas fa-clock"></i> Attendance Summary
-            </a>
             <a href="view_payslips.php" class="<?= ($current_page == 'view_payslips.php') ? 'active' : '' ?>">
-                <i class="fas fa-file-alt"></i> View Payslips
+                <i class="fas fa-file-invoice-dollar"></i> View Payslips
+            </a>
+            <a href="payslip_archive.php" class="<?= ($current_page == 'payslip_archive.php') ? 'active' : '' ?>">
+                <i class="fas fa-archive"></i> Payslip Archive
             </a>
         </div>
-        
+
+        <!-- OTHER -->
         <div class="nav-section">
-            <a href="logout.php" class="<?php echo ($current_page == 'logout.php') ? 'active' : ''; ?>">
+            <div class="nav-section-title">Other</div>
+            <a href="about.php" class="<?= ($current_page == 'about.php') ? 'active' : '' ?>">
+                <i class="fas fa-info-circle"></i> About
+            </a>
+            <a href="logout.php" class="<?= ($current_page == 'logout.php') ? 'active' : '' ?>">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </div>
-        
         <div class="sidebar-footer">
             © <?php echo date('Y'); ?> Multi Axis Handlers & Tech Inc.
         </div>
+
     </div>
 
     <!-- Main Content -->

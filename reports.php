@@ -11,8 +11,16 @@ $username = $_SESSION['user'];
 $role = $_SESSION['role'];
 $current_page = basename($_SERVER['PHP_SELF']);
 
-$employeeData = $_SESSION['attendance_data'] ?? $_SESSION['attendance_data_monthly'] ?? [];
-
+$employeeData = $_SESSION['attendance_data'] ?? $_SESSION['attendance_data_monthly'] ?? $_SESSION['attendance_data_semi_monthly'] ?? [];
+if (isset($_SESSION['attendance_data'])) {
+    $formAction = "save_weekly_att.php";
+} elseif (isset($_SESSION['attendance_data_monthly'])) {
+    $formAction = "save_monthly_att.php";
+} elseif (isset($_SESSION['attendance_data_semi_monthly'])) {
+    $formAction = "save_semi-monthly_att.php";
+} else {
+    $formAction = "employee_attendance_monthly.php"; // fallback
+}
 
 
 $uploadError = $_SESSION['upload_error'] ?? null;
@@ -594,12 +602,12 @@ $saturdays = getSaturdays(date('Y'));
         <!-- ATTENDANCE -->
         <div class="nav-section">
             <div class="nav-section-title">Attendance</div>
-            <a href="employee_attendance_monthly.php" class="<?= ($current_page == 'employee_attendance_monthly.php') ? 'active' : '' ?>">
-                <i class="fas fa-calendar-alt"></i> Monthly Attendance
+            <a href="upload_excel_monthly.php" class="<?= in_array($current_page, ['employee_attendace.php', 'employee_attendace_monthly.php', 'employee_attendace_semi-monthly.php']) ? 'active' : '' ?>">
+                <i class="fas fa-calendar-alt"></i> Upload Attendance
             </a>
-            <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
+            <!-- <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
                 <i class="fas fa-calendar-week"></i> Weekly Attendance
-            </a>
+            </a> -->
             <a href="attendance_summary_report.php" class="<?= ($current_page == 'attendance_summary_report.php') ? 'active' : '' ?>">
                 <i class="fas fa-clipboard-list"></i> Attendance Summary
             </a>
@@ -990,17 +998,32 @@ $saturdays = getSaturdays(date('Y'));
                     </div>
                     <div class="modal-footer justify-content-center border-0">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <form method="post" action="save_attendance.php">
+
+                        <form method="post" action="<?= $formAction ?>">
                             <input type="hidden" name="save_attendance" value="1">
-                            <input type="hidden" name="source" value="<?php echo isset($_SESSION['attendance_data_monthly']) ? 'employee_attendance_monthly.php' : 'employee_attendance.php'; ?>">
+                            <input type="hidden" name="source"
+                                value="<?php
+                                        if (isset($_SESSION['attendance_data_monthly'])) {
+                                            echo 'employee_attendance_monthly.php';
+                                        } elseif (isset($_SESSION['attendance_data_semi_monthly'])) {
+                                            echo 'employee_attendance_semi-monthly.php';
+                                        } elseif (isset($_SESSION['attendance_data'])){
+                                            echo 'employee_attendance.php';
+                                        }
+                                        else{
+
+                                        }
+                                        ?>">
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save"></i> Save Records
                             </button>
                         </form>
+
                     </div>
                 </div>
             </div>
         </div>
+
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>

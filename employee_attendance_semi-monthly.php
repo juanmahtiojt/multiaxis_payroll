@@ -11,11 +11,7 @@ $username = $_SESSION['user'];
 $role = $_SESSION['role'];
 $current_page = basename($_SERVER['PHP_SELF']);
 
-// Merge monthly and semi-monthly attendance data
-// $monthlyData = $_SESSION['attendance_data_monthly'] ?? [];
-// $semiMonthlyData = $_SESSION['attendance_data_semi_monthly'] ?? [];
-$employeeData = $_SESSION['attendance_data_monthly'] ?? [];
-
+$employeeData = $_SESSION['attendance_data_semi_monthly'] ?? [];
 $uploadError = $_SESSION['upload_error'] ?? null;
 unset($_SESSION['upload_error']);
 ?>
@@ -359,8 +355,8 @@ unset($_SESSION['upload_error']);
         <!-- ATTENDANCE -->
         <div class="nav-section">
             <div class="nav-section-title">Attendance</div>
-            <a href="upload_excel_monthly.php" class="<?= in_array($current_page, ['employee_attendace.php', 'employee_attendace_monthly.php', 'employee_attendace_semi-monthly.php']) ? 'active' : '' ?>">
-                <i class="fas fa-calendar-alt"></i> Upload Attendance
+            <a href="employee_attendance_monthly.php" class="<?= in_array($current_page, ['employee_attendace.php', 'employee_attendace_monthly.php', 'employee_attendace_semi-monthly.php']) ? 'active' : '' ?>">
+                <i class="fas fa-calendar-alt"></i> Monthly Attendance
             </a>
             <!-- <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
                 <i class="fas fa-calendar-week"></i> Weekly Attendance

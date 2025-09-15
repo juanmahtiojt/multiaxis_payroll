@@ -3,6 +3,15 @@ session_start();
 require 'vendor/autoload.php';
 include 'config.php'; // Add your DB connection here
 
+if (!isset($_SESSION['user'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$username = $_SESSION['user'];
+$role = $_SESSION['role'];
+$current_page = basename($_SERVER['PHP_SELF']);
+
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
@@ -41,9 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = processMonthly($spreadsheet);
             $_SESSION['attendance_data_monthly'] = $data;
             header('Location: employee_attendance_monthly.php');
-        } elseif ($attendanceType === 'semi-monthly') {
-            $_SESSION['upload_error'] = 'Semi-monthly processing not implemented yet.';
-            header('Location: employee_attendance.php');
+        } elseif ($attendanceType === 'semi_monthly') {
+            $data = processSemimonthly($spreadsheet);
+            $_SESSION['attendance_data_semi_monthly'] = $data;
+            header('Location: employee_attendance_semi-monthly.php');
         }
         exit;
     } catch (Exception $e) {
@@ -53,10 +63,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+function processSemimonthly($spreadsheet)
+{
+    $sheet = $spreadsheet->getActiveSheet();
+    $employeeData = [];
+    $highestRow = $sheet->getHighestRow();
+    $startRow = 10;
+
+    while ($startRow <= $highestRow) {
+        $idNo = trim($sheet->getCell('E' . $startRow)->getFormattedValue());
+        if (empty($idNo) || !is_numeric($idNo)) {
+            $startRow++;
+            continue;
+        }
+
+        $department = $sheet->getCell('L' . $startRow)->getFormattedValue();
+        $name = $sheet->getCell('E' . ($startRow + 2))->getFormattedValue();
+
+        $dates = [];
+        $amIn = [];
+        $amOut = [];
+        $attendanceStart = $startRow + 7;
+
+        for ($i = 0; $i < 15; $i++) {
+            $currentRow = $attendanceStart + ($i * 2);
+            if ($currentRow > $highestRow) break;
+
+            $dateVal = $sheet->getCell('C' . $currentRow)->getFormattedValue();
+            $amInVal = $sheet->getCell('E' . $currentRow)->getFormattedValue();
+            $amOutVal = $sheet->getCell('G' . $currentRow)->getFormattedValue();
+
+            if (empty($dateVal)) break;
+
+            $dates[] = $dateVal;
+            $amIn[] = $amInVal;
+            $amOut[] = $amOutVal;
+        }
+
+        $employeeData[] = [
+            'id_no' => $idNo,
+            'department' => $department,
+            'name' => $name,
+            'dates' => $dates,
+            'am_in' => $amIn,
+            'am_out' => $amOut,
+        ];
+
+        $nextRow = $startRow + 1;
+        while ($nextRow <= $highestRow) {
+            $nextId = trim($sheet->getCell('E' . $nextRow)->getFormattedValue());
+            if (!empty($nextId) && is_numeric($nextId)) {
+                break;
+            }
+            $nextRow++;
+        }
+
+        $startRow = $nextRow;
+    }
+
+    return $employeeData;
+}
+
 /**
  * WEEKLY PROCESSOR
  */
-function processWeekly($spreadsheet) {
+function processWeekly($spreadsheet)
+{
     $sheet = $spreadsheet->getActiveSheet();
     $employeeData = [];
     $highestRow = $sheet->getHighestRow();
@@ -119,7 +191,8 @@ function processWeekly($spreadsheet) {
 /**
  * MONTHLY PROCESSOR
  */
-function processMonthly($spreadsheet) {
+function processMonthly($spreadsheet)
+{
     $sheet = $spreadsheet->getActiveSheet();
     $highestRow = $sheet->getHighestRow();
     $employeeData = [];
@@ -136,8 +209,8 @@ function processMonthly($spreadsheet) {
         $amIn = [];
         $amOut = [];
         $attendanceStart = $startRow + 7;
-        
-        for ($i = 0; $i < 18; $i++) {
+
+        for ($i = 0; $i <= 31; $i++) {
             $currentRow = $attendanceStart + ($i * 2);
             $cellObj = $sheet->getCell('C' . $currentRow);
             $rawValue = $cellObj->getValue();
@@ -193,6 +266,7 @@ function processMonthly($spreadsheet) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -210,7 +284,7 @@ function processMonthly($spreadsheet) {
             --box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
             --gradient-bg: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
         }
-        
+
         body {
             margin: 0;
             min-height: 100vh;
@@ -237,7 +311,7 @@ function processMonthly($spreadsheet) {
             position: relative;
             overflow: hidden;
         }
-        
+
         .card-header-stripe {
             position: absolute;
             top: 0;
@@ -253,7 +327,7 @@ function processMonthly($spreadsheet) {
             color: var(--secondary-color);
             font-size: 1.5rem;
         }
-        
+
         .upload-card p.lead {
             color: #64748b;
             font-size: 0.95rem;
@@ -270,29 +344,30 @@ function processMonthly($spreadsheet) {
             cursor: pointer;
             background-color: #f8fafc;
         }
-        
-        .file-upload-container:hover, .file-upload-container.dragging {
+
+        .file-upload-container:hover,
+        .file-upload-container.dragging {
             border-color: var(--primary-color);
             background-color: #eff6ff;
         }
-        
+
         .file-upload-icon {
             font-size: 2.5rem;
             color: var(--primary-color);
             margin-bottom: 1rem;
         }
-        
+
         .file-upload-text {
             font-weight: 500;
             color: var(--secondary-color);
             margin-bottom: 0.5rem;
         }
-        
+
         .file-upload-help {
             font-size: 0.85rem;
             color: #64748b;
         }
-        
+
         .selected-file {
             display: none;
             background-color: #f0f9ff;
@@ -301,13 +376,13 @@ function processMonthly($spreadsheet) {
             margin-top: 1rem;
             align-items: center;
         }
-        
+
         .selected-file-icon {
             color: var(--primary-color);
             font-size: 1.25rem;
             margin-right: 0.75rem;
         }
-        
+
         .selected-file-name {
             font-weight: 500;
             color: var(--secondary-color);
@@ -316,13 +391,13 @@ function processMonthly($spreadsheet) {
             white-space: nowrap;
             flex-grow: 1;
         }
-        
+
         .selected-file-clear {
             color: #94a3b8;
             cursor: pointer;
             transition: color 0.2s ease;
         }
-        
+
         .selected-file-clear:hover {
             color: #ef4444;
         }
@@ -338,7 +413,7 @@ function processMonthly($spreadsheet) {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
-        
+
         #file-input {
             display: none;
         }
@@ -356,11 +431,11 @@ function processMonthly($spreadsheet) {
             background-color: var(--primary-dark);
             transform: translateY(-1px);
         }
-        
+
         .btn-primary:active {
             transform: translateY(0);
         }
-        
+
         .btn-icon {
             margin-right: 0.5rem;
         }
@@ -371,17 +446,17 @@ function processMonthly($spreadsheet) {
             color: #64748b;
             margin-top: 1.5rem;
         }
-        
+
         .footer-link {
             color: var(--primary-color);
             text-decoration: none;
             font-weight: 500;
         }
-        
+
         .footer-link:hover {
             text-decoration: underline;
         }
-        
+
         .alert {
             border-radius: 8px;
             padding: 1rem;
@@ -390,24 +465,24 @@ function processMonthly($spreadsheet) {
             display: flex;
             align-items: center;
         }
-        
+
         .alert-icon {
             margin-right: 0.75rem;
             font-size: 1.25rem;
         }
-        
+
         .alert-danger {
             background-color: #fee2e2;
             color: #b91c1c;
         }
-        
+
         .loader {
             display: none;
             justify-content: center;
             align-items: center;
             padding: 1rem 0;
         }
-        
+
         .spinner {
             width: 40px;
             height: 40px;
@@ -416,176 +491,404 @@ function processMonthly($spreadsheet) {
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             to {
                 transform: rotate(360deg);
             }
         }
-        
+
         @media (max-width: 576px) {
             .upload-card {
                 padding: 1.5rem;
             }
-            
+
             .file-upload-container {
                 padding: 1.5rem 1rem;
             }
         }
+
+        /* Fade-in and scale animation for modal */
+        @keyframes modalShow {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Apply animation to modal container */
+        .page-container {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            max-width: 550px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            z-index: 1000;
+            padding: 2rem;
+
+            /* Animation */
+            animation: modalShow 0.3s ease forwards;
+        }
+
+        /* Optional: fade in overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            /* Fade in overlay */
+            animation: fadeInOverlay 0.3s ease forwards;
+        }
+
+        @keyframes fadeInOverlay {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+
+        /* Improved Sidebar Styles */
+        .sidebar {
+            width: 270px;
+            background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            transition: all 0.3s;
+            overflow: hidden;
+            box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 20px 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2px;
+        }
+
+        .sidebar-logo {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+            margin-bottom: -30px;
+            margin-top: -50px;
+        }
+
+        .company-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: -10px;
+            opacity: 0.95;
+            line-height: 1.3;
+        }
+
+        .nav-section {
+            margin-bottom: 2px;
+        }
+
+        .nav-section-title {
+            padding: 8px 20px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 600;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 13px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar a i {
+            margin-right: 12px;
+            width: 24px;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: white;
+            border-left-color: rgba(93, 173, 226, 0.5);
+        }
+
+        .sidebar a.active {
+            background-color: rgba(93, 173, 226, 0.15);
+            color: white;
+            border-left-color: #5dade2;
+            font-weight: 500;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            font-size: 12px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 2px;
+        }
     </style>
 </head>
+
 <body>
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-<div class="page-container">
-    <div class="upload-card">
-        <div class="card-header-stripe"></div>
-        <h2><i class="fas fa-file-import me-2"></i>Attendance Import</h2>
-        <p class="lead">Upload Crystal Report attendance data for processing and analysis</p>
+    <!-- Improved Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="my_project/images/MULTI-removebg-preview.png" class="sidebar-logo" alt="Company Logo">
+            <div class="company-name">Multi Axis Handlers & Tech Inc</div>
+        </div>
 
-        <?php if (isset($_SESSION['upload_error'])): ?>
-            <div class="alert alert-danger fade show" role="alert">
-                <i class="fas fa-exclamation-circle alert-icon"></i>
-                <?= $_SESSION['upload_error']; unset($_SESSION['upload_error']); ?>
-            </div>
-        <?php endif; ?>
+        <!-- MAIN NAVIGATION -->
+        <div class="nav-section">
+            <div class="nav-section-title">Main</div>
+            <a href="dashboard.php" class="<?= ($current_page == 'dashboard.php') ? 'active' : '' ?>">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <?php if ($role === 'admin') : ?>
+                <a href="add_user.php" class="<?= ($current_page == 'add_user.php') ? 'active' : '' ?>">
+                    <i class="fas fa-user-plus"></i> Employees
+                </a>
+            <?php endif; ?>
+        </div>
 
-            <form action="upload_excel_monthly.php" method="POST" enctype="multipart/form-data" id="upload-form">
-            <div class="mb-3">
-                <label for="attendance_type" class="form-label">Attendance Type</label>
-                <select class="form-control" id="attendance_type" name="attendance_type" required>
-                    <option value="monthly">Monthly</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="semi_monthly">Semi-Monthly</option>
-                </select>
-            </div>
+        <!-- ATTENDANCE -->
+        <div class="nav-section">
+            <div class="nav-section-title">Attendance</div>
+            <a href="upload_excel_monthly.php" class="<?= in_array($current_page, ['employee_attendace.php', 'employee_attendace_monthly.php', 'employee_attendace_semi-monthly.php']) ? 'active' : '' ?>">
+                <i class="fas fa-calendar-alt"></i> Upload Attendance
+            </a>
+            <!-- <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-week"></i> Weekly Attendance
+            </a> -->
+            <a href="attendance_summary_report.php" class="<?= ($current_page == 'attendance_summary_report.php') ? 'active' : '' ?>">
+                <i class="fas fa-clipboard-list"></i> Attendance Summary
+            </a>
+        </div>
 
-            <div class="file-upload-container" id="drop-area">
-                <input type="file" name="attendance_file" id="file-input" accept=".xlsx,.xls" required>
-                <div class="file-upload-icon">
-                    <i class="fas fa-file-excel"></i>
+        <!-- PAYROLL -->
+        <div class="nav-section">
+            <div class="nav-section-title">Payroll</div>
+            <a href="payroll.php" class="<?= ($current_page == 'payroll.php') ? 'active' : '' ?>">
+                <i class="fas fa-money-bill-wave"></i> Payroll
+            </a>
+            <a href="reports.php" class="<?php echo ($current_page == 'reports.php') ? 'active' : ''; ?>">
+                <i class="fas fa-chart-bar"></i> Deductions
+            </a>
+            <a href="view_payslips.php" class="<?= ($current_page == 'view_payslips.php') ? 'active' : '' ?>">
+                <i class="fas fa-file-invoice-dollar"></i> View Payslips
+            </a>
+            <a href="payslip_archive.php" class="<?= ($current_page == 'payslip_archive.php') ? 'active' : '' ?>">
+                <i class="fas fa-archive"></i> Payslip Archive
+            </a>
+        </div>
+
+        <!-- OTHER -->
+        <div class="nav-section">
+            <div class="nav-section-title">Other</div>
+            <a href="about.php" class="<?= ($current_page == 'about.php') ? 'active' : '' ?>">
+                <i class="fas fa-info-circle"></i> About
+            </a>
+            <a href="logout.php" class="<?= ($current_page == 'logout.php') ? 'active' : '' ?>">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+        <div class="sidebar-footer">
+            © <?php echo date('Y'); ?> Multi Axis Handlers & Tech Inc.
+        </div>
+
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="page-container">
+                <div class="upload-card">
+                    <div class="card-header-stripe"></div>
+                    <h2><i class="fas fa-file-import me-2"></i>Attendance Import</h2>
+                    <p class="lead">Upload Crystal Report attendance data for processing and analysis</p>
+
+                    <?php if (isset($_SESSION['upload_error'])): ?>
+                        <div class="alert alert-danger fade show" role="alert">
+                            <i class="fas fa-exclamation-circle alert-icon"></i>
+                            <?= $_SESSION['upload_error'];
+                            unset($_SESSION['upload_error']); ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <form action="upload_excel_monthly.php" method="POST" enctype="multipart/form-data" id="upload-form">
+                        <div class="mb-3">
+                            <label for="attendance_type" class="form-label">Attendance Type</label>
+                            <select class="form-control" id="attendance_type" name="attendance_type" required>
+                                <option value="monthly">Monthly</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="semi_monthly">Semi-Monthly</option>
+                            </select>
+                        </div>
+
+                        <div class="file-upload-container" id="drop-area">
+                            <input type="file" name="attendance_file" id="file-input" accept=".xlsx,.xls" required>
+                            <div class="file-upload-icon">
+                                <i class="fas fa-file-excel"></i>
+                            </div>
+                            <div class="file-upload-text">Drag & drop an Excel file or click to browse</div>
+                            <div class="file-upload-help">Only Excel files exported from Crystal Reports are supported</div>
+
+                            <div class="selected-file" id="selected-file" style="display:none;">
+                                <i class="fas fa-file-excel selected-file-icon"></i>
+                                <div class="selected-file-name" id="file-name"></div>
+                                <i class="fas fa-times selected-file-clear" id="clear-file"></i>
+                            </div>
+                        </div>
+
+                        <div class="loader" id="loader" style="display:none;">
+                            <div class="spinner"></div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button class="btn btn-primary" type="submit" id="submit-btn">
+                                <i class="fas fa-upload btn-icon"></i> Process Attendance Data
+                            </button>
+                        </div>
+                    </form>
+
                 </div>
-                <div class="file-upload-text">Drag & drop an Excel file or click to browse</div>
-                <div class="file-upload-help">Only Excel files exported from Crystal Reports are supported</div>
-
-                <div class="selected-file" id="selected-file" style="display:none;">
-                    <i class="fas fa-file-excel selected-file-icon"></i>
-                    <div class="selected-file-name" id="file-name"></div>
-                    <i class="fas fa-times selected-file-clear" id="clear-file"></i>
-                </div>
             </div>
 
-            <div class="loader" id="loader" style="display:none;">
-                <div class="spinner"></div>
-            </div>
+            <!-- <div class="footer-text">
+                Need help? <a href="#" class="footer-link">View documentation</a> or <a href="#" class="footer-link">contact support</a>
+            </div> -->
+        </div>
 
-            <div class="d-grid">
-                <button class="btn btn-primary" type="submit" id="submit-btn">
-                    <i class="fas fa-upload btn-icon"></i> Process Attendance Data
-                </button>
-            </div>
-        </form>
-
-    </div>
-    
-    <div class="footer-text">
-        Need help? <a href="#" class="footer-link">View documentation</a> or <a href="#" class="footer-link">contact support</a>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const dropArea = document.getElementById('drop-area');
-        const fileInput = document.getElementById('file-input');
-        const fileName = document.getElementById('file-name');
-        const selectedFile = document.getElementById('selected-file');
-        const clearFile = document.getElementById('clear-file');
-        const uploadForm = document.getElementById('upload-form');
-        const submitBtn = document.getElementById('submit-btn');
-        const loader = document.getElementById('loader');
-        
-        // Open file dialog when clicking on drop area
-        dropArea.addEventListener('click', () => {
-            fileInput.click();
-        });
-        
-        // Handle file selection
-        fileInput.addEventListener('change', handleFileSelect);
-        
-        // Handle drag and drop
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
-        });
-        
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, highlight, false);
-        });
-        
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, unhighlight, false);
-        });
-        
-        dropArea.addEventListener('drop', handleDrop, false);
-        
-        // Handle clear button
-        clearFile.addEventListener('click', (e) => {
-            e.stopPropagation();
-            clearFileSelection();
-            window.location.href = "employee_attendance_monthly.php"; // Go back to monthly page
-        });
-
-        
-        // Handle form submission
-        uploadForm.addEventListener('submit', () => {
-            if (fileInput.files.length > 0) {
-                submitBtn.disabled = true;
-                loader.style.display = 'flex';
-            }
-        });
-        
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        
-        function highlight() {
-            dropArea.classList.add('dragging');
-        }
-        
-        function unhighlight() {
-            dropArea.classList.remove('dragging');
-        }
-        
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            
-            if (files.length > 0) {
-                fileInput.files = files;
-                handleFileSelect();
-            }
-        }
-        
-        function handleFileSelect() {
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                
-                // Check if the file is an Excel file
-                if (file.name.match(/\.(xlsx|xls)$/)) {
-                    fileName.textContent = file.name;
-                    selectedFile.style.display = 'flex';
-                } else {
-                    alert('Please select a valid Excel file (.xlsx or .xls)');
-                    clearFileSelection();
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.getElementById('modalOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none'; // hide modal
                 }
-            }
-        }
-        
-        function clearFileSelection() {
-            fileInput.value = '';
-            selectedFile.style.display = 'none';
-        }
-    });
-</script>
+            });
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const dropArea = document.getElementById('drop-area');
+                const fileInput = document.getElementById('file-input');
+                const fileName = document.getElementById('file-name');
+                const selectedFile = document.getElementById('selected-file');
+                const clearFile = document.getElementById('clear-file');
+                const uploadForm = document.getElementById('upload-form');
+                const submitBtn = document.getElementById('submit-btn');
+                const loader = document.getElementById('loader');
+
+                // Open file dialog when clicking on drop area
+                dropArea.addEventListener('click', () => {
+                    fileInput.click();
+                });
+
+                // Handle file selection
+                fileInput.addEventListener('change', handleFileSelect);
+
+                // Handle drag and drop
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, preventDefaults, false);
+                });
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, highlight, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, unhighlight, false);
+                });
+
+                dropArea.addEventListener('drop', handleDrop, false);
+
+                // Handle clear button
+                clearFile.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    clearFileSelection();
+                    window.location.href = "employee_attendance_monthly.php"; // Go back to monthly page
+                });
+
+
+                // Handle form submission
+                uploadForm.addEventListener('submit', () => {
+                    if (fileInput.files.length > 0) {
+                        submitBtn.disabled = true;
+                        loader.style.display = 'flex';
+                    }
+                });
+
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                function highlight() {
+                    dropArea.classList.add('dragging');
+                }
+
+                function unhighlight() {
+                    dropArea.classList.remove('dragging');
+                }
+
+                function handleDrop(e) {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+
+                    if (files.length > 0) {
+                        fileInput.files = files;
+                        handleFileSelect();
+                    }
+                }
+
+                function handleFileSelect() {
+                    if (fileInput.files.length > 0) {
+                        const file = fileInput.files[0];
+
+                        // Check if the file is an Excel file
+                        if (file.name.match(/\.(xlsx|xls)$/)) {
+                            fileName.textContent = file.name;
+                            selectedFile.style.display = 'flex';
+                        } else {
+                            alert('Please select a valid Excel file (.xlsx or .xls)');
+                            clearFileSelection();
+                        }
+                    }
+                }
+
+                function clearFileSelection() {
+                    fileInput.value = '';
+                    selectedFile.style.display = 'none';
+                }
+            });
+        </script>
 </body>
+
 </html>
