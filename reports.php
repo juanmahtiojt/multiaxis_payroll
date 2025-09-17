@@ -11,7 +11,11 @@ $username = $_SESSION['user'];
 $role = $_SESSION['role'];
 $current_page = basename($_SERVER['PHP_SELF']);
 
-$employeeData = $_SESSION['attendance_data'] ?? $_SESSION['attendance_data_monthly'] ?? $_SESSION['attendance_data_semi_monthly'] ?? [];
+$employeeData = $_SESSION['attendance_data']
+    ?? $_SESSION['attendance_data_monthly']
+    ?? $_SESSION['attendance_data_semi_monthly']
+    ?? [];
+
 if (isset($_SESSION['attendance_data'])) {
     $formAction = "save_weekly_att.php";
 } elseif (isset($_SESSION['attendance_data_monthly'])) {
@@ -22,6 +26,13 @@ if (isset($_SESSION['attendance_data'])) {
     $formAction = "employee_attendance_monthly.php"; // fallback
 }
 
+$payPeriods = [];
+$sql = "SELECT id_no, pay_schedule FROM daily_rate";
+$result = $conn->query($sql);
+
+while ($row = $result->fetch_assoc()) {
+    $payPeriods[$row['id_no']] = strtolower($row['pay_schedule']);
+}
 
 $uploadError = $_SESSION['upload_error'] ?? null;
 unset($_SESSION['upload_error']);
@@ -685,6 +696,47 @@ $saturdays = getSaturdays(date('Y'));
                                         // Modified grouping logic to handle duplicates
                                         $groupedByEmployee = [];
                                         $processedDates = []; // Track processed dates for each employee
+                                        $payPeriods = [];
+                                        $sql = "SELECT id_no, pay_schedule FROM daily_rate";
+                                        $result = $conn->query($sql);
+
+                                        while ($row = $result->fetch_assoc()) {
+                                            $payPeriods[$row['id_no']] = strtolower(trim($row['pay_schedule']));
+                                        }
+
+                                        // Determine the current required pay period
+                                        if (isset($_SESSION['attendance_data_monthly'])) {
+                                            $requiredPeriod = 'fixed'; // alias monthly → fixed
+                                        } elseif (isset($_SESSION['attendance_data_semi_monthly'])) {
+                                            $requiredPeriod = 'semi-monthly';
+                                        } elseif (isset($_SESSION['attendance_data'])) {
+                                            $requiredPeriod = 'weekly';
+                                        } else {
+                                            $requiredPeriod = null; // fallback
+                                        }
+
+                                        $employeeData = array_filter($employeeData, function ($employee) use ($payPeriods, $requiredPeriod) {
+                                            $id = $employee['id_no'] ?? null;
+                                            if (!$id || !isset($payPeriods[$id]) || !$requiredPeriod) {
+                                                return false;
+                                            }
+
+                                            $period = strtolower(trim($payPeriods[$id]));
+
+                                            // alias monthly → fixed
+                                            if ($period === 'monthly') {
+                                                $period = 'fixed';
+                                            }
+                                            if ($period === 'semi monthly') {
+                                                $period = 'semi-monthly';
+                                            }
+
+                                            return $period === $requiredPeriod;
+                                        });
+
+
+
+
 
                                         foreach ($employeeData as $employee) {
                                             if (isset($employee['dates'])) {
@@ -1007,13 +1059,13 @@ $saturdays = getSaturdays(date('Y'));
                                             echo 'employee_attendance_monthly.php';
                                         } elseif (isset($_SESSION['attendance_data_semi_monthly'])) {
                                             echo 'employee_attendance_semi-monthly.php';
-                                        } elseif (isset($_SESSION['attendance_data'])){
+                                        } elseif (isset($_SESSION['attendance_data'])) {
+                                            echo 'employee_attendance.php'; // weekly
+                                        } else {
                                             echo 'employee_attendance.php';
                                         }
-                                        else{
-
-                                        }
                                         ?>">
+
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save"></i> Save Records
                             </button>

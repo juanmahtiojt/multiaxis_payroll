@@ -9,7 +9,7 @@ if (!isset($_SESSION['user'])) {
 
 $sourcePage = $_POST['source'] ?? 'employee_attendance_semi-monthly.php';
 
-if (!isset($_SESSION['attendance_data_semi_monthly'])) {
+if (!isset($_POST['save_attendance']) || !isset($_SESSION['attendance_data_semi_monthly'])) {
     $_SESSION['upload_error'] = "No attendance data to save.";
     header("Location: $sourcePage");
     exit();
@@ -21,7 +21,7 @@ $employeeData = $_SESSION['attendance_data_semi_monthly'];
 function calculateBasicSalary($dailyRate, $paySchedule)
 {
     switch (strtolower($paySchedule)) {
-        case 'semi-monthly':
+        case 'weekly':
             return $dailyRate * 6; // 6 days per week
         case 'semi-monthly':
             return $dailyRate * 15; // 11 days per semi-month
@@ -716,11 +716,11 @@ try {
 
     $conn->commit();
 
-    unset($_SESSION['attendance_data']);
+    unset($_SESSION['attendance_data_semi_monthly']);
 
     $_SESSION['save_success'] = "Successfully saved $successCount semi-monthly payroll records with batch ID: $batchId";
 
-    header("Location: $sourcePage");
+    header("Location: upload_excel_monthly.php");
     exit();
 } catch (Exception $e) {
     $conn->rollback();

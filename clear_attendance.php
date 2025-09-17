@@ -7,12 +7,14 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
-// Set session variable for activity logging
+// Optional: flag for activity logging
 $_SESSION['attendance_deleted'] = true;
 
-// Clear session attendance data
+// Clear all attendance session data
 unset($_SESSION['attendance_data']);
+unset($_SESSION['attendance_data_monthly']);
+unset($_SESSION['attendance_data_semi_monthly']);
 
-header("Location: employee_attendance.php");
+// Redirect back to upload modal page
+header("Location: upload_excel_monthly.php");
 exit();
-?>

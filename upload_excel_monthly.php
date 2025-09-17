@@ -3,6 +3,19 @@ session_start();
 require 'vendor/autoload.php';
 include 'config.php'; // Add your DB connection here
 
+if (isset($_SESSION['attendance_data'])) {
+    header("Location: employee_attendance.php");
+    exit;
+} elseif (isset($_SESSION['attendance_data_monthly'])) {
+    header("Location: employee_attendance_monthly.php");
+    exit;
+} elseif (isset($_SESSION['attendance_data_semi_monthly'])) {
+    header("Location: employee_attendance_semi-monthly.php");
+    exit;
+}
+
+
+
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit();
@@ -261,6 +274,10 @@ function processMonthly($spreadsheet)
 
     return $employeeData;
 }
+
+$hasUploaded = isset($_SESSION['attendance_data'])
+    || isset($_SESSION['attendance_data_monthly'])
+    || isset($_SESSION['attendance_data_semi_monthly']);
 ?>
 
 
@@ -687,7 +704,7 @@ function processMonthly($spreadsheet)
         <!-- ATTENDANCE -->
         <div class="nav-section">
             <div class="nav-section-title">Attendance</div>
-            <a href="upload_excel_monthly.php" class="<?= in_array($current_page, ['employee_attendace.php', 'employee_attendace_monthly.php', 'employee_attendace_semi-monthly.php']) ? 'active' : '' ?>">
+            <a href="upload_excel_monthly.php" class="<?= in_array($current_page, ['upload_excel_monthly.php','employee_attendace.php', 'employee_attendace_monthly.php', 'employee_attendace_semi-monthly.php']) ? 'active' : '' ?>">
                 <i class="fas fa-calendar-alt"></i> Upload Attendance
             </a>
             <!-- <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
@@ -729,166 +746,183 @@ function processMonthly($spreadsheet)
             © <?php echo date('Y'); ?> Multi Axis Handlers & Tech Inc.
         </div>
 
-        <div class="modal-overlay" id="modalOverlay">
-            <div class="page-container">
-                <div class="upload-card">
-                    <div class="card-header-stripe"></div>
-                    <h2><i class="fas fa-file-import me-2"></i>Attendance Import</h2>
-                    <p class="lead">Upload Crystal Report attendance data for processing and analysis</p>
+        <?php if (!$hasUploaded): ?>
+            <!-- Show modal if no file uploaded -->
+            <div class="modal-overlay" id="modalOverlay">
+                <div class="page-container">
+                    <div class="upload-card">
+                        <div class="card-header-stripe"></div>
+                        <h2><i class="fas fa-file-import me-2"></i>Attendance Import</h2>
+                        <p class="lead">Upload Crystal Report attendance data for processing and analysis</p>
 
-                    <?php if (isset($_SESSION['upload_error'])): ?>
-                        <div class="alert alert-danger fade show" role="alert">
-                            <i class="fas fa-exclamation-circle alert-icon"></i>
-                            <?= $_SESSION['upload_error'];
-                            unset($_SESSION['upload_error']); ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <form action="upload_excel_monthly.php" method="POST" enctype="multipart/form-data" id="upload-form">
-                        <div class="mb-3">
-                            <label for="attendance_type" class="form-label">Attendance Type</label>
-                            <select class="form-control" id="attendance_type" name="attendance_type" required>
-                                <option value="monthly">Monthly</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="semi_monthly">Semi-Monthly</option>
-                            </select>
-                        </div>
-
-                        <div class="file-upload-container" id="drop-area">
-                            <input type="file" name="attendance_file" id="file-input" accept=".xlsx,.xls" required>
-                            <div class="file-upload-icon">
-                                <i class="fas fa-file-excel"></i>
+                        <?php if (isset($_SESSION['upload_error'])): ?>
+                            <div class="alert alert-danger fade show" role="alert">
+                                <i class="fas fa-exclamation-circle alert-icon"></i>
+                                <?= $_SESSION['upload_error'];
+                                unset($_SESSION['upload_error']); ?>
                             </div>
-                            <div class="file-upload-text">Drag & drop an Excel file or click to browse</div>
-                            <div class="file-upload-help">Only Excel files exported from Crystal Reports are supported</div>
+                        <?php endif; ?>
 
-                            <div class="selected-file" id="selected-file" style="display:none;">
-                                <i class="fas fa-file-excel selected-file-icon"></i>
-                                <div class="selected-file-name" id="file-name"></div>
-                                <i class="fas fa-times selected-file-clear" id="clear-file"></i>
+                        <form action="upload_excel_monthly.php" method="POST" enctype="multipart/form-data" id="upload-form">
+                            <div class="mb-3">
+                                <label for="attendance_type" class="form-label">Attendance Type</label>
+                                <select class="form-control" id="attendance_type" name="attendance_type" required>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="semi_monthly">Semi-Monthly</option>
+                                </select>
                             </div>
-                        </div>
 
-                        <div class="loader" id="loader" style="display:none;">
-                            <div class="spinner"></div>
-                        </div>
+                            <div class="file-upload-container" id="drop-area">
+                                <input type="file" name="attendance_file" id="file-input" accept=".xlsx,.xls" required>
+                                <div class="file-upload-icon">
+                                    <i class="fas fa-file-excel"></i>
+                                </div>
+                                <div class="file-upload-text">Drag & drop an Excel file or click to browse</div>
+                                <div class="file-upload-help">Only Excel files exported from Crystal Reports are supported</div>
 
-                        <div class="d-grid">
-                            <button class="btn btn-primary" type="submit" id="submit-btn">
-                                <i class="fas fa-upload btn-icon"></i> Process Attendance Data
-                            </button>
-                        </div>
-                    </form>
+                                <div class="selected-file" id="selected-file" style="display:none;">
+                                    <i class="fas fa-file-excel selected-file-icon"></i>
+                                    <div class="selected-file-name" id="file-name"></div>
+                                    <i class="fas fa-times selected-file-clear" id="clear-file"></i>
+                                </div>
+                            </div>
 
+                            <div class="loader" id="loader" style="display:none;">
+                                <div class="spinner"></div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button class="btn btn-primary" type="submit" id="submit-btn">
+                                    <i class="fas fa-upload btn-icon"></i> Process Attendance Data
+                                </button>
+                            </div>
+                        </form>
+
+                    </div>
                 </div>
             </div>
+        <?php else: ?>
+            <!-- Show selected attendance type instead of modal -->
+            <div class="attendance-container mt-4">
+                <?php
+                if (isset($_SESSION['attendance_data'])) {
+                    include 'employee_attendance.php'; // weekly
+                } elseif (isset($_SESSION['attendance_data_monthly'])) {
+                    include 'employee_attendance_monthly.php'; // monthly
+                } elseif (isset($_SESSION['attendance_data_semi_monthly'])) {
+                    include 'employee_attendance_semi-monthly.php'; // semi-monthly
+                }
+                ?>
+            </div>
+        <?php endif; ?>
 
-            <!-- <div class="footer-text">
+        <!-- <div class="footer-text">
                 Need help? <a href="#" class="footer-link">View documentation</a> or <a href="#" class="footer-link">contact support</a>
             </div> -->
-        </div>
+    </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            document.getElementById('modalOverlay').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.style.display = 'none'; // hide modal
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none'; // hide modal
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropArea = document.getElementById('drop-area');
+            const fileInput = document.getElementById('file-input');
+            const fileName = document.getElementById('file-name');
+            const selectedFile = document.getElementById('selected-file');
+            const clearFile = document.getElementById('clear-file');
+            const uploadForm = document.getElementById('upload-form');
+            const submitBtn = document.getElementById('submit-btn');
+            const loader = document.getElementById('loader');
+
+            // Open file dialog when clicking on drop area
+            dropArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // Handle file selection
+            fileInput.addEventListener('change', handleFileSelect);
+
+            // Handle drag and drop
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            dropArea.addEventListener('drop', handleDrop, false);
+
+            // Handle clear button
+            clearFile.addEventListener('click', (e) => {
+                e.stopPropagation();
+                clearFileSelection();
+                window.location.href = "employee_attendance_monthly.php"; // Go back to monthly page
+            });
+
+
+            // Handle form submission
+            uploadForm.addEventListener('submit', () => {
+                if (fileInput.files.length > 0) {
+                    submitBtn.disabled = true;
+                    loader.style.display = 'flex';
                 }
             });
 
-            document.addEventListener('DOMContentLoaded', function() {
-                const dropArea = document.getElementById('drop-area');
-                const fileInput = document.getElementById('file-input');
-                const fileName = document.getElementById('file-name');
-                const selectedFile = document.getElementById('selected-file');
-                const clearFile = document.getElementById('clear-file');
-                const uploadForm = document.getElementById('upload-form');
-                const submitBtn = document.getElementById('submit-btn');
-                const loader = document.getElementById('loader');
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
 
-                // Open file dialog when clicking on drop area
-                dropArea.addEventListener('click', () => {
-                    fileInput.click();
-                });
+            function highlight() {
+                dropArea.classList.add('dragging');
+            }
 
-                // Handle file selection
-                fileInput.addEventListener('change', handleFileSelect);
+            function unhighlight() {
+                dropArea.classList.remove('dragging');
+            }
 
-                // Handle drag and drop
-                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                    dropArea.addEventListener(eventName, preventDefaults, false);
-                });
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
 
-                ['dragenter', 'dragover'].forEach(eventName => {
-                    dropArea.addEventListener(eventName, highlight, false);
-                });
-
-                ['dragleave', 'drop'].forEach(eventName => {
-                    dropArea.addEventListener(eventName, unhighlight, false);
-                });
-
-                dropArea.addEventListener('drop', handleDrop, false);
-
-                // Handle clear button
-                clearFile.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    clearFileSelection();
-                    window.location.href = "employee_attendance_monthly.php"; // Go back to monthly page
-                });
-
-
-                // Handle form submission
-                uploadForm.addEventListener('submit', () => {
-                    if (fileInput.files.length > 0) {
-                        submitBtn.disabled = true;
-                        loader.style.display = 'flex';
-                    }
-                });
-
-                function preventDefaults(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    handleFileSelect();
                 }
+            }
 
-                function highlight() {
-                    dropArea.classList.add('dragging');
-                }
+            function handleFileSelect() {
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
 
-                function unhighlight() {
-                    dropArea.classList.remove('dragging');
-                }
-
-                function handleDrop(e) {
-                    const dt = e.dataTransfer;
-                    const files = dt.files;
-
-                    if (files.length > 0) {
-                        fileInput.files = files;
-                        handleFileSelect();
+                    // Check if the file is an Excel file
+                    if (file.name.match(/\.(xlsx|xls)$/)) {
+                        fileName.textContent = file.name;
+                        selectedFile.style.display = 'flex';
+                    } else {
+                        alert('Please select a valid Excel file (.xlsx or .xls)');
+                        clearFileSelection();
                     }
                 }
+            }
 
-                function handleFileSelect() {
-                    if (fileInput.files.length > 0) {
-                        const file = fileInput.files[0];
-
-                        // Check if the file is an Excel file
-                        if (file.name.match(/\.(xlsx|xls)$/)) {
-                            fileName.textContent = file.name;
-                            selectedFile.style.display = 'flex';
-                        } else {
-                            alert('Please select a valid Excel file (.xlsx or .xls)');
-                            clearFileSelection();
-                        }
-                    }
-                }
-
-                function clearFileSelection() {
-                    fileInput.value = '';
-                    selectedFile.style.display = 'none';
-                }
-            });
-        </script>
+            function clearFileSelection() {
+                fileInput.value = '';
+                selectedFile.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 
 </html>

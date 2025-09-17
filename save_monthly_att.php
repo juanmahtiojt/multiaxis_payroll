@@ -9,7 +9,7 @@ if (!isset($_SESSION['user'])) {
 
 $sourcePage = $_POST['source'] ?? 'employee_attendance_monthly.php';
 
-if (!isset($_POST['attendance_data_monthly']) || !isset($_SESSION['attendance_data_monthly'])) {
+if (!isset($_POST['save_attendance']) || !isset($_SESSION['attendance_data_monthly'])) {
     $_SESSION['upload_error'] = "No attendance data to save.";
     header("Location: $sourcePage");
     exit();
@@ -363,7 +363,7 @@ try {
         $dailyRate = $employeeInfo['daily_rate'];
         $paySchedule = $employeeInfo['pay_schedule'];
 
-        if (strtolower($paySchedule) !== 'monthly') {
+        if (strtolower($paySchedule) !== 'fixed') {
             // Skip non-weekly employees in this file
             continue;
         }
@@ -606,7 +606,7 @@ try {
                 }
             }
 
-            $pay_period = "semi-monthly";
+            $pay_period = "fixed";
 
             // Calculate absent deduction
             $absent_deduction = $totalAbsences * $dailyRate;
@@ -716,11 +716,11 @@ try {
 
     $conn->commit();
 
-    unset($_SESSION['attendance_data']);
+    unset($_SESSION['attendance_data_monthly']);
 
     $_SESSION['save_success'] = "Successfully saved $successCount weekly payroll records with batch ID: $batchId";
 
-    header("Location: $sourcePage");
+    header("Location: upload_excel_monthly.php");
     exit();
 } catch (Exception $e) {
     $conn->rollback();

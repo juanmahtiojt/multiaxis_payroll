@@ -573,17 +573,7 @@ function getPayslipsByDate($conn, $date, $archived = 0)
                                                             </div>
                                                             <div class="info-item">
                                                                 <strong>Net Pay:</strong> ₱<?= number_format(
-                                                                                                $payslip['basic_salary'] + $payslip['overtime_pay']
-                                                                                                    - ($payslip['sss_premium']
-                                                                                                        + $payslip['sss_loan']
-                                                                                                        + $payslip['pagibig_premium']
-                                                                                                        + $payslip['pagibig_loan']
-                                                                                                        + $payslip['philhealth']
-                                                                                                        + $payslip['cash_advance']
-                                                                                                        + $payslip['late_deduction']
-                                                                                                        + $payslip['absent_deduction']
-                                                                                                        + $payslip['undertime_deduction']
-                                                                                                    ),
+                                                                                                $payslip['total_earnings'] - $payslip['total_deductions'],
                                                                                                 2
                                                                                             ); ?>
                                                             </div>
@@ -680,20 +670,11 @@ function getPayslipsByDate($conn, $date, $archived = 0)
                                                             <strong>Date Range:</strong> <?php echo date('M d, Y', strtotime($payslip['start_date'])); ?> - <?php echo date('M d, Y', strtotime($payslip['end_date'])); ?>
                                                         </div>
                                                         <div class="info-item">
-                                                            <strong>Net Pay:</strong> ₱<?= number_format(
-                                                                                                $payslip['basic_salary'] + $payslip['overtime_pay']
-                                                                                                    - ($payslip['sss_premium']
-                                                                                                        + $payslip['sss_loan']
-                                                                                                        + $payslip['pagibig_premium']
-                                                                                                        + $payslip['pagibig_loan']
-                                                                                                        + $payslip['philhealth']
-                                                                                                        + $payslip['cash_advance']
-                                                                                                        + $payslip['late_deduction']
-                                                                                                        + $payslip['absent_deduction']
-                                                                                                        + $payslip['undertime_deduction']
-                                                                                                    ),
+                                                                <strong>Net Pay:</strong> ₱<?= number_format(
+                                                                                                $payslip['total_earnings'] - $payslip['total_deductions'],
                                                                                                 2
                                                                                             ); ?>
+                                                            </div>
                                                         <div class="info-item">
                                                             <strong>Archived:</strong> <?php echo $payslip['formatted_date']; ?>
                                                         </div>

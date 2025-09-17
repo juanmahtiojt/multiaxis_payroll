@@ -16,6 +16,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
 // $semiMonthlyData = $_SESSION['attendance_data_semi_monthly'] ?? [];
 $employeeData = $_SESSION['attendance_data_monthly'] ?? [];
 
+$payPeriods = [];
+$sql = "SELECT id_no, pay_schedule FROM daily_rate";
+$result = $conn->query($sql);
+
+while ($row = $result->fetch_assoc()) {
+    $payPeriods[$row['id_no']] = strtolower($row['pay_schedule']);
+}
+
 $uploadError = $_SESSION['upload_error'] ?? null;
 unset($_SESSION['upload_error']);
 ?>
@@ -26,7 +34,7 @@ unset($_SESSION['upload_error']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Attendance</title>
+    <title>Monthly Upload</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -359,9 +367,15 @@ unset($_SESSION['upload_error']);
         <!-- ATTENDANCE -->
         <div class="nav-section">
             <div class="nav-section-title">Attendance</div>
-            <a href="upload_excel_monthly.php" class="<?= in_array($current_page, ['employee_attendace.php', 'employee_attendace_monthly.php', 'employee_attendace_semi-monthly.php']) ? 'active' : '' ?>">
+            <a href="upload_excel_monthly.php"
+                class="<?= in_array($current_page, [
+                            'employee_attendance.php',
+                            'employee_attendance_monthly.php',
+                            'employee_attendance_semi_monthly.php'
+                        ]) ? 'active' : '' ?>">
                 <i class="fas fa-calendar-alt"></i> Upload Attendance
             </a>
+
             <!-- <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
                 <i class="fas fa-calendar-week"></i> Weekly Attendance
             </a> -->
@@ -448,6 +462,11 @@ unset($_SESSION['upload_error']);
                                         <?php
                                         // Flatten and group by date
                                         $grouped = [];
+                                        $employeeData = array_filter($employeeData, function ($employee) use ($payPeriods) {
+                                            $id = $employee['id_no'] ?? null;
+                                            return isset($payPeriods[$id]) && $payPeriods[$id] === 'fixed';
+                                        });
+
 
                                         foreach ($employeeData as $employee) {
                                             foreach ($employee['dates'] as $i => $date) {

@@ -1,3 +1,4 @@
+<!-- save_weekly_att.php -->
 <?php
 session_start();
 include __DIR__ . "/config.php";
@@ -7,14 +8,14 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
+
 $sourcePage = $_POST['source'] ?? 'employee_attendance.php';
 
-if (!isset($_POST['attendance_data']) || !isset($_SESSION['attendance_data'])) {
+if (!isset($_POST['save_attendance']) || !isset($_SESSION['attendance_data'])) {
     $_SESSION['upload_error'] = "No attendance data to save.";
     header("Location: $sourcePage");
     exit();
 }
-
 $employeeData = $_SESSION['attendance_data'];
 
 // Calculate basic salary based on daily rate and pay schedule
@@ -720,7 +721,7 @@ try {
 
     $_SESSION['save_success'] = "Successfully saved $successCount weekly payroll records with batch ID: $batchId";
 
-    header("Location: $sourcePage");
+    header("Location: upload_excel_monthly.php");
     exit();
 } catch (Exception $e) {
     $conn->rollback();

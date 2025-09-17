@@ -29,9 +29,20 @@ if (isset($_SESSION['attendance_deleted']) && $_SESSION['attendance_deleted'] ==
     unset($_SESSION['attendance_deleted']);
 }
 
+$payPeriods = [];
+$sql = "SELECT id_no, pay_schedule FROM daily_rate";
+$result = $conn->query($sql);
+
+while ($row = $result->fetch_assoc()) {
+    $payPeriods[$row['id_no']] = strtolower($row['pay_schedule']);
+}
+
 $employeeData = $_SESSION['attendance_data'] ?? [];
 $uploadError = $_SESSION['upload_error'] ?? null;
 unset($_SESSION['upload_error']);
+
+$current_page = basename($_SERVER['PHP_SELF']);
+
 ?>
 
 <!DOCTYPE html>
@@ -40,7 +51,7 @@ unset($_SESSION['upload_error']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Attendance</title>
+    <title>Weekly Upload</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -373,12 +384,20 @@ unset($_SESSION['upload_error']);
         <!-- ATTENDANCE -->
         <div class="nav-section">
             <div class="nav-section-title">Attendance</div>
-            <a href="employee_attendance_monthly.php" class="<?= ($current_page == 'employee_attendance_monthly.php') ? 'active' : '' ?>">
-                <i class="fas fa-calendar-alt"></i> Monthly Attendance
+            <a href="upload_excel_monthly.php"
+                class="<?= in_array($current_page, [
+                            'employee_attendance.php',
+                            'employee_attendance_monthly.php',
+                            'employee_attendance_semi_monthly.php'
+                        ]) ? 'active' : '' ?>">
+                <i class="fas fa-calendar-alt"></i> Upload Attendance
             </a>
-            <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
+
+
+
+            <!-- <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
                 <i class="fas fa-calendar-week"></i> Weekly Attendance
-            </a>
+            </a> -->
             <a href="attendance_summary_report.php" class="<?= ($current_page == 'attendance_summary_report.php') ? 'active' : '' ?>">
                 <i class="fas fa-clipboard-list"></i> Attendance Summary
             </a>
@@ -461,6 +480,13 @@ unset($_SESSION['upload_error']);
                                         <?php
                                         // Flatten and group by date
                                         $grouped = [];
+                                        $employeeData = array_filter($employeeData, function ($employee) use ($payPeriods) {
+                                            $id = $employee['id_no'] ?? null;
+                                            return isset($payPeriods[$id]) && $payPeriods[$id] === '';
+                                        });
+
+
+
 
                                         foreach ($employeeData as $employee) {
                                             foreach ($employee['dates'] as $i => $date) {

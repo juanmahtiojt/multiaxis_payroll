@@ -20,8 +20,12 @@ $stmt->execute();
 $stmt->close();
 
 // Clear session monthly attendance data
+// Clear all attendance session data
+unset($_SESSION['attendance_data']);
 unset($_SESSION['attendance_data_monthly']);
+unset($_SESSION['attendance_data_semi_monthly']);
 
-header("Location: employee_attendance_monthly.php?msg=deleted");
+// Redirect back to upload modal page
+header("Location: upload_excel_monthly.php");
 exit();
 ?>
