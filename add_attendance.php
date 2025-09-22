@@ -249,7 +249,8 @@ if (isset($_GET['id_no'])) {
                         <label for="id_no" class="form-label">Employee ID</label>
                         <div class="input-group has-icon">
                             <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                            <input type="text" class="form-control" id="id_no" name="id_no" required placeholder="Enter employee ID">
+                            <input type="text" class="form-control" id="id_no" name="id_no" required
+                                placeholder="Enter employee ID">
                         </div>
                         <!-- <div class="form-text">Unique identifier for the employee in the system</div> -->
                     </div>
@@ -258,7 +259,8 @@ if (isset($_GET['id_no'])) {
                         <label for="department" class="form-label">Department</label>
                         <div class="input-group has-icon">
                             <span class="input-group-text"><i class="fas fa-building"></i></span>
-                            <input type="text" class="form-control" id="department" name="department" required placeholder="Employee Department" readonly>
+                            <input type="text" class="form-control" id="department" name="department" required
+                                placeholder="Employee Department" readonly>
                         </div>
                     </div>
 
@@ -266,7 +268,8 @@ if (isset($_GET['id_no'])) {
                         <label for="name" class="form-label">Full Name</label>
                         <div class="input-group has-icon">
                             <span class="input-group-text"><i class="fas fa-user"></i></span>
-                            <input type="text" class="form-control" id="name" name="name" required placeholder="Employee Name" readonly>
+                            <input type="text" class="form-control" id="name" name="name" required
+                                placeholder="Employee Name" readonly>
                         </div>
                     </div>
 
@@ -274,7 +277,8 @@ if (isset($_GET['id_no'])) {
                         <label for="pay_schedule" class="form-label">Pay Period</label>
                         <div class="input-group has-icon">
                             <span class="input-group-text"><i class="fa-solid fa-receipt"></i></span>
-                            <input type="text" class="form-control" id="pay_schedule" name="pay_schedule" required placeholder="Employee Pay Period" readonly>
+                            <input type="text" class="form-control" id="pay_schedule" name="pay_schedule" required
+                                placeholder="Employee Pay Period" readonly>
                         </div>
                     </div>
                     <!-- <input type="text" id="id_no" name="id_no" placeholder="Enter employee ID">
@@ -305,7 +309,8 @@ if (isset($_GET['id_no'])) {
                         <label for="date" class="form-label">Date</label>
                         <div class="input-group has-icon">
                             <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
-                            <input type="text" class="form-control" id="selected-days" name="selected-days" placeholder="Select dates">
+                            <input type="text" class="form-control" id="selected-days" name="selected-days"
+                                placeholder="Select dates">
                         </div>
                     </div>
 
@@ -395,12 +400,12 @@ if (isset($_GET['id_no'])) {
                     let end2 = new Date(year, m + 1, 0);
 
                     options.push({
-                        label: `${start1.toLocaleString('default',{month:'long'})} 1–15, ${year}`,
+                        label: `${start1.toLocaleString('default', { month: 'long' })} 1–15, ${year}`,
                         start: start1.toISOString().split("T")[0],
                         end: end1.toISOString().split("T")[0]
                     });
                     options.push({
-                        label: `${start2.toLocaleString('default',{month:'long'})} 16–${end2.getDate()}, ${year}`,
+                        label: `${start2.toLocaleString('default', { month: 'long' })} 16–${end2.getDate()}, ${year}`,
                         start: start2.toISOString().split("T")[0],
                         end: end2.toISOString().split("T")[0]
                     });
@@ -439,7 +444,7 @@ if (isset($_GET['id_no'])) {
         }
 
         /** -------- EMPLOYEE FETCH -------- */
-        document.getElementById('id_no').addEventListener('keydown', function(e) {
+        document.getElementById('id_no').addEventListener('keydown', function (e) {
             if (e.key === "Enter") {
                 e.preventDefault(); // ⛔ stop form from submitting immediately
                 const empId = this.value.trim();
@@ -471,12 +476,42 @@ if (isset($_GET['id_no'])) {
             }
         });
 
+        /** -------- FLATPICKR START DATE -------- */
+        flatpickr("#start-date", {
+            altInput: true,
+            altFormat: "d-M-y",     // what user sees: 22-Sep-25 (we’ll override to Sept below)
+            dateFormat: "Y-m-d",    // what is saved in real input
+            locale: {
+                months: {
+                    shorthand: ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"], // 👈 changed "Sep" → "Sept"
+                    longhand: ["January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December"]
+                }
+            }
+        });
+
+        /** -------- FLATPICKR END DATE -------- */
+        flatpickr("#end-date", {
+            altInput: true,
+            altFormat: "d-M-y",
+            dateFormat: "Y-m-d",
+            locale: {
+                months: {
+                    shorthand: ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"],
+                    longhand: ["January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December"]
+                }
+            }
+        });
+
 
         /** -------- FLATPICKR OT/UT -------- */
         flatpickr("#selected-days", {
             mode: "multiple",
-            dateFormat: "Y-m-d",
-            onChange: function(selectedDates) {
+            dateFormat: "d-M-y", // ✅ Flatpickr built-in format gives 22-Sep-25
+            onChange: function (selectedDates) {
                 let tbody = document.querySelector("#ot-ut-table tbody");
                 tbody.innerHTML = "";
 
@@ -486,7 +521,13 @@ if (isset($_GET['id_no'])) {
                 }
 
                 selectedDates.forEach(date => {
-                    let formatted = date.toISOString().split("T")[0];
+                    // Format manually: 22-Sept-25
+                    const day = ("0" + date.getDate()).slice(-2);
+                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+                    const month = monthNames[date.getMonth()];
+                    const year = date.getFullYear().toString().slice(-2);
+                    const formatted = `${day}-${month}-${year}`;
+
                     let row = `
                 <tr>
                     <td>
@@ -501,6 +542,8 @@ if (isset($_GET['id_no'])) {
                 });
             }
         });
+
+
     </script>
 
 

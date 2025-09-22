@@ -1,7 +1,7 @@
 <?php
 $host = "localhost";
 $user = "root";  // Default XAMPP username
-$pass = "cvsuOJT@2025";      // Leave empty if no password
+$pass = "argonza@@@";      // Leave empty if no password
 $db = "mathipms"; // Updated database name
 
 $conn = mysqli_connect($host, $user, $pass, $db);
