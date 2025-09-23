@@ -221,7 +221,7 @@ if (isset($_GET['id_no'])) {
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <h1 class="card-title">Add Attendace</h1>
+                <h1 class="card-title">Add Attendance</h1>
                 <p class="card-subtitle">Create an attendance record in the payroll system</p>
             </div>
 
@@ -293,7 +293,8 @@ if (isset($_GET['id_no'])) {
                         <label for="time_in" class="form-label">Start Date</label>
                         <div class="input-group has-icon">
                             <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
-                            <input type="date" class="form-control" id="time_in" name="time_in" value="">
+                            <input type="date" class="form-control" id="time_in" name="time_in" value=""
+                                placeholder="dd-mm-yyy">
                         </div>
                     </div>
 
@@ -301,7 +302,8 @@ if (isset($_GET['id_no'])) {
                         <label for="time_out" class="form-label">End Date</label>
                         <div class="input-group has-icon">
                             <span class="input-group-text"><i class="fa-solid fa-calendar"></i></span>
-                            <input type="date" class="form-control" id="time_out" name="time_out" value="">
+                            <input type="date" class="form-control" id="time_out" name="time_out" value=""
+                                placeholder="dd-mm-yyy">
                         </div>
                     </div>
 
@@ -476,72 +478,74 @@ if (isset($_GET['id_no'])) {
             }
         });
 
-        /** -------- FLATPICKR START DATE -------- */
-        flatpickr("#start-date", {
-            altInput: true,
-            altFormat: "d-M-y",     // what user sees: 22-Sep-25 (we’ll override to Sept below)
-            dateFormat: "Y-m-d",    // what is saved in real input
-            locale: {
-                months: {
-                    shorthand: ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                        "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"], // 👈 changed "Sep" → "Sept"
-                    longhand: ["January", "February", "March", "April", "May", "June",
-                        "July", "August", "September", "October", "November", "December"]
-                }
-            }
-        });
+        function formatWithSept(date) {
+    const day = ("0" + date.getDate()).slice(-2);
+    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"];
+    const month = monthNames[date.getMonth()];
+    const year = date.getFullYear().toString().slice(-2);
+    return `${day}-${month}-${year}`;
+}
 
-        /** -------- FLATPICKR END DATE -------- */
-        flatpickr("#end-date", {
-            altInput: true,
-            altFormat: "d-M-y",
-            dateFormat: "Y-m-d",
-            locale: {
-                months: {
-                    shorthand: ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                        "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"],
-                    longhand: ["January", "February", "March", "April", "May", "June",
-                        "July", "August", "September", "October", "November", "December"]
-                }
-            }
-        });
+/** -------- START DATE -------- */
+flatpickr("#time_in", {
+    dateFormat: "Y-m-d",  // stored in DB
+    altInput: true,       // show friendly text
+    onValueUpdate: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length > 0) {
+            instance.altInput.value = formatWithSept(selectedDates[0]);
+        }
+    }
+});
 
+/** -------- END DATE -------- */
+flatpickr("#time_out", {
+    dateFormat: "Y-m-d",
+    altInput: true,
+    onValueUpdate: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length > 0) {
+            instance.altInput.value = formatWithSept(selectedDates[0]);
+        }
+    }
+});
 
-        /** -------- FLATPICKR OT/UT -------- */
-        flatpickr("#selected-days", {
-            mode: "multiple",
-            dateFormat: "d-M-y", // ✅ Flatpickr built-in format gives 22-Sep-25
-            onChange: function (selectedDates) {
-                let tbody = document.querySelector("#ot-ut-table tbody");
-                tbody.innerHTML = "";
+/** -------- OT/UT MULTIPLE DATES -------- */
+flatpickr("#selected-days", {
+    mode: "multiple",
+    dateFormat: "Y-m-d", // DB saves ISO
+    altInput: true,
+    onValueUpdate: function(selectedDates, dateStr, instance) {
+        let tbody = document.querySelector("#ot-ut-table tbody");
+        tbody.innerHTML = "";
 
-                if (selectedDates.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="3" class="text-center">No dates selected</td></tr>';
-                    return;
-                }
+        if (selectedDates.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center">No dates selected</td></tr>';
+            return;
+        }
 
-                selectedDates.forEach(date => {
-                    // Format manually: 22-Sept-25
-                    const day = ("0" + date.getDate()).slice(-2);
-                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
-                    const month = monthNames[date.getMonth()];
-                    const year = date.getFullYear().toString().slice(-2);
-                    const formatted = `${day}-${month}-${year}`;
+        selectedDates.forEach(date => {
+            const formatted = formatWithSept(date);
+            const iso = date.toISOString().split("T")[0]; // 👈 DB value (YYYY-MM-DD)
 
-                    let row = `
+            let row = `
                 <tr>
                     <td>
-                        <input type="hidden" name="work_dates[]" value="${formatted}">
+                        <input type="hidden" name="work_dates[]" value="${iso}">
                         ${formatted}
                     </td>
-                    <td><input type="number" step="0.5" class="form-control" name="ot_hours[${formatted}]" placeholder="0"></td>
-                    <td><input type="number" step="0.5" class="form-control" name="ut_hours[${formatted}]" placeholder="0"></td>
+                    <td><input type="number" step="0.5" class="form-control" name="ot_hours[${iso}]" placeholder="0"></td>
+                    <td><input type="number" step="0.5" class="form-control" name="ut_hours[${iso}]" placeholder="0"></td>
                 </tr>
             `;
-                    tbody.insertAdjacentHTML("beforeend", row);
-                });
-            }
+            tbody.insertAdjacentHTML("beforeend", row);
         });
+
+        // also force altInput box to show our custom format
+        if (selectedDates.length > 0) {
+            instance.altInput.value = selectedDates.map(formatWithSept).join(", ");
+        }
+    }
+});
+
 
 
     </script>

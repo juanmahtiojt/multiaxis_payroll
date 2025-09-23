@@ -198,7 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <h1 class="card-title">Add Attendace</h1>
+                <h1 class="card-title">Add Attendance</h1>
                 <p class="card-subtitle">Create an attendance record in the payroll system</p>
             </div>
             
