@@ -2,7 +2,7 @@
 // enter_payroll.php
 $host = "localhost";
 $username = "root";
-$password = "cvsuOJT@2025"; // Change this if you have a password
+$password = "argonza@@@"; // Change this if you have a password: password:cvsuOJT@2025
 $dbname = "mathipms";
 
 $conn = new mysqli($host, $username, $password, $dbname);
@@ -422,6 +422,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_weekly_employee'])
             <!-- <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
                 <i class="fas fa-calendar-week"></i> Weekly Attendance
             </a> -->
+            <a href="manual_attendance.php" class="<?= ($current_page == 'manual_attendance.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-week"></i> Manual Attendance
+            </a>
             <a href="attendance_summary_report.php" class="<?= ($current_page == 'attendance_summary_report.php') ? 'active' : '' ?>">
                 <i class="fas fa-clipboard-list"></i> Attendance Summary
             </a>
