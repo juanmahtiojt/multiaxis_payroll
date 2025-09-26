@@ -31,7 +31,7 @@ if ($message === 'success') {
 }
 
 // Fetch attendance records
-$sql = "SELECT id, id_no, department, name, pay_schedule, work_days_count, ot_hours, ut_hours, created_at 
+$sql = "SELECT id, id_no, department, name, pay_schedule, start_date, end_date,  work_days_count, ot_hours, ut_hours, created_at 
         FROM manual_attendance ORDER BY created_at DESC";
 $result = $conn->query($sql);
 ?>
@@ -44,6 +44,19 @@ $result = $conn->query($sql);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <style>
+    * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #d6eaf8;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+        }
     /* Improved Sidebar Styles */
     .sidebar {
         width: 270px;
@@ -145,6 +158,13 @@ $result = $conn->query($sql);
         min-height: 100vh;
         background-color: #d6eaf8;
     }
+    .report-header {
+            background-color: #eaf2f8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
 </style>
 
 <body class="bg-light">
@@ -244,12 +264,19 @@ $result = $conn->query($sql);
 
     <div class="container mt-5">
         <div class="card shadow">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="mb-0">Manual Attendance Records</h3>
-                <a href="add_attendance.php" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus"></i> Add Attendance
-                </a>
-            </div>
+            <!-- Page Header -->
+                <div class="report-header mb-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h2 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Manual Attendance</h2>
+                            <p class="text-muted mb-0"></p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <a href="add_attendance.php" class="btn btn-success add-btn"><i class="fas fa-plus"></i> Add
+                                Attendance</a>
+                        </div>
+                    </div>
+                </div>
 
             <?php if ($messageText): ?>
                 <div class="alert alert-<?= $messageClass ?> m-3">
@@ -281,6 +308,8 @@ $result = $conn->query($sql);
                             <th>Name</th>
                             <th>Department</th>
                             <th>Pay Schedule</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
                             <th>Work Days</th>
                             <th>OT Hours</th>
                             <th>UT Hours</th>
@@ -296,6 +325,8 @@ $result = $conn->query($sql);
                                     <td><?= htmlspecialchars($row['name']) ?></td>
                                     <td><?= htmlspecialchars($row['department']) ?></td>
                                     <td><?= htmlspecialchars($row['pay_schedule']) ?></td>
+                                    <td><?= $row['start_date'] ?></td>
+                                    <td><?= $row['end_date'] ?></td>
                                     <td><?= (int)$row['work_days_count'] ?></td>
                                     <td><?= (int)$row['ot_hours'] ?></td>
                                     <td><?= (int)$row['ut_hours'] ?></td>
