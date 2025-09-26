@@ -243,7 +243,7 @@ if (isset($_GET['id_no'])) {
             <?php endif; ?>
 
             <div class="card-body">
-                <form method="POST" action="" id="addEmployeeForm">
+                <form method="POST" action="save_manual_attendance.php" id="addEmployeeForm">
 
                     <div class="mb-3">
                         <label for="id_no" class="form-label">Employee ID</label>
@@ -313,6 +313,8 @@ if (isset($_GET['id_no'])) {
                                 placeholder="Select dates">
                         </div>
                     </div>
+                    <input type="hidden" name="work_days_count" id="work_days_count" value="0">
+
 
                     <div class="table-responsive mt-3">
                         <table class="table table-bordered" id="ot-ut-table">
@@ -338,7 +340,7 @@ if (isset($_GET['id_no'])) {
                 <a href="manual_attendance.php" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>Back
                 </a>
-                <button type="submit" form="" class="btn btn-primary">
+                <button type="submit" form="addEmployeeForm" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Add Attendance
                 </button>
             </div>
@@ -372,6 +374,8 @@ if (isset($_GET['id_no'])) {
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
+       
+
         /** -------- PAY PERIOD OPTIONS -------- */
         function getPeriodOptions(type) {
             let today = new Date();
@@ -444,37 +448,46 @@ if (isset($_GET['id_no'])) {
         }
 
         /** -------- EMPLOYEE FETCH -------- */
-        document.getElementById('id_no').addEventListener('keydown', function (e) {
-            if (e.key === "Enter") {
-                e.preventDefault(); // ⛔ stop form from submitting immediately
-                const empId = this.value.trim();
-                console.log("Enter pressed with ID:", empId);
+        document.addEventListener("DOMContentLoaded", function () {
+    const empInput = document.getElementById('id_no');
+    if (!empInput) {
+        console.error("❌ Input field with id='id_no' not found!");
+        return;
+    }
 
-                if (!empId) return;
+    empInput.addEventListener('keydown', function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const empId = this.value.trim();
+            console.log("Enter pressed with ID:", empId);
 
-                fetch('get_employee.php?id_no=' + encodeURIComponent(empId))
-                    .then(r => r.text())
-                    .then(txt => {
-                        console.log("Raw response:", txt); // 👀 debug
-                        try {
-                            const json = JSON.parse(txt);
-                            if (json.success) {
-                                document.getElementById('name').value = json.data.name ?? '';
-                                document.getElementById('department').value = json.data.department ?? '';
-                                document.getElementById('pay_schedule').value = json.data.pay_schedule ?? '';
-                            } else {
-                                document.getElementById('name').value = '';
-                                document.getElementById('department').value = '';
-                                document.getElementById('pay_schedule').value = '';
-                                alert(json.message || "Employee not found!");
-                            }
-                        } catch (e) {
-                            console.error("Invalid JSON:", e);
+            if (!empId) return;
+
+            fetch('get_employee.php?id_no=' + encodeURIComponent(empId))
+                .then(r => r.text())
+                .then(txt => {
+                    console.log("Raw response:", txt);
+                    try {
+                        const json = JSON.parse(txt);
+                        if (json.success) {
+                            document.getElementById('name').value = json.data.name ?? '';
+                            document.getElementById('department').value = json.data.department ?? '';
+                            document.getElementById('pay_schedule').value = json.data.pay_schedule ?? '';
+                        } else {
+                            document.getElementById('name').value = '';
+                            document.getElementById('department').value = '';
+                            document.getElementById('pay_schedule').value = '';
+                            alert(json.message || "Employee not found!");
                         }
-                    })
-                    .catch(err => console.error("Fetch error:", err));
-            }
-        });
+                    } catch (e) {
+                        console.error("Invalid JSON:", e);
+                    }
+                })
+                .catch(err => console.error("Fetch error:", err));
+        }
+    });
+});
+
 
         /** -------- FLATPICKR START DATE -------- */
         flatpickr("#start-date", {
@@ -509,26 +522,28 @@ if (isset($_GET['id_no'])) {
 
         /** -------- FLATPICKR OT/UT -------- */
         flatpickr("#selected-days", {
-            mode: "multiple",
-            dateFormat: "d-M-y", // ✅ Flatpickr built-in format gives 22-Sep-25
-            onChange: function (selectedDates) {
-                let tbody = document.querySelector("#ot-ut-table tbody");
-                tbody.innerHTML = "";
+    mode: "multiple",
+    dateFormat: "d-M-y",
+    onChange: function (selectedDates) {
+        let tbody = document.querySelector("#ot-ut-table tbody");
+        tbody.innerHTML = "";
 
-                if (selectedDates.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="3" class="text-center">No dates selected</td></tr>';
-                    return;
-                }
+        // Update work_days_count here 👇
+        document.getElementById("work_days_count").value = selectedDates.length;
 
-                selectedDates.forEach(date => {
-                    // Format manually: 22-Sept-25
-                    const day = ("0" + date.getDate()).slice(-2);
-                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
-                    const month = monthNames[date.getMonth()];
-                    const year = date.getFullYear().toString().slice(-2);
-                    const formatted = `${day}-${month}-${year}`;
+        if (selectedDates.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center">No dates selected</td></tr>';
+            return;
+        }
 
-                    let row = `
+        selectedDates.forEach(date => {
+            const day = ("0" + date.getDate()).slice(-2);
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear().toString().slice(-2);
+            const formatted = `${day}-${month}-${year}`;
+
+            let row = `
                 <tr>
                     <td>
                         <input type="hidden" name="work_dates[]" value="${formatted}">
@@ -538,10 +553,11 @@ if (isset($_GET['id_no'])) {
                     <td><input type="number" step="0.5" class="form-control" name="ut_hours[${formatted}]" placeholder="0"></td>
                 </tr>
             `;
-                    tbody.insertAdjacentHTML("beforeend", row);
-                });
-            }
+            tbody.insertAdjacentHTML("beforeend", row);
         });
+    }
+});
+
 
 
     </script>
