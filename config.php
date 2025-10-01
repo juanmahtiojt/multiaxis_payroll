@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";  // Default XAMPP username
 
-$pass = "juan1234";      // Leave empty if no password
+$pass = "argonza@@@";      // Leave empty if no password
 
 // $pass = "argonza@@@";      // Leave empty if no password; password:cvsuOJT@2025 
 // >>>>>>> 072030f35afea24f2a68512d08169494f69a3d1e

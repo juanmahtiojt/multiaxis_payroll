@@ -7,15 +7,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $department   = $_POST['department'] ?? '';
     $name         = $_POST['name'] ?? '';
     $pay_schedule = $_POST['pay_schedule'] ?? '';
-    $start_date = $_POST['time_in'] ?? null;   
-    $end_date   = $_POST['time_out'] ?? null;  
+    $start_date   = $_POST['time_in'] ?? null;   
+    $end_date     = $_POST['time_out'] ?? null;  
     $work_days_count = (int)($_POST['work_days_count'] ?? 0);
-    // Safely sum OT and UT
-    $ot_hours = isset($_POST['ot_hours']) ? array_sum($_POST['ot_hours']) : 0;
-    $ut_hours = isset($_POST['ut_hours']) ? array_sum($_POST['ut_hours']) : 0;
+
+    $ot_hours_arr = $_POST['ot_hours'] ?? [];
+    $ut_hours_arr = $_POST['ut_hours'] ?? [];
+
+    // Calculate totals
+    $ot_hours_total = array_sum($ot_hours_arr);
+    $ut_hours_total = array_sum($ut_hours_arr);
+
+    // Build JSON structure
+    $attendance = [
+        "id_no" => $id_no,
+        "days" => []
+    ];
+
+    foreach ($ot_hours_arr as $date => $ot_val) {
+        $attendance['days'][$date] = [
+            "ot" => (int)$ot_val,
+            "ut" => (int)($ut_hours_arr[$date] ?? 0)
+        ];
+    }
+
+    $attendance_json = json_encode($attendance);
 
     if ($id_no && $name && $work_days_count > 0) {
-
         $check = $conn->prepare("SELECT id FROM manual_attendance WHERE id_no = ?");
         $check->bind_param("s", $id_no);
         $check->execute();
@@ -31,12 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $stmt = $conn->prepare("
             INSERT INTO manual_attendance 
-            (id_no, department, name, pay_schedule, start_date, end_date, work_days_count, ot_hours, ut_hours) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (id_no, department, name, pay_schedule, start_date, end_date, work_days_count, ot_hours, ut_hours, attendance_data) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
         $stmt->bind_param(
-            "ssssssiii",
+            "ssssssiiis",
             $id_no,
             $department,
             $name,
@@ -44,8 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $start_date,
             $end_date,
             $work_days_count,
-            $ot_hours,
-            $ut_hours
+            $ot_hours_total,
+            $ut_hours_total,
+            $attendance_json
         );
 
         $stmt->execute();

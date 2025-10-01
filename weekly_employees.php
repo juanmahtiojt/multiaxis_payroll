@@ -2,7 +2,7 @@
 // enter_payroll.php
 $host = "localhost";
 $username = "root";
-$password = "argonza@@@"; // Change this if you have a password: password:cvsuOJT@2025
+$password = "argonza@@@"; // Change this if you have a password; password:cvsuOJT@2025
 $dbname = "mathipms";
 
 $conn = new mysqli($host, $username, $password, $dbname);
