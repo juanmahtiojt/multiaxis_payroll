@@ -256,15 +256,13 @@ $result = $conn->query($sql);
                     Are you sure you want to save this row?
                 </div>
                 <div class="modal-footer">
-                    <form method="POST" action="submit_manual_attendance.php">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <input type="hidden" name="id" id="confirm-id">
-                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
-                    </form>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmSubmitBtn">Yes, Submit</button>
                 </div>
             </div>
         </div>
     </div>
+
 
 
     <div class="container mt-5">
@@ -324,35 +322,30 @@ $result = $conn->query($sql);
                     <tbody>
                         <?php if ($result && $result->num_rows > 0): ?>
                             <?php while ($row = $result->fetch_assoc()): ?>
-                                <tr>
-                                    <!-- <td><?= $row['id'] ?></td> -->
-                                    <td><?= htmlspecialchars($row['id_no']) ?></td>
-                                    <td><?= htmlspecialchars($row['name']) ?></td>
-                                    <td><?= htmlspecialchars($row['department']) ?></td>
-                                    <td><?= htmlspecialchars($row['pay_schedule']) ?></td>
-                                    <td><?= $row['start_date'] ?></td>
-                                    <td><?= $row['end_date'] ?></td>
-                                    <td><?= (int) $row['work_days_count'] ?></td>
-                                    <td><?= (int) $row['ot_hours'] ?></td>
-                                    <td><?= (int) $row['ut_hours'] ?></td>
-                                    <!-- <td><?= $row['created_at'] ?></td> -->
-                                    <td>
-                                        <a href="edit_manual.php?id=<?= $row['id'] ?>" class="btn btn-primary btn-sm">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </a>
-                                        <button id="save-<?= $row['id'] ?>" onclick="openConfirmModal(<?= $row['id'] ?>)"
-                                            class="btn btn-success btn-sm">
-                                            <i class="fas fa-save"></i> Submit
-                                        </button>
-                                    </td>
-
-
-                                </tr>
+                                <form id="form-<?= $row['id'] ?>" method="POST" action="submit_manual_attendance.php">
+                                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                    <tr>
+                                        <td><?= htmlspecialchars($row['id_no']) ?></td>
+                                        <td><?= htmlspecialchars($row['name']) ?></td>
+                                        <td><?= htmlspecialchars($row['department']) ?></td>
+                                        <td><?= htmlspecialchars($row['pay_schedule']) ?></td>
+                                        <td><?= $row['start_date'] ?></td>
+                                        <td><?= $row['end_date'] ?></td>
+                                        <td><?= (int) $row['work_days_count'] ?></td>
+                                        <td><?= (int) $row['ot_hours'] ?></td>
+                                        <td><?= (int) $row['ut_hours'] ?></td>
+                                        <td>
+                                            <a href="edit_manual.php?id=<?= $row['id'] ?>" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <button type="button" id="save-<?= $row['id'] ?>" class="btn btn-success btn-sm">
+                                                <i class="fas fa-save"></i> Submit
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </form>
                             <?php endwhile; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="9" class="text-center text-muted">No attendance records found.</td>
-                            </tr>
+
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -367,6 +360,24 @@ $result = $conn->query($sql);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        let currentForm = null;
+
+        document.querySelectorAll('button[id^="save-"]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const rowId = this.id.replace('save-', '');
+                currentForm = document.getElementById('form-' + rowId);
+                const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+                modal.show();
+            });
+        });
+
+        document.getElementById('confirmSubmitBtn').addEventListener('click', function() {
+            if (currentForm) {
+                currentForm.submit(); // Submit the selected row
+            }
+        });
+
         document.addEventListener("DOMContentLoaded", () => {
             const alertBox = document.querySelector(".alert");
             if (alertBox) {
@@ -385,7 +396,7 @@ $result = $conn->query($sql);
         }
 
 
-        document.getElementById("confirmSaveBtn").addEventListener("click", function () {
+        document.getElementById("confirmSaveBtn").addEventListener("click", function() {
             if (rowToSave !== null) {
                 saveRow(rowToSave); // ✅ call your save function
                 rowToSave = null;

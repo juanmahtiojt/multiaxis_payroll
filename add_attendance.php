@@ -376,7 +376,13 @@ if (isset($_GET['id_no'])) {
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
-
+        document.getElementById('addEmployeeForm').addEventListener('submit', function(e) {
+            console.log('Submitting form with:', {
+                id_no: document.getElementById('id_no').value,
+                name: document.getElementById('name').value,
+                work_dates: document.querySelectorAll('input[name="work_dates[]"]').length
+            });
+        });
 
         /** -------- PAY PERIOD OPTIONS -------- */
         function getPeriodOptions(type) {
@@ -450,14 +456,14 @@ if (isset($_GET['id_no'])) {
         }
 
         /** -------- EMPLOYEE FETCH -------- */
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             const empInput = document.getElementById('id_no');
             if (!empInput) {
                 console.error("❌ Input field with id='id_no' not found!");
                 return;
             }
 
-            empInput.addEventListener('keydown', function (e) {
+            empInput.addEventListener('keydown', function(e) {
                 if (e.key === "Enter") {
                     e.preventDefault();
                     const empId = this.value.trim();
@@ -475,6 +481,7 @@ if (isset($_GET['id_no'])) {
                                     document.getElementById('name').value = json.data.name ?? '';
                                     document.getElementById('department').value = json.data.department ?? '';
                                     document.getElementById('pay_schedule').value = json.data.pay_schedule ?? '';
+
                                 } else {
                                     document.getElementById('name').value = '';
                                     document.getElementById('department').value = '';
@@ -502,14 +509,16 @@ if (isset($_GET['id_no'])) {
         /** -------- FLATPICKR START DATE -------- */
         flatpickr("#start-date", {
             altInput: true,
-            altFormat: "d-M-y",     // what user sees: 22-Sep-25 (we’ll override to Sept below)
-            dateFormat: "Y-m-d",    // what is saved in real input
+            altFormat: "d-M-y", // what user sees: 22-Sep-25 (we’ll override to Sept below)
+            dateFormat: "Y-m-d", // what is saved in real input
             locale: {
                 months: {
                     shorthand: ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                        "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"], // 👈 changed "Sep" → "Sept"
+                        "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"
+                    ], // 👈 changed "Sep" → "Sept"
                     longhand: ["January", "February", "March", "April", "May", "June",
-                        "July", "August", "September", "October", "November", "December"]
+                        "July", "August", "September", "October", "November", "December"
+                    ]
                 }
             }
         });
@@ -522,9 +531,11 @@ if (isset($_GET['id_no'])) {
             locale: {
                 months: {
                     shorthand: ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                        "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"],
+                        "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"
+                    ],
                     longhand: ["January", "February", "March", "April", "May", "June",
-                        "July", "August", "September", "October", "November", "December"]
+                        "July", "August", "September", "October", "November", "December"
+                    ]
                 }
             }
         });
@@ -532,71 +543,99 @@ if (isset($_GET['id_no'])) {
 
         /** -------- FLATPICKR OT/UT -------- */
         const startInput = document.getElementById("time_in");
-const endInput   = document.getElementById("time_out");
+        const endInput = document.getElementById("time_out");
 
-const selectedDaysPicker = flatpickr("#selected-days", {
-    mode: "multiple",
-    altInput: true,
-    altFormat: "d-M-y",   // what user sees
-    dateFormat: "Y-m-d",  // what is stored internally
-    minDate: null,
-    maxDate: null,
+        const selectedDaysPicker = flatpickr("#selected-days", {
+            mode: "multiple",
+            altInput: true,
+            altFormat: "d-M-y", // what user sees
+            dateFormat: "Y-m-d", // what is stored internally
+            minDate: null,
+            maxDate: null,
 
-    onOpen: function() {
-        if (startInput.value) {
-            this.set("minDate", startInput.value); // YYYY-MM-DD from <input type="date">
-        }
-        if (endInput.value) {
-            this.set("maxDate", endInput.value);
-        }
-    },
+            onOpen: function() {
+                if (startInput.value) {
+                    this.set("minDate", startInput.value); // YYYY-MM-DD from <input type="date">
+                }
+                if (endInput.value) {
+                    this.set("maxDate", endInput.value);
+                }
+            },
 
-    onChange: function (selectedDates) {
-        let tbody = document.querySelector("#ot-ut-table tbody");
-        tbody.innerHTML = "";
+            onChange: function(selectedDates) {
+                let tbody = document.querySelector("#ot-ut-table tbody");
+                tbody.innerHTML = "";
 
-        // Update work_days_count
-        document.getElementById("work_days_count").value = selectedDates.length;
+                document.getElementById("work_days_count").value = selectedDates.length;
 
-        if (selectedDates.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" class="text-center">No dates selected</td></tr>';
-            return;
-        }
+                if (selectedDates.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center">No dates selected</td></tr>';
+                    return;
+                }
 
-        selectedDates.forEach(date => {
-            const day = ("0" + date.getDate()).slice(-2);
-            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
-            const month = monthNames[date.getMonth()];
-            const year = date.getFullYear().toString().slice(-2);
-            const formatted = `${day}-${month}-${year}`;
+                selectedDates.forEach(date => {
+                    const isoDate = date.toLocaleDateString("en-CA");
+                    const day = ("0" + date.getDate()).slice(-2);
+                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"
+                    ];
+                    const month = monthNames[date.getMonth()];
+                    const year = date.getFullYear().toString().slice(-2);
+                    const formatted = `${day}-${month}-${year}`;
 
-            let row = `
-                <tr>
-                    <td>
-                        <input type="hidden" name="work_dates[]" value="${formatted}">
-                        ${formatted}
-                    </td>
-                    <td><input type="number" step="0.5" class="form-control" name="ot_hours[${formatted}]" placeholder="0"></td>
-                    <td><input type="number" step="0.5" class="form-control" name="ut_hours[${formatted}]" placeholder="0"></td>
-                </tr>
-            `;
-            tbody.insertAdjacentHTML("beforeend", row);
+                    fetch("check_date.php?date=" + isoDate)
+                        .then(r => r.json())
+                        .then(info => {
+                            let badge = "";
+                            if (info.isSunday) {
+                                badge += `<span class="badge bg-warning text-dark ms-2">Sunday</span>`;
+                            }
+                            if (info.holiday) {
+                                badge += `<span class="badge bg-danger ms-2">${info.holiday} (${info.holiday_type})</span>`;
+                            }
+
+                            let row = `
+            <tr>
+                <td>
+                    <input type="hidden" name="work_dates[]" value="${isoDate}">
+                    <input type="hidden" name="isSunday[${isoDate}]" value="${info.isSunday ? 1 : 0}">
+                    <input type="hidden" name="holiday_id[${isoDate}]" value="${info.holiday_id ?? ''}">
+                    <input type="hidden" name="holiday_type[${isoDate}]" value="${info.holiday_type ?? ''}">
+
+                    <!-- 🔑 store rates for backend use -->
+                    <input type="hidden" name="regular_rate[${isoDate}]" value="${info.rates.regular_rate ?? 1}">
+                    <input type="hidden" name="overtime_rate[${isoDate}]" value="${info.rates.overtime_rate ?? 1.25}">
+                    <input type="hidden" name="restdayholiday_regular[${isoDate}]" value="${info.rates.restdayholiday_regular ?? 0}">
+                    <input type="hidden" name="restdayholiday_overtime[${isoDate}]" value="${info.rates.restdayholiday_overtime ?? 0}">
+                    <input type="hidden" name="restdayholiday_special[${isoDate}]" value="${info.rates.restdayholiday_special ?? 0}">
+                    <input type="hidden" name="restdayspecialholiday_overtime[${isoDate}]" value="${info.rates.restdayspecialholiday_overtime ?? 0}">
+                    
+                    ${formatted} ${badge}
+                </td>
+                <td><input type="number" step="0.5" class="form-control" name="ot_hours[${isoDate}]" placeholder="0"></td>
+                <td><input type="number" step="0.5" class="form-control" name="ut_hours[${isoDate}]" placeholder="0"></td>
+            </tr>
+        `;
+                            tbody.insertAdjacentHTML("beforeend", row);
+                        })
+                        .catch(err => {
+                            console.error("Error checking date:", err);
+                        });
+                });
+
+            }
+
         });
-    }
-});
-
-// Keep Flatpickr min/max in sync when user changes start/end dates
-[startInput, endInput].forEach(input => {
-    input.addEventListener("change", () => {
-        selectedDaysPicker.set("minDate", startInput.value || null);
-        selectedDaysPicker.set("maxDate", endInput.value || null);
-        console.log("Updated allowed range:", startInput.value, "to", endInput.value);
-    });
-});
 
 
-
+        // Keep Flatpickr min/max in sync when user changes start/end dates
+        [startInput, endInput].forEach(input => {
+            input.addEventListener("change", () => {
+                selectedDaysPicker.set("minDate", startInput.value || null);
+                selectedDaysPicker.set("maxDate", endInput.value || null);
+                console.log("Updated allowed range:", startInput.value, "to", endInput.value);
+            });
+        });
     </script>
 
 
