@@ -339,7 +339,7 @@ if (isset($_GET['id_no'])) {
             </div>
 
             <div class="card-footer d-flex justify-content-between">
-                <a href="manual_attendance.php" class="btn btn-secondary">
+                <a href="manual.php" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i>Back
                 </a>
                 <button type="submit" form="addEmployeeForm" class="btn btn-primary">
@@ -376,7 +376,7 @@ if (isset($_GET['id_no'])) {
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
-       
+
 
         /** -------- PAY PERIOD OPTIONS -------- */
         function getPeriodOptions(type) {
@@ -451,55 +451,55 @@ if (isset($_GET['id_no'])) {
 
         /** -------- EMPLOYEE FETCH -------- */
         document.addEventListener("DOMContentLoaded", function () {
-    const empInput = document.getElementById('id_no');
-    if (!empInput) {
-        console.error("❌ Input field with id='id_no' not found!");
-        return;
-    }
+            const empInput = document.getElementById('id_no');
+            if (!empInput) {
+                console.error("❌ Input field with id='id_no' not found!");
+                return;
+            }
 
-    empInput.addEventListener('keydown', function (e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const empId = this.value.trim();
-            console.log("Enter pressed with ID:", empId);
+            empInput.addEventListener('keydown', function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    const empId = this.value.trim();
+                    console.log("Enter pressed with ID:", empId);
 
-            if (!empId) return;
+                    if (!empId) return;
 
-            fetch('get_employee.php?id_no=' + encodeURIComponent(empId))
-                .then(r => r.text())
-                .then(txt => {
-                    console.log("Raw response:", txt);
-                    try {
-                        const json = JSON.parse(txt);
-                        if (json.success) {
-                            document.getElementById('name').value = json.data.name ?? '';
-                            document.getElementById('department').value = json.data.department ?? '';
-                            document.getElementById('pay_schedule').value = json.data.pay_schedule ?? '';
-                        } else {
-                            document.getElementById('name').value = '';
-                            document.getElementById('department').value = '';
-                            document.getElementById('pay_schedule').value = '';
-                            alert(json.message || "Employee not found!");
-                        }
-                    } catch (e) {
-                        console.error("Invalid JSON:", e);
-                    }
-                })
-                .catch(err => console.error("Fetch error:", err));
-        }
-    });
-});
+                    fetch('get_employee.php?id_no=' + encodeURIComponent(empId))
+                        .then(r => r.text())
+                        .then(txt => {
+                            console.log("Raw response:", txt);
+                            try {
+                                const json = JSON.parse(txt);
+                                if (json.success) {
+                                    document.getElementById('name').value = json.data.name ?? '';
+                                    document.getElementById('department').value = json.data.department ?? '';
+                                    document.getElementById('pay_schedule').value = json.data.pay_schedule ?? '';
+                                } else {
+                                    document.getElementById('name').value = '';
+                                    document.getElementById('department').value = '';
+                                    document.getElementById('pay_schedule').value = '';
+                                    alert(json.message || "Employee not found!");
+                                }
+                            } catch (e) {
+                                console.error("Invalid JSON:", e);
+                            }
+                        })
+                        .catch(err => console.error("Fetch error:", err));
+                }
+            });
+        });
 
 
         function formatWithSept(date) {
-    const day = ("0" + date.getDate()).slice(-2);
-    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"];
-    const month = monthNames[date.getMonth()];
-    const year = date.getFullYear().toString().slice(-2);
-    return `${day}-${month}-${year}`;
-}
+            const day = ("0" + date.getDate()).slice(-2);
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear().toString().slice(-2);
+            return `${day}-${month}-${year}`;
+        }
 
-/** -------- FLATPICKR START DATE -------- */
+        /** -------- FLATPICKR START DATE -------- */
         flatpickr("#start-date", {
             altInput: true,
             altFormat: "d-M-y",     // what user sees: 22-Sep-25 (we’ll override to Sept below)
@@ -531,14 +531,31 @@ if (isset($_GET['id_no'])) {
 
 
         /** -------- FLATPICKR OT/UT -------- */
-        flatpickr("#selected-days", {
+        const startInput = document.getElementById("time_in");
+const endInput   = document.getElementById("time_out");
+
+const selectedDaysPicker = flatpickr("#selected-days", {
     mode: "multiple",
-    dateFormat: "d-M-y",
+    altInput: true,
+    altFormat: "d-M-y",   // what user sees
+    dateFormat: "Y-m-d",  // what is stored internally
+    minDate: null,
+    maxDate: null,
+
+    onOpen: function() {
+        if (startInput.value) {
+            this.set("minDate", startInput.value); // YYYY-MM-DD from <input type="date">
+        }
+        if (endInput.value) {
+            this.set("maxDate", endInput.value);
+        }
+    },
+
     onChange: function (selectedDates) {
         let tbody = document.querySelector("#ot-ut-table tbody");
         tbody.innerHTML = "";
 
-        // Update work_days_count here 👇
+        // Update work_days_count
         document.getElementById("work_days_count").value = selectedDates.length;
 
         if (selectedDates.length === 0) {
@@ -548,7 +565,8 @@ if (isset($_GET['id_no'])) {
 
         selectedDates.forEach(date => {
             const day = ("0" + date.getDate()).slice(-2);
-            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
             const month = monthNames[date.getMonth()];
             const year = date.getFullYear().toString().slice(-2);
             const formatted = `${day}-${month}-${year}`;
@@ -567,6 +585,17 @@ if (isset($_GET['id_no'])) {
         });
     }
 });
+
+// Keep Flatpickr min/max in sync when user changes start/end dates
+[startInput, endInput].forEach(input => {
+    input.addEventListener("change", () => {
+        selectedDaysPicker.set("minDate", startInput.value || null);
+        selectedDaysPicker.set("maxDate", endInput.value || null);
+        console.log("Updated allowed range:", startInput.value, "to", endInput.value);
+    });
+});
+
+
 
     </script>
 

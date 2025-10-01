@@ -45,18 +45,19 @@ $result = $conn->query($sql);
 </head>
 <style>
     * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-        body {
-            background-color: #d6eaf8;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-            font-family: 'Segoe UI', sans-serif;
-        }
+    body {
+        background-color: #d6eaf8;
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
     /* Improved Sidebar Styles */
     .sidebar {
         width: 270px;
@@ -158,13 +159,14 @@ $result = $conn->query($sql);
         min-height: 100vh;
         background-color: #d6eaf8;
     }
+
     .report-header {
-            background-color: #eaf2f8;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
+        background-color: #eaf2f8;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
 </style>
 
 <body class="bg-light">
@@ -254,8 +256,11 @@ $result = $conn->query($sql);
                     Are you sure you want to save this row?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="confirmSaveBtn">Yes, Save</button>
+                    <form method="POST" action="submit_manual_attendance.php">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <input type="hidden" name="id" id="confirm-id">
+                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -265,18 +270,18 @@ $result = $conn->query($sql);
     <div class="container mt-5">
         <div class="card shadow">
             <!-- Page Header -->
-                <div class="report-header mb-4">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <h2 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Manual Attendance</h2>
-                            <p class="text-muted mb-0"></p>
-                        </div>
-                        <div class="col-md-6 text-md-end">
-                            <a href="add_attendance.php" class="btn btn-success add-btn"><i class="fas fa-plus"></i> Add
-                                Attendance</a>
-                        </div>
+            <div class="report-header mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h2 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Manual Attendance</h2>
+                        <p class="text-muted mb-0"></p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="add_attendance.php" class="btn btn-success add-btn"><i class="fas fa-plus"></i> Add
+                            Attendance</a>
                     </div>
                 </div>
+            </div>
 
             <?php if ($messageText): ?>
                 <div class="alert alert-<?= $messageClass ?> m-3">
@@ -327,14 +332,20 @@ $result = $conn->query($sql);
                                     <td><?= htmlspecialchars($row['pay_schedule']) ?></td>
                                     <td><?= $row['start_date'] ?></td>
                                     <td><?= $row['end_date'] ?></td>
-                                    <td><?= (int)$row['work_days_count'] ?></td>
-                                    <td><?= (int)$row['ot_hours'] ?></td>
-                                    <td><?= (int)$row['ut_hours'] ?></td>
+                                    <td><?= (int) $row['work_days_count'] ?></td>
+                                    <td><?= (int) $row['ot_hours'] ?></td>
+                                    <td><?= (int) $row['ut_hours'] ?></td>
                                     <!-- <td><?= $row['created_at'] ?></td> -->
                                     <td>
-                                        <button id="edit-<?= $row['id'] ?>" onclick="enableEdit(<?= $row['id'] ?>)">Edit</button>
-                                        <button id="save-<?= $row['id'] ?>" onclick="openConfirmModal(<?= $row['id'] ?>)">Submit</button>
+                                        <a href="edit_manual.php?id=<?= $row['id'] ?>" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <button id="save-<?= $row['id'] ?>" onclick="openConfirmModal(<?= $row['id'] ?>)"
+                                            class="btn btn-success btn-sm">
+                                            <i class="fas fa-save"></i> Submit
+                                        </button>
                                     </td>
+
 
                                 </tr>
                             <?php endwhile; ?>
@@ -367,13 +378,14 @@ $result = $conn->query($sql);
 
         let rowToSave = null; // store which row user wants to save
 
-        function openConfirmModal(rowId) {
-            rowToSave = rowId;
-            let modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        function openConfirmModal(id) {
+            document.getElementById("confirm-id").value = id;
+            var modal = new bootstrap.Modal(document.getElementById("confirmModal"));
             modal.show();
         }
 
-        document.getElementById("confirmSaveBtn").addEventListener("click", function() {
+
+        document.getElementById("confirmSaveBtn").addEventListener("click", function () {
             if (rowToSave !== null) {
                 saveRow(rowToSave); // ✅ call your save function
                 rowToSave = null;
