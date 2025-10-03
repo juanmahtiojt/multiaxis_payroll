@@ -4,26 +4,7 @@ session_start();
 include 'config.php';
 include 'functions.php';
 
-// --- Validate required POST data ---
-// $id_no        = $_POST['id_no'] ?? '';
-// $name         = $_POST['name'] ?? '';
-// $department   = $_POST['department'] ?? '';
-// $pay_schedule = $_POST['pay_schedule'] ?? '';
-// $start_date   = $_POST['time_in'] ?? null;
-// $end_date     = $_POST['time_out'] ?? null;
-// $work_dates = $_POST['work_dates'] ?? [];
 
-
-// $work_days_count = count($work_dates);
-
-// $missing = [];
-// if (!$id_no) $missing[] = 'id_no';
-// if (!$name) $missing[] = 'name';
-// if (empty($work_dates)) $missing[] = 'work_dates';
-
-// if (!empty($missing)) {
-//     die("Error: Missing required fields: " . implode(', ', $missing));
-// }
 $id = $_POST['id'] ?? 0;
 
 // Fetch the row from the DB
@@ -53,7 +34,8 @@ $attendanceData = json_decode($row['attendance_data'], true);
 $work_dates   = array_keys($attendanceData['days'] ?? []);
 
 // --- Fetch employee rate and deductions ---
-$employeeRate = getEmployeeRate($conn, $id_no);
+$employeeRate = getDailyRateForAttendance($conn, $id_no, $pay_schedule);
+
 $employeeDeductions = getEmployeeDeductions($conn, $id_no);
 
 $daily_rate = $employeeRate['daily_rate'] ?? 0;
@@ -94,18 +76,24 @@ $regularOtPay       = 0;
 $specialHolidayPay  = 0;
 $undertimeDeduction = 0;
 
-$attendanceData = ['id_no' => $id_no, 'days' => []];
+$attendanceCalculated = ['id_no' => $id_no, 'days' => []];
 
 // --- Loop through each work date ---
 foreach ($work_dates as $workDate) {
-    $isSunday = ($_POST['isSunday'][$workDate] ?? 0) == 1;
-    $otHours  = (float)($_POST['ot_hours'][$workDate] ?? 0);
-    $utHours  = (float)($_POST['ut_hours'][$workDate] ?? 0);
-    $holiday_id   = $_POST['holiday_id'][$workDate] ?? null;
-    $holiday_type = $_POST['holiday_type'][$workDate] ?? '';
+    $dayData   = $attendanceData['days'][$workDate] ?? [];
+    $isSunday  = $dayData['is_sunday'] ?? false;
+    $otHours   = (float)($dayData['ot'] ?? 0);
+    $utHours   = (float)($dayData['ut'] ?? 0);
+    $holiday_id   = $dayData['holiday_id'] ?? null;
+    $holiday_type = $dayData['holiday_type'] ?? '';
 
     // Get multipliers
-    $multipliers = getHolidayMultipliers($workDate, $isSunday, $holidays, $sundayRates);
+    $multipliers = getHolidayMultipliers(
+        $workDate,
+        $isSunday,
+        ['holiday_type' => $holiday_type],
+        $sundayRates
+    );
 
     // Daily pay calculations
     $dailyBasic = $daily_rate * ($multipliers['regular'] ?? 1);
@@ -130,26 +118,22 @@ foreach ($work_dates as $workDate) {
         $specialHolidayPay += $dailyBasic * ($multipliers['restdayholiday_special'] ?? 1.5);
     }
 
-    // Store in attendance JSON
-    $attendanceData['days'][$workDate] = [
-        'ot'            => $otHours,
-        'ut'            => $utHours,
-        'is_sunday'     => $isSunday,
-        'holiday_id'    => $holiday_id,
-        'holiday_type'  => $holiday_type,
-        'multipliers'   => [
-            'regular_rate'                  => $multipliers['regular'] ?? 1,
-            'overtime_rate'                 => $multipliers['overtime'] ?? 1.25,
-            'restdayholiday_regular'        => $multipliers['restdayholiday_regular'] ?? 0,
-            'restdayholiday_special'        => $multipliers['restdayholiday_special'] ?? 0,
-            'restdayholiday_overtime'       => $multipliers['restdayholiday_overtime'] ?? 0,
-            'restdayspecialholiday_overtime' => $multipliers['restdayspecialholiday_overtime'] ?? 0
-        ],
-        'regular_pay'    => $dailyBasic,
-        'overtime_pay'   => $dailyOt,
+    // Store in new JSON
+    $attendanceCalculated['days'][$workDate] = [
+        'ot'                  => $otHours,
+        'ut'                  => $utHours,
+        'is_sunday'           => $isSunday,
+        'holiday_id'          => $holiday_id,
+        'holiday_type'        => $holiday_type,
+        'multipliers'         => $multipliers,
+        'regular_pay'         => $dailyBasic,
+        'overtime_pay'        => $dailyOt,
         'undertime_deduction' => $dailyUt
     ];
 }
+
+$attendanceJsonEncoded = json_encode($attendanceCalculated, JSON_PRETTY_PRINT);
+
 
 // Total earnings & deductions
 $totalEarnings   = $basicSalary + $overtimePayTotal + $restDayPay + $regularHolidayPay + $regularOtPay + $specialHolidayPay;
@@ -330,7 +314,7 @@ if ($stmt->execute()) {
     exit();
 } else {
     $error = $stmt->error;
-    
+
     $stmt->close();
     die("Database Error: $error");
 }

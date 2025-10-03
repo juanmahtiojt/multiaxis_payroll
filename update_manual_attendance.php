@@ -1,12 +1,14 @@
 <?php
 include __DIR__ . "/config.php";
+include __DIR__ . "/functions.php";
 session_start();
 
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit();
 }
-// activity log
+
+// Log activity
 $username = $_SESSION['user'];
 $activity = "Update employee manual attendance";
 $page = basename(__FILE__);
@@ -18,71 +20,104 @@ if ($stmt) {
     $stmt->bind_param("sssss", $username, $activity, $page, $ip_address, $timestamp);
     $stmt->execute();
     $stmt->close();
-} else {
-    // Optionally log error or handle it here
 }
 
-$id = intval($_POST['id']);
-$ot = $_POST['ot'] ?? [];
-$ut = $_POST['ut'] ?? [];
-$new_dates = $_POST['new_date'] ?? [];
-$new_ots   = $_POST['new_ot'] ?? [];
-$new_uts   = $_POST['new_ut'] ?? [];
+$id           = intval($_POST['id']);
+$id_no        = $_POST['id_no'] ?? '';
+$department   = $_POST['department'] ?? '';
+$name         = $_POST['name'] ?? '';
+$pay_schedule = $_POST['pay_schedule'] ?? '';
+$start_date   = $_POST['start_date'] ?? null;
+$end_date     = $_POST['end_date'] ?? null;
+$work_days_count = (int)($_POST['work_days_count'] ?? 0);
 
+$ot_hours_arr = $_POST['ot_hours'] ?? [];
+$ut_hours_arr = $_POST['ut_hours'] ?? [];
 
+$totalRegular   = 0;
+$totalOvertime  = 0;
+$totalUndertime = 0;
+$attendanceData = [];
 
-$data = [];
+foreach ($_POST['work_dates'] as $workDate) {
+    $isSunday = ($_POST['isSunday'][$workDate] ?? 0) == 1;
 
-// Existing OT/UT rows
-foreach ($ot as $date => $hours) {
-    if (!isset($data[$date])) $data[$date] = [];
-    $data[$date]['ot'] = (int)$hours;
+    $holidayInfo = [
+        "holiday_id"   => $_POST['holiday_id'][$workDate] ?? null,
+        "holiday_type" => $_POST['holiday_type'][$workDate] ?? null
+    ];
+
+    $postedMultipliers = [
+        "regular_rate"                   => $_POST['regular_rate'][$workDate] ?? 1,
+        "overtime_rate"                  => $_POST['overtime_rate'][$workDate] ?? 1.25,
+        "restdayholiday_regular"         => $_POST['restdayholiday_regular'][$workDate] ?? 0,
+        "restdayholiday_special"         => $_POST['restdayholiday_special'][$workDate] ?? 0,
+        "restdayholiday_overtime"        => $_POST['restdayholiday_overtime'][$workDate] ?? 0,
+        "restdayspecialholiday_overtime" => $_POST['restdayspecialholiday_overtime'][$workDate] ?? 0,
+    ];
+
+    $multipliers = getHolidayMultipliers($workDate, $isSunday, $holidayInfo, $postedMultipliers);
+
+    $otHours = (float)($_POST['ot_hours'][$workDate] ?? 0);
+    $utHours = (float)($_POST['ut_hours'][$workDate] ?? 0);
+
+    $daily_rate = getEmployeeRate($conn, $id_no, $pay_schedule);
+
+    $regularPay         = $daily_rate * $multipliers['regular'];
+    $overtimePay        = ($daily_rate / 8) * $otHours * $multipliers['overtime'];
+    $undertimeDeduction = ($daily_rate / 8) * $utHours;
+
+    $totalRegular   += $regularPay;
+    $totalOvertime  += $overtimePay;
+    $totalUndertime += $undertimeDeduction;
+
+    $attendanceData[$workDate] = [
+        "ot"                  => $otHours,
+        "ut"                  => $utHours,
+        "is_sunday"           => $isSunday,
+        "holiday_id"          => $holidayInfo['holiday_id'],
+        "holiday_type"        => $holidayInfo['holiday_type'],
+        "multipliers"         => $postedMultipliers,
+        "regular_pay"         => round($regularPay, 2),
+        "overtime_pay"        => round($overtimePay, 2),
+        "undertime_deduction" => round($undertimeDeduction, 2)
+    ];
 }
-foreach ($ut as $date => $hours) {
-    if (!isset($data[$date])) $data[$date] = [];
-    $data[$date]['ut'] = (int)$hours;
-}
 
-// Newly added rows
-foreach ($new_dates as $i => $date) {
-    if (empty($date)) continue; // skip blank
-    if (!isset($data[$date])) $data[$date] = [];
-    $data[$date]['ot'] = (int)($new_ots[$i] ?? 0);
-    $data[$date]['ut'] = (int)($new_uts[$i] ?? 0);
-}
+$finalAttendance = [
+    "days"  => $attendanceData,
+    "id_no" => $id_no
+];
+
+$attendance_json = json_encode($finalAttendance, JSON_PRETTY_PRINT);
 
 // Calculate totals
-$ot_hours = 0;
-$ut_hours = 0;
-foreach ($data as $day) {
-    $ot_hours += (int)($day['ot'] ?? 0);
-    $ut_hours += (int)($day['ut'] ?? 0);
-}
-$work_days_count = count($data);
-$attendanceDataJson = json_encode($data);
+$ot_hours_total = array_sum($ot_hours_arr);
+$ut_hours_total = array_sum($ut_hours_arr);
 
-$stmt = $conn->prepare("UPDATE manual_attendance 
-                        SET start_date=?, 
-                            end_date=?, 
-                            attendance_data=?, 
-                            ot_hours=?, 
-                            ut_hours=?, 
-                            work_days_count=? 
-                        WHERE id=?");
+$stmt = $conn->prepare("UPDATE manual_attendance
+    SET id_no=?, department=?, name=?, pay_schedule=?, 
+        start_date=?, end_date=?, work_days_count=?, 
+        ot_hours=?, ut_hours=?, attendance_data=? 
+    WHERE id=?");
+
 $stmt->bind_param(
-    "sssiiii", 
-    $_POST['start_date'], 
-    $_POST['end_date'], 
-    $attendanceDataJson, 
-    $ot_hours, 
-    $ut_hours, 
-    $work_days_count, 
+    "ssssssiiisi",
+    $id_no,
+    $department,
+    $name,
+    $pay_schedule,
+    $start_date,
+    $end_date,
+    $work_days_count,
+    $ot_hours_total,
+    $ut_hours_total,
+    $attendance_json,
     $id
 );
 
-
 if ($stmt->execute()) {
-    header("Location: manual.php?success=1");
+    header("Location: manual.php?msg=updated");
     exit();
 } else {
     echo "Error updating record: " . $stmt->error;

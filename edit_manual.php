@@ -59,25 +59,32 @@ $usedDatesForJs = array_keys($days);
             const newRow = document.createElement("tr");
 
             newRow.innerHTML = `
-                <td>
-                    <input type="date" class="form-control new-date"
-                           name="new_date[]"
-                           min="${startDate || ''}"
-                           max="${endDate || ''}">
-                </td>
-                <td><input type="number" class="form-control new-ot" name="new_ot[]" placeholder="0"></td>
-                <td><input type="number" class="form-control new-ut" name="new_ut[]" placeholder="0"></td>
-            `;
+        <td>
+            <input type="date" class="form-control work-date" name="work_dates[]"
+                   min="${startDate || ''}" max="${endDate || ''}">
+            <input type="hidden" name="isSunday[]" value="0">
+            <input type="hidden" name="holiday_id[]" value="">
+            <input type="hidden" name="holiday_type[]" value="">
+            
+            <!-- 🔑 default rate placeholders -->
+            <input type="hidden" name="regular_rate[]" value="1">
+            <input type="hidden" name="overtime_rate[]" value="1.25">
+            <input type="hidden" name="restdayholiday_regular[]" value="0">
+            <input type="hidden" name="restdayholiday_overtime[]" value="0">
+            <input type="hidden" name="restdayholiday_special[]" value="0">
+            <input type="hidden" name="restdayspecialholiday_overtime[]" value="0">
+        </td>
+        <td><input type="number" step="0.5" class="form-control" name="ot_hours[]" placeholder="0"></td>
+        <td><input type="number" step="0.5" class="form-control" name="ut_hours[]" placeholder="0"></td>
+    `;
 
             tbody.appendChild(newRow);
 
-            // Add event listener to check against duplicates
-            const dateInput = newRow.querySelector(".new-date");
-            dateInput.dataset.prevValue = ""; // track previous to allow change
+            // Duplicate date validation (same as before)
+            const dateInput = newRow.querySelector(".work-date");
+            dateInput.dataset.prevValue = "";
             dateInput.addEventListener("change", function() {
                 const selected = this.value;
-
-                // if previously selected a value in this input, free it up
                 const prev = this.dataset.prevValue || "";
                 if (prev) {
                     const idxPrev = usedDates.indexOf(prev);
@@ -91,10 +98,10 @@ $usedDatesForJs = array_keys($days);
 
                 if (usedDates.includes(selected)) {
                     alert("This date is already used. Please pick another date.");
-                    this.value = ""; // reset
+                    this.value = "";
                     this.dataset.prevValue = "";
                 } else {
-                    usedDates.push(selected); // mark as used
+                    usedDates.push(selected);
                     this.dataset.prevValue = selected;
                 }
             });
@@ -163,10 +170,10 @@ $usedDatesForJs = array_keys($days);
                                         $ot = $data['ot'] ?? '';
                                         $ut = $data['ut'] ?? '';
                                         $isSunday = $data['is_sunday'] ?? 0;
-                                        $holiday = $data['holiday_id'] ?? null;
+                                        $holiday = $data['holiday_id'] ?? '';
                                         $holidayType = $data['holiday_type'] ?? '';
+                                        $rates = $data['rates'] ?? [];
 
-                                        // Build badge
                                         $badge = '';
                                         if ($isSunday) {
                                             $badge .= '<span class="badge bg-warning text-dark ms-2">Sunday</span>';
@@ -180,13 +187,22 @@ $usedDatesForJs = array_keys($days);
                                                 <?= htmlspecialchars($d) ?> <?= $badge ?>
                                                 <input type="hidden" name="work_dates[]" value="<?= htmlspecialchars($d) ?>">
                                                 <input type="hidden" name="isSunday[<?= htmlspecialchars($d) ?>]" value="<?= $isSunday ?>">
-                                                <input type="hidden" name="holiday_id[<?= htmlspecialchars($d) ?>]" value="<?= $holiday ?>">
+                                                <input type="hidden" name="holiday_id[<?= htmlspecialchars($d) ?>]" value="<?= htmlspecialchars($holiday) ?>">
                                                 <input type="hidden" name="holiday_type[<?= htmlspecialchars($d) ?>]" value="<?= htmlspecialchars($holidayType) ?>">
+
+                                                <!-- 🔑 store rates for backend -->
+                                                <input type="hidden" name="regular_rate[<?= htmlspecialchars($d) ?>]" value="<?= $rates['regular_rate'] ?? 1 ?>">
+                                                <input type="hidden" name="overtime_rate[<?= htmlspecialchars($d) ?>]" value="<?= $rates['overtime_rate'] ?? 1.25 ?>">
+                                                <input type="hidden" name="restdayholiday_regular[<?= htmlspecialchars($d) ?>]" value="<?= $rates['restdayholiday_regular'] ?? 0 ?>">
+                                                <input type="hidden" name="restdayholiday_overtime[<?= htmlspecialchars($d) ?>]" value="<?= $rates['restdayholiday_overtime'] ?? 0 ?>">
+                                                <input type="hidden" name="restdayholiday_special[<?= htmlspecialchars($d) ?>]" value="<?= $rates['restdayholiday_special'] ?? 0 ?>">
+                                                <input type="hidden" name="restdayspecialholiday_overtime[<?= htmlspecialchars($d) ?>]" value="<?= $rates['restdayspecialholiday_overtime'] ?? 0 ?>">
                                             </td>
-                                            <td><input type="number" class="form-control" name="ot[<?= htmlspecialchars($d) ?>]" value="<?= htmlspecialchars($ot) ?>"></td>
-                                            <td><input type="number" class="form-control" name="ut[<?= htmlspecialchars($d) ?>]" value="<?= htmlspecialchars($ut) ?>"></td>
+                                            <td><input type="number" step="0.5" class="form-control" name="ot_hours[<?= htmlspecialchars($d) ?>]" value="<?= htmlspecialchars($ot) ?>"></td>
+                                            <td><input type="number" step="0.5" class="form-control" name="ut_hours[<?= htmlspecialchars($d) ?>]" value="<?= htmlspecialchars($ut) ?>"></td>
                                         </tr>
                                     <?php endforeach; ?>
+
 
                                 <?php else: ?>
                                     <tr>

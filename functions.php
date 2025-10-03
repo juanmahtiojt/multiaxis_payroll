@@ -61,19 +61,42 @@ function getEmployeeName($conn, $id_no) {
  * @param string $id_no
  * @return array|null
  */
-function getEmployeeRate($conn, $id_no) {
-    $sql = "SELECT daily_rate, pay_schedule 
-            FROM daily_rate 
-            WHERE id_no = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $id_no);
+function getEmployeeRate($conn, $id_no, $pay_schedule) {
+    $stmt = $conn->prepare("SELECT daily_rate FROM daily_rate WHERE id_no = ? AND pay_schedule = ?");
+    $stmt->bind_param("ss", $id_no, $pay_schedule);
     $stmt->execute();
     $result = $stmt->get_result();
-    $rate = $result->fetch_assoc();
-    $stmt->close();
 
-    return $rate ?: null; // return null if not found
+    if ($row = $result->fetch_assoc()) {
+        return (float)$row['daily_rate'];
+    }
+
+    return 0;
 }
+
+/**
+ * Get only the daily_rate for payroll calculations
+ * Returns float (0 if not found)
+ */
+function getDailyRateForAttendance(mysqli $conn, string $id_no, string $pay_schedule): float {
+    $stmt = $conn->prepare("
+        SELECT daily_rate 
+        FROM daily_rate 
+        WHERE id_no = ? AND pay_schedule = ?
+        LIMIT 1
+    ");
+    $stmt->bind_param("ss", $id_no, $pay_schedule);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($row = $result->fetch_assoc()) {
+        return (float)$row['daily_rate'];
+    }
+
+    return 0.0;
+}
+
+
 
 /**
  * Get employee deductions and leave info

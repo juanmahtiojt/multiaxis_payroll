@@ -1,6 +1,7 @@
 <?php
 // save_manual_attendance.php
 include 'config.php';
+include 'functions.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_no        = $_POST['id_no'] ?? '';
@@ -53,6 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $otHours = (float)($_POST['ot_hours'][$workDate] ?? 0);
         $utHours = (float)($_POST['ut_hours'][$workDate] ?? 0);
+        
+        $daily_rate = getEmployeeRate($conn, $id_no, $pay_schedule);
 
         // Salary computation
         $regularPay         = $daily_rate * $multipliers['regular'];

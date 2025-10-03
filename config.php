@@ -1,10 +1,9 @@
 <?php
 $host = "localhost";
 $user = "root";  // Default XAMPP username
-$pass = "cvsuOJT@2025";
-// $pass = "juan1234";
-// $pass = "argonza@@@"; 
-$db = "mathipms"; // Updated database name
+// $pass = "cvsuOJT@2025";
+$pass = "juan1234";
+$db = "mathipms"; 
 
 $conn = mysqli_connect($host, $user, $pass, $db);
 date_default_timezone_set('Asia/Manila');
