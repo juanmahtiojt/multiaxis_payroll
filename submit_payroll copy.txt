@@ -1,0 +1,93 @@
+<?php
+$host = 'localhost';
+$db = 'multiaxis_payroll_system';
+$user = 'root';
+$pass = ''; // update this if needed
+$conn = new mysqli($host, $user, $pass, $db);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Sanitize input
+function sanitize($conn, $field) {
+    return isset($_POST[$field]) ? $conn->real_escape_string($_POST[$field]) : '';
+}
+
+// Generate a batch ID (timestamp-based)
+$batch_id = 'BATCH-' . date('YmdHis');
+
+// Get all the form data
+$employee_id        = sanitize($conn, 'id_no'); // Preserving the complete ID including leading zeros
+$name               = sanitize($conn, 'name');
+$department         = sanitize($conn, 'department');
+$sss_no             = sanitize($conn, 'sss_no');
+$pagibig_no         = sanitize($conn, 'pagibig_no');
+$tin_no             = sanitize($conn, 'tin_no');
+$philhealth_no      = sanitize($conn, 'philhealth_no');
+$pay_period         = sanitize($conn, 'payroll_period');
+$start_date         = sanitize($conn, 'start_date');
+$end_date           = sanitize($conn, 'end_date');
+$basic_salary       = (float) sanitize($conn, 'basic');
+$overtime_pay       = (float) sanitize($conn, 'overtime_pay');
+$overtime_hours     = (float) sanitize($conn, 'hours');
+$overtime_rate      = (float) sanitize($conn, 'rate');
+$rest_day_pay       = (float) sanitize($conn, 'rest_day_pay');
+$regular_holiday_pay = (float) sanitize($conn, 'regular_holiday');
+$regular_ot_pay     = (float) sanitize($conn, 'regular_ot');
+$special_holiday_pay = (float) sanitize($conn, 'special_holiday_pay');
+$thirteenth_month_pay = (float) sanitize($conn, 'thirteenth_month');
+$sss_premium        = (float) sanitize($conn, 'sss_premium');
+$sss_loan           = (float) sanitize($conn, 'sss_loan');
+$pagibig_premium    = (float) sanitize($conn, 'pagibig_premium');
+$pagibig_loan       = (float) sanitize($conn, 'pagibig_loan');
+$philhealth         = (float) sanitize($conn, 'philhealth');
+$cash_advance       = (float) sanitize($conn, 'cash_advance');
+$late_deduction     = (float) sanitize($conn, 'late');
+$absent_deduction   = (float) sanitize($conn, 'absent');
+$undertime_deduction = (float) sanitize($conn, 'undertime');
+$leave_with_pay     = (float) sanitize($conn, 'leave_with_pay');
+$leave_without_pay  = (float) sanitize($conn, 'leave_without_pay');
+$available_leave    = (float) sanitize($conn, 'available_leave');
+
+// Calculate totals
+$total_earnings = $basic_salary + $overtime_pay + $rest_day_pay + $regular_holiday_pay + 
+                $regular_ot_pay + $special_holiday_pay + $thirteenth_month_pay;
+
+$total_deductions = $sss_premium + $sss_loan + $pagibig_premium + $pagibig_loan + 
+                  $philhealth + $cash_advance + $late_deduction + $absent_deduction + 
+                  $undertime_deduction;
+
+$net_pay = $total_earnings - $total_deductions;
+
+// Current timestamp for created_at and updated_at
+$current_timestamp = date('Y-m-d H:i:s');
+
+// Insert into payroll_records table
+$sql = "INSERT INTO payroll_records (
+    batch_id, employee_id, name, department, pay_period, start_date, end_date,
+    basic_salary, overtime_pay, overtime_hours, overtime_rate,
+    rest_day_pay, regular_holiday_pay, regular_ot_pay, special_holiday_pay,
+    late_deduction, absent_deduction, undertime_deduction,
+    total_earnings, total_deductions, net_pay, created_at, updated_at,
+    sss_no, pagibig_no, tin_no, philhealth_no, thirteenth_month_pay,
+    sss_premium, sss_loan, pagibig_premium, pagibig_loan, philhealth,
+    cash_advance, leave_with_pay, leave_without_pay, available_leave
+) VALUES (
+    '$batch_id', '$employee_id', '$name', '$department', '$pay_period', '$start_date', '$end_date',
+    '$basic_salary', '$overtime_pay', '$overtime_hours', '$overtime_rate',
+    '$rest_day_pay', '$regular_holiday_pay', '$regular_ot_pay', '$special_holiday_pay',
+    '$late_deduction', '$absent_deduction', '$undertime_deduction',
+    '$total_earnings', '$total_deductions', '$net_pay', '$current_timestamp', '$current_timestamp',
+    '$sss_no', '$pagibig_no', '$tin_no', '$philhealth_no', '$thirteenth_month_pay',
+    '$sss_premium', '$sss_loan', '$pagibig_premium', '$pagibig_loan', '$philhealth',
+    '$cash_advance', '$leave_with_pay', '$leave_without_pay', '$available_leave'
+)";
+
+if ($conn->query($sql) === TRUE) {
+    echo "<script>alert('Payroll submitted successfully!'); window.location.href='enter_payroll.php';</script>";
+} else {
+    echo "Error: " . $sql . "<br>" . $conn->error;
+}
+
+$conn->close();
+?>

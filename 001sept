@@ -1,0 +1,327 @@
+ALTER TABLE your_table_name
+ADD UNIQUE unique_all_columns (
+    batch_id,
+    employee_id,
+    name,
+    department,
+    pay_period,
+    start_date,
+    end_date,
+    basic_salary,
+    overtime_pay,
+    overtime_hours,
+    overtime_rate,
+    rest_day_pay,
+    regular_holiday_pay,
+    regular_ot_pay,
+    special_holiday_pay,
+    late_deduction,
+    absent_deduction,
+    undertime_deduction,
+    total_earnings,
+    total_deductions,
+    net_pay,
+    archived,
+    created_ats,
+    sss_no,
+    pagibig_no,
+    tin_no,
+    philhealth_no,
+    thirteenth_month_pay,
+    sss_premium,
+    sss_loan,
+    pagibig_premium,
+    pagibig_loan,
+    philhealth,
+    cash_advance,
+    leave_with_pay,
+    leave_without_pay,
+    available_leave
+);
+
+
+ALTER TABLE payroll_records ADD UNIQUE unique_all_columns ( batch_id, employee_id, name, department, pay_period, start_date, end_date, basic_salary, total_earnings, total_deductions, net_pay );
+
+
+try {
+    // Begin transaction
+    $conn->begin_transaction();
+
+    // Prepare the SELECT COUNT(*) statement once
+    $checkStmt = $conn->prepare("SELECT COUNT(*) 
+        FROM payroll_records 
+        WHERE batch_id = ?
+          AND employee_id = ?
+          AND name = ?
+          AND department = ?
+          AND pay_period = ?
+          AND start_date = ?
+          AND end_date = ?
+          AND basic_salary = ?
+          AND overtime_pay = ?
+          AND overtime_hours = ?
+          AND overtime_rate = ?
+          AND rest_day_pay = ?
+          AND regular_holiday_pay = ?
+          AND regular_ot_pay = ?
+          AND special_holiday_pay = ?
+          AND late_deduction = ?
+          AND absent_deduction = ?
+          AND undertime_deduction = ?
+          AND sss_no = ?
+          AND pagibig_no = ?
+          AND tin_no = ?
+          AND philhealth_no = ?
+          AND thirteenth_month_pay = ?
+          AND sss_premium = ?
+          AND sss_loan = ?
+          AND pagibig_premium = ?
+          AND pagibig_loan = ?
+          AND philhealth = ?
+          AND cash_advance = ?
+          AND leave_with_pay = ?
+          AND leave_without_pay = ?
+          AND available_leave = ?
+          AND total_earnings = ?
+          AND total_deductions = ?
+          AND net_pay = ?
+    )");
+    if (!$checkStmt) {
+        throw new Exception("Prepare failed for checkStmt: " . $conn->error);
+    }
+
+    // Prepare the INSERT statement once
+    $insertStmt = $conn->prepare("INSERT INTO payroll_records (
+        batch_id, employee_id, name, department, pay_period, 
+        start_date, end_date, basic_salary, overtime_pay, overtime_hours, overtime_rate,
+        rest_day_pay, regular_holiday_pay, regular_ot_pay, special_holiday_pay, 
+        late_deduction, absent_deduction, undertime_deduction, 
+        sss_no, pagibig_no, tin_no, philhealth_no, thirteenth_month_pay,
+        sss_premium, sss_loan, pagibig_premium, pagibig_loan, philhealth, cash_advance,
+        leave_with_pay, leave_without_pay, available_leave,
+        total_earnings, total_deductions, net_pay, created_at, updated_at
+    ) VALUES (
+        ?, ?, ?, ?, ?, 
+        ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, 
+        ?, ?, ?,
+        ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?,
+        ?, ?, ?,
+        ?, ?, ?, NOW(), NOW()
+    )");
+    if (!$insertStmt) {
+        throw new Exception("Prepare failed for insertStmt: " . $conn->error);
+    }
+
+    // Loop through your entries (assuming $entries is an array)
+    foreach ($entries as $entry) {
+        // Extract variables from $entry or your data source
+        $batchId = $batchId; // Assuming defined outside loop
+        $employeeId = $entry['id_no'];
+        $employeeName = $entry['name'];
+        $department = $entry['department'];
+        $pay_period = $pay_period; // Assuming defined outside loop
+        $startDate = $startDate;   // Assuming defined outside loop
+        $endDate = $endDate;       // Assuming defined outside loop
+        $basicSalary = $entry['basic_salary'];
+        $totalOvertime = $entry['overtime_pay'];
+        $total_ot_hours = $entry['overtime_hours'];
+        $overtime_rate = isset($overtimeMultiplier) ? $overtimeMultiplier : 0.00;
+        $rest_day_pay = $entry['rest_day_pay'];
+        $regular_holiday_pay = $entry['regular_holiday_pay'];
+        $regular_ot_pay = $entry['regular_ot_pay'];
+        $special_holiday_pay = $entry['special_holiday_pay'];
+        $late_deduction = $entry['late_deduction'];
+        $absent_deduction = $entry['absent_deduction'];
+        $totalUndertime = $entry['undertime_deduction'];
+        $sss_no = $entry['sss_no'];
+        $pagibig_no = $entry['pagibig_no'];
+        $tin_no = $entry['tin_no'];
+        $philhealth_no = $entry['philhealth_no'];
+        $thirteenth_month_pay = $entry['thirteenth_month_pay'];
+        $sss_premium = $entry['sss_premium'];
+        $sss_loan = $entry['sss_loan'];
+        $pagibig_premium = $entry['pagibig_premium'];
+        $pagibig_loan = $entry['pagibig_loan'];
+        $philhealth = $entry['philhealth'];
+        $cash_advance = $entry['cash_advance'];
+        $leave_with_pay = $entry['leave_with_pay'];
+        $leave_without_pay = $entry['leave_without_pay'];
+        $available_leave = $entry['available_leave'];
+        $total_earnings = $entry['total_earnings'];
+        $total_deductions = $entry['total_deductions'];
+        $net_pay = $entry['net_pay'];
+
+        // Bind parameters for the SELECT COUNT(*) check
+        $checkStmt->bind_param(
+            "sssssssdddddddddddssssdddddddiiiddd",
+            $batchId,
+            $employeeId,
+            $employeeName,
+            $department,
+            $pay_period,
+            $startDate,
+            $endDate,
+            $basicSalary,
+            $totalOvertime,
+            $total_ot_hours,
+            $overtime_rate,
+            $rest_day_pay,
+            $regular_holiday_pay,
+            $regular_ot_pay,
+            $special_holiday_pay,
+            $late_deduction,
+            $absent_deduction,
+            $totalUndertime,
+            $sss_no,
+            $pagibig_no,
+            $tin_no,
+            $philhealth_no,
+            $thirteenth_month_pay,
+            $sss_premium,
+            $sss_loan,
+            $pagibig_premium,
+            $pagibig_loan,
+            $philhealth,
+            $cash_advance,
+            $leave_with_pay,
+            $leave_without_pay,
+            $available_leave,
+            $total_earnings,
+            $total_deductions,
+            $net_pay
+        );
+
+        $checkStmt->execute();
+        $checkStmt->bind_result($exists);
+        $checkStmt->fetch();
+        $checkStmt->free_result();
+
+        if ($exists > 0) {
+            $errorCount++;
+            error_log("Skipped duplicate payroll record for employee: {$employeeName}");
+            continue; // Skip this record
+        }
+
+        // Bind parameters for the INSERT
+        $insertStmt->bind_param(
+            "sssssssdddddddddddssssdddddddiiiddd",
+            $batchId,
+            $employeeId,
+            $employeeName,
+            $department,
+            $pay_period,
+            $startDate,
+            $endDate,
+            $basicSalary,
+            $totalOvertime,
+            $total_ot_hours,
+            $overtime_rate,
+            $rest_day_pay,
+            $regular_holiday_pay,
+            $regular_ot_pay,
+            $special_holiday_pay,
+            $late_deduction,
+            $absent_deduction,
+            $totalUndertime,
+            $sss_no,
+            $pagibig_no,
+            $tin_no,
+            $philhealth_no,
+            $thirteenth_month_pay,
+            $sss_premium,
+            $sss_loan,
+            $pagibig_premium,
+            $pagibig_loan,
+            $philhealth,
+            $cash_advance,
+            $leave_with_pay,
+            $leave_without_pay,
+            $available_leave,
+            $total_earnings,
+            $total_deductions,
+            $net_pay
+        );
+
+        if (!$insertStmt->execute()) {
+            if ($conn->errno == 1062) { // Duplicate key error
+                $errorCount++;
+                error_log("Skipped duplicate payroll record for employee: {$employeeName}");
+            } else {
+                throw new Exception("Error saving data: " . $insertStmt->error);
+            }
+        } else {
+            $successCount++;
+        }
+    }
+
+    // Close statements
+    $checkStmt->close();
+    $insertStmt->close();
+
+    // Commit transaction
+    $conn->commit();
+
+    // Clear session data if needed
+    // unset($_SESSION['attendance_data_monthly']);
+    // unset($_SESSION['attendance_data']);
+
+    // Set success message
+    $_SESSION['save_success'] = "Successfully saved $successCount payroll records with batch ID: $batchId";
+
+    // Redirect back
+    header("Location: $sourcePage");
+    exit();
+
+} catch (Exception $e) {
+    // Rollback on error
+    $conn->rollback();
+
+    $_SESSION['upload_error'] = "Error saving attendance records: " . $e->getMessage();
+
+    header("Location: $sourcePage");
+    exit();
+}
+///////
+
+
+
+$firstDate = new DateTime($entries[0]['date']);
+$lastDate = new DateTime($entries[count($entries) - 1]['date']);
+
+switch (strtolower($paySchedule)) {
+    case 'weekly':
+        // Start date is the earliest date in entries
+        $startDate = $firstDate->format('Y-m-d');
+        // End date is 6 days after start date (7 days total)
+        $endDateObj = clone $firstDate;
+        $endDateObj->modify('+6 days');
+        $endDate = $endDateObj->format('Y-m-d');
+        break;
+
+    case 'semi-monthly':
+        // Determine if firstDate is in first half or second half of month
+        $day = (int)$firstDate->format('d');
+        $yearMonth = $firstDate->format('Y-m');
+
+        if ($day <= 15) {
+            // First half: 1st to 15th
+            $startDate = $yearMonth . '-01';
+            $endDate = $yearMonth . '-15';
+        } else {
+            // Second half: 16th to last day of month
+            $startDate = $yearMonth . '-16';
+            $endDateObj = new DateTime($yearMonth . '-01');
+            $endDateObj->modify('last day of this month');
+            $endDate = $endDateObj->format('Y-m-d');
+        }
+        break;
+
+    case 'fixed':
+    default:
+        // Use full range of dates in entries
+        $startDate = $firstDate->format('Y-m-d');
+        $endDate = $lastDate->format('Y-m-d');
+        break;
+}

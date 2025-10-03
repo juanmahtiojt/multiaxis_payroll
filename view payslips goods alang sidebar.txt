@@ -1,0 +1,153 @@
+<?php
+session_start();
+include __DIR__ . "/config.php";  // Include database connection
+
+// Redirect to login if not authenticated
+if (!isset($_SESSION['user'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$username = $_SESSION['user']; // Get logged-in username
+$role = $_SESSION['role']; // Get user role
+
+// Default query for no data if no date is selected
+$overtime_query = "SELECT * FROM employee_overtime_holiday WHERE 1=0"; // No results query by default
+
+// Check if form is submitted and filter by selected date range
+if (isset($_POST['start_date']) && isset($_POST['end_date'])) {
+    $start_date = mysqli_real_escape_string($conn, $_POST['start_date']);
+    $end_date = mysqli_real_escape_string($conn, $_POST['end_date']);
+    
+    // Modify query to filter based on selected dates
+    $overtime_query = "SELECT * FROM employee_overtime_holiday WHERE start_date >= '$start_date' AND end_date <= '$end_date'";
+}
+
+$overtime_result = mysqli_query($conn, $overtime_query);
+
+$current_page = basename($_SERVER['PHP_SELF']); // Get the current page filename
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>A4 Payslip Layout</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0mm;
+            box-sizing: border-box;
+            background: #fff;
+        }
+
+        .a4-page {
+            width: 210mm;
+            height: 297mm;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 0mm;
+            box-sizing: border-box;
+        }
+
+        .payslip {
+            border: 1px solid #000;
+            padding: 10px;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .payslip p {
+            margin: 11px 0;
+        }
+
+        /* Style for date range form */
+        .date-form {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .date-form input {
+            margin: 0 5px;
+            padding: 5px;
+        }
+
+        /* Style for print button */
+        .print-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .print-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Media query for print */
+        @media print {
+            .date-form {
+                display: none;
+            }
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Date range form -->
+    <div class="date-form">
+        <form method="POST" action="<?= htmlspecialchars($current_page) ?>">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" required>
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date" required>
+            <input type="submit" value="Generate Payslips">
+        </form>
+    </div>
+
+    <!-- Print button -->
+    <button class="print-btn" onclick="window.print()">Print Payslips</button>
+
+    <!-- Payslips layout -->
+    <div class="a4-page">
+        <?php if (mysqli_num_rows($overtime_result) > 0): ?>
+            <?php while ($row = mysqli_fetch_assoc($overtime_result)): ?>
+                <div class="payslip">
+                    <!-- Add company name at the top of the payslip -->
+                    <p style="text-align: center; font-size: 18px; font-weight: bold;">Multi Axis Handlers & Tech Inc</p>
+                    <p><strong>Employee ID:</strong> <?= htmlspecialchars($row['employee_id']) ?></p>
+                    <p><strong>Employee Name:</strong> <?= htmlspecialchars($row['employee_name']) ?></p>
+                    <p class="start-end-date"><strong>Start Date - End Date:</strong> <?= htmlspecialchars($row['start_date']) ?> - <?= htmlspecialchars($row['end_date']) ?></p>
+                    <p><strong>Subtotal Minus Deductions:</strong> ₱<?= number_format($row['subtotal_minus_deductions'], 2) ?></p>
+<p><strong>Regular Overtime:</strong> ₱<?= number_format($row['regular_overtime'], 2) ?></p>
+<p><strong>Rest Day:</strong> ₱<?= number_format($row['rest_day'], 2) ?></p>
+<p><strong>Rest Day with Overtime:</strong> ₱<?= number_format($row['rest_day_overtime'], 2) ?></p>
+<p><strong>Regular Holiday:</strong> ₱<?= number_format($row['regular_holiday'], 2) ?></p>
+<p><strong>Regular Holiday with Overtime:</strong> ₱<?= number_format($row['regular_holiday_overtime'], 2) ?></p>
+<p><strong>Work on Rest Day + Regular Holiday:</strong> ₱<?= number_format($row['work_on_rest_regular_holiday'], 2) ?></p>
+<p><strong>Special Non-Working Holiday:</strong> ₱<?= number_format($row['special_non_working_holiday'], 2) ?></p>
+<p><strong>Special Holiday with Overtime:</strong> ₱<?= number_format($row['special_holiday_overtime'], 2) ?></p>
+<p><strong>Total Pay:</strong> ₱<?= number_format($row['total_pay'], 2) ?></p>
+
+                </div>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <p>No data available. Please select a date range to generate payslips.</p>
+        <?php endif; ?>
+    </div>
+
+</body>
+</html>

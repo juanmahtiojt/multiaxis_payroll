@@ -1,0 +1,102 @@
+<?php
+ini_set('memory_limit', '512M');
+require 'vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
+$rows = [];
+$error = '';
+$success = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['crystal_file'])) {
+    $allowed_types = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+
+    if (in_array($_FILES['crystal_file']['type'], $allowed_types)) {
+        $target_dir = "uploads/";
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+
+        $target_file = $target_dir . basename($_FILES['crystal_file']['name']);
+
+        if (move_uploaded_file($_FILES['crystal_file']['tmp_name'], $target_file)) {
+            $success = "File uploaded successfully!";
+
+            try {
+                // Use optimized reader to reduce memory
+                $reader = IOFactory::createReader("Xlsx");
+                $reader->setReadDataOnly(true);
+                $spreadsheet = $reader->load($target_file);
+                $sheet = $spreadsheet->getActiveSheet();
+
+                $row_num = 10;
+
+                while ($sheet->getCell('C' . $row_num)->getValue() !== '') {
+                    $employee_id = $sheet->getCell('E' . $row_num)->getFormattedValue();
+                    $department = $sheet->getCell('L' . $row_num)->getFormattedValue();
+                    $name = $sheet->getCell('E' . ($row_num + 2))->getFormattedValue();
+
+                    $rows[] = [
+                        'employee_id' => $employee_id,
+                        'department' => $department,
+                        'name' => $name,
+                    ];
+
+                    $row_num += 30;
+                }
+
+            } catch (Exception $e) {
+                $error = "Error reading file: " . $e->getMessage();
+            }
+        } else {
+            $error = "Error uploading the file.";
+        }
+    } else {
+        $error = "Invalid file type. Please upload a .xlsx file.";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Crystal Attendance File</title>
+</head>
+<body>
+    <h1>Upload Crystal Attendance File</h1>
+
+    <?php if ($error): ?>
+        <p style="color:red;"><?= $error ?></p>
+    <?php endif; ?>
+
+    <?php if ($success): ?>
+        <p style="color:green;"><?= $success ?></p>
+    <?php endif; ?>
+
+    <form action="" method="post" enctype="multipart/form-data">
+        <label for="crystal_file">Choose Crystal Reports File (.xlsx): </label>
+        <input type="file" name="crystal_file" id="crystal_file" required>
+        <br><br>
+        <input type="submit" value="Upload & Display">
+    </form>
+
+    <?php if (count($rows) > 0): ?>
+        <h2>Employee Data Extracted</h2>
+        <table border="1" cellpadding="5">
+            <tr>
+                <th>Employee ID</th>
+                <th>Department</th>
+                <th>Name</th>
+            </tr>
+            <?php foreach ($rows as $row): ?>
+                <tr>
+                    <td><?= htmlspecialchars($row['employee_id']) ?></td>
+                    <td><?= htmlspecialchars($row['department']) ?></td>
+                    <td><?= htmlspecialchars($row['name']) ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+    <?php endif; ?>
+</body>
+</html>

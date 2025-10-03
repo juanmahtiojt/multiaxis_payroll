@@ -1,0 +1,42 @@
+<?php
+session_start();
+
+// Retrieve session data
+if (isset($_SESSION['employeeData'])) {
+    $employeeData = $_SESSION['employeeData'];
+
+    // Sidebar
+    echo '
+    <div id="sidebar">
+        <ul>
+            <li><a href="home.php">Home</a></li>
+            <li><a href="employee_attendance_monthly.php">Attendance Monthly</a></li>
+<li><a href="employee_attendance.php">Attendance Weekly</a></li>
+            <li><a href="reports.php">Reports</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </div>';
+
+    // Main Content
+    echo '<div class="main-content"><div class="table-container"><h2 class="text-center">📊 Employee Deductions (Details)</h2>';
+
+    foreach ($employeeData as $data) {
+        echo "Employee Name: " . $data['name'] . "<br>";
+        echo "Subtotal Daily Rate: ₱" . number_format($data['totalDailyRate'], 2) . "<br>";
+        echo "Subtotal Daily Wage: ₱" . number_format($data['totalDailyWage'], 2) . "<br>";
+        echo "SSS: ₱" . number_format($data['sss'], 2) . "<br>";
+        echo "Pag-ibig: ₱" . number_format($data['pagibig'], 2) . "<br>";
+        echo "PhilHealth: ₱" . number_format($data['philhealth'], 2) . "<br>";
+        echo "Total Deductions: ₱" . number_format($data['totalDeductions'], 2) . "<br>";
+        echo "Subtotal minus Deductions: ₱" . number_format($data['subtotalMinusDeductions'], 2) . "<br>";
+        echo "<hr>";
+    }
+
+    // Clear session data if needed
+    // unset($_SESSION['employeeData']);
+} else {
+    echo "No employee data found.";
+}
+
+echo '</div></div>';
+?>
