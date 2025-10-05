@@ -131,32 +131,32 @@ function getEmployeeDeductions($conn, $id_no) {
  *
  * @return array ['regular' => float, 'overtime' => float]
  */
-function getHolidayMultipliers($date, $isSunday, $holidayInfo, $postedMultipliers) {
-    $multipliers = [
-        "regular"   => (float)($postedMultipliers['regular_rate'] ?? 1),
-        "overtime"  => (float)($postedMultipliers['overtime_rate'] ?? 1.25),
+function getHolidayMultipliers($date, $isSunday, $holidayInfo, $multipliers) {
+    $result = [
+        "regular"   => (float)($multipliers['regular_rate'] ?? 1),
+        "overtime"  => (float)($multipliers['overtime_rate'] ?? 1.25),
     ];
 
     // Add holiday logic
     if (!empty($holidayInfo['holiday_type'])) {
         if ($holidayInfo['holiday_type'] === "Regular") {
             // Regular Holiday rules
-            $multipliers["regular"]   = (float)($postedMultipliers['restdayholiday_regular'] ?? 2);
-            $multipliers["overtime"]  = (float)($postedMultipliers['restdayholiday_overtime'] ?? 2.6);
+            $result["regular"]   = (float)($multipliers['restdayholiday_regular'] ?? 2);
+            $result["overtime"]  = (float)($multipliers['restdayholiday_overtime'] ?? 2.6);
         } elseif ($holidayInfo['holiday_type'] === "Special") {
             // Special Holiday rules
-            $multipliers["regular"]   = (float)($postedMultipliers['restdayholiday_special'] ?? 1.3);
-            $multipliers["overtime"]  = (float)($postedMultipliers['restdayspecialholiday_overtime'] ?? 1.69);
+            $result["regular"]   = (float)($multipliers['restdayholiday_special'] ?? 1.3);
+            $result["overtime"]  = (float)($multipliers['restdayspecialholiday_overtime'] ?? 1.69);
         }
     }
 
-    // Sunday adjustment
+    // Sunday adjustment (only if NOT a holiday)
     if ($isSunday && empty($holidayInfo['holiday_type'])) {
-        $multipliers["regular"]  = (float)($postedMultipliers['regular_rate'] ?? 1.3);
-        $multipliers["overtime"] = (float)($postedMultipliers['overtime_rate'] ?? 1.69);
+        $result["regular"]  = (float)($multipliers['sunday_regular'] ?? 1.3);
+        $result["overtime"] = (float)($multipliers['sunday_overtime'] ?? 1.69);
     }
 
-    return $multipliers;
+    return $result;
 }
 function getRates($conn) {
     // Fetch global rates

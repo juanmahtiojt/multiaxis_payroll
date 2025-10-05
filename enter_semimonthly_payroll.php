@@ -394,11 +394,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_weekly_employee'])
         <!-- ATTENDANCE -->
         <div class="nav-section">
             <div class="nav-section-title">Attendance</div>
-            <a href="employee_attendance_monthly.php" class="<?= ($current_page == 'employee_attendance_monthly.php') ? 'active' : '' ?>">
-                <i class="fas fa-calendar-alt"></i> Monthly Attendance
+            <a href="upload_excel_monthly.php" class="<?= in_array($current_page, ['employee_attendace.php', 'employee_attendace_monthly.php', 'employee_attendace_semi-monthly.php']) ? 'active' : '' ?>">
+                <i class="fas fa-calendar-alt"></i> Upload Attendance
             </a>
-            <a href="employee_attendance.php" class="<?= ($current_page == 'employee_attendance.php') ? 'active' : '' ?>">
-                <i class="fas fa-calendar-week"></i> Weekly Attendance
+            <a href="manual.php" class="<?= ($current_page == 'manual.php') ? 'active' : '' ?>">
+                <i class="fas fa-calendar-week"></i> Manual Attendance
             </a>
             <a href="attendance_summary_report.php" class="<?= ($current_page == 'attendance_summary_report.php') ? 'active' : '' ?>">
                 <i class="fas fa-clipboard-list"></i> Attendance Summary

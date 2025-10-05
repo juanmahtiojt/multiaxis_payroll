@@ -395,17 +395,16 @@ table.grid td {
                 $html .= '<tr>'; // Start new row every 2 payslips
             }
 
-            // Calculate overtime & totals
-            $overtimePay = $row['overtime_pay'];
+            $regularOtDay = isset($_GET['regular_ot_day']) ? $_GET['regular_ot_day'] : 0;
+            
+
+            $overtimePay = $row['overtime_pay'] + $regularOtDay;
             if ((empty($overtimePay) || $overtimePay == 0) && $row['overtime_hours'] > 0 && $row['overtime_rate'] > 0) {
                 $overtimePay = $row['overtime_hours'] * $row['overtime_rate'];
             }
-            $totalEarnings = $row['basic_salary'] + $overtimePay;
-            $totalDeductions =
-                $row['sss_premium'] + $row['sss_loan'] + $row['pagibig_premium'] +
-                $row['pagibig_loan'] + $row['philhealth'] + $row['cash_advance'] +
-                $row['late_deduction'] + $row['absent_deduction'] + $row['undertime_deduction'];
-            $netPay = $totalEarnings - $totalDeductions;
+            $totalEarnings = $row['total_earnings'] ;
+            $totalDeductions =$row['total_deductions'] ;
+            $netPay = $row['net_pay'];
 
             // Logo
             $logoPath = __DIR__ . "/my_project/images/MULTI-removebg-preview.png";

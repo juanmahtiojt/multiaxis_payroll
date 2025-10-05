@@ -224,7 +224,7 @@ if (isset($_GET['id_no'])) {
                 <h1 class="card-title">Add Attendance</h1>
                 <p class="card-subtitle">Create an attendance record in the payroll system</p>
             </div>
-
+<!-- 
             <?php if ($message): ?>
                 <div class="mx-4 mt-4 mb-0">
                     <div class="alert alert-<?= $messageType ?>">
@@ -240,7 +240,7 @@ if (isset($_GET['id_no'])) {
                         </div>
                     </div>
                 </div>
-            <?php endif; ?>
+            <?php endif; ?> -->
 
             <div class="card-body">
                 <form method="POST" action="save_manual_attendance.php" id="addEmployeeForm">

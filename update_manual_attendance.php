@@ -55,6 +55,7 @@ foreach ($_POST['work_dates'] as $workDate) {
         "restdayholiday_overtime"        => $_POST['restdayholiday_overtime'][$workDate] ?? 0,
         "restdayspecialholiday_overtime" => $_POST['restdayspecialholiday_overtime'][$workDate] ?? 0,
     ];
+     $work_days_count++;
 
     $multipliers = getHolidayMultipliers($workDate, $isSunday, $holidayInfo, $postedMultipliers);
 

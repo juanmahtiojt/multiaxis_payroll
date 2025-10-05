@@ -66,8 +66,10 @@ try {
             $row['created_ats'] = $createdAt; // so the PDF uses the same timestamp
         }
 
-        // Calculate overtime & totals
-        $overtimePay = $row['overtime_pay'];
+        $regularOtDay = isset($_GET['regular_ot_day']) ? $_GET['regular_ot_day'] : 0;
+        $overtimePay = $row['overtime_pay'] + $regularOtDay;
+
+
         if ((empty($overtimePay) || $overtimePay == 0) && $row['overtime_hours'] > 0 && $row['overtime_rate'] > 0) {
             $overtimePay = $row['overtime_hours'] * $row['overtime_rate'];
         }
@@ -323,7 +325,7 @@ table.grid td {
         $html .= '
                 <tr>
                     <td class="description"><strong>Total Earnings</strong></td>
-                    <td class="amount"><strong>P' . number_format((float)($totalEarnings ?? 0), 2) . '</strong></td>
+                    <td class="amount"><strong>P' . number_format((float)($row['total_earnings'] ?? 0), 2) . '</strong></td>
 
                 </tr>
             </table>
@@ -359,7 +361,7 @@ table.grid td {
         $html .= '
                 <tr>
                     <td class="description"><strong>Total Deductions</strong></td>
-                   <td class="amount"><strong>P' . number_format((float)($totalDeductions ?? 0), 2) . '</strong></td>
+                   <td class="amount"><strong>P' . number_format((float)($row['total_deductions'] ?? 0), 2) . '</strong></td>
 
                 </tr>
             </table>
@@ -368,7 +370,7 @@ table.grid td {
         <div class="summary-section">
             <div class="net-pay-row">
                 <span class="net-pay-label">NET PAY:</span>
-                <span class="net-pay-amount">P' . number_format((float)($netPay ?? 0), 2) . '</span>
+                <span class="net-pay-amount">P' . number_format((float)($row['net_pay'] ?? 0), 2) . '</span>
 
             </div>
         </div>

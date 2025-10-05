@@ -355,12 +355,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
     <!-- Sidebar Overlay for Mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
+    
     <!-- Mobile Menu Toggle Button -->
     <button class="menu-toggle" id="menuToggle">
         <i class="fas fa-bars"></i>
     </button>
-
+    
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <img src="my_project/images/MULTI-removebg-preview.png" class="sidebar-logo" alt="Company Logo">
@@ -386,9 +386,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <a href="upload_excel_monthly.php" class="<?= in_array($current_page, ['employee_attendace.php', 'employee_attendace_monthly.php', 'employee_attendace_semi-monthly.php']) ? 'active' : '' ?>">
                 <i class="fas fa-calendar-alt"></i> Upload Attendance
             </a>
-            <a href="manual_attendance.php" class="<?= ($current_page == 'manual_attendance.php') ? 'active' : '' ?>">
+            <a href="manual.php" class="<?= ($current_page == 'manual.php') ? 'active' : '' ?>">
                 <i class="fas fa-calendar-week"></i> Manual Attendance
-            </a> 
+            </a>
             <a href="attendance_summary_report.php" class="<?= ($current_page == 'attendance_summary_report.php') ? 'active' : '' ?>">
                 <i class="fas fa-clipboard-list"></i> Attendance Summary
             </a>
@@ -397,7 +397,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <!-- PAYROLL -->
         <div class="nav-section">
             <div class="nav-section-title">Payroll</div>
-            <a href="payroll.php" class="<?= ($current_page == 'payroll.php') ? 'active' : '' ?>">
+            <a href="payroll.php"
+                class="<?= in_array($current_page, ['payroll.php', 'enter_payroll.php', 'weekly_employees.php', 'semi-monthly_employees.php', 'enter_weekly_payroll.php', 'enter_payroll.php','enter_semimonthly_payroll.php']) ? 'active' : '' ?>">
                 <i class="fas fa-money-bill-wave"></i> Payroll
             </a>
             <a href="reports.php" class="<?php echo ($current_page == 'reports.php') ? 'active' : ''; ?>">
@@ -425,7 +426,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
             © <?php echo date('Y'); ?> Multi Axis Handlers & Tech Inc.
         </div>
 
-    </div>
 
     </div>
 
@@ -444,7 +444,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <?php
                         $servername = "localhost";
                         $username = "root";
-                        $password = "cvsuOJT@2025";
+                        // $password = "cvsuOJT@2025";
+                        $password = "juan1234";
                         $dbname = "mathipms";
 
                         $allowed_periods = ["hourly", "daily", "weekly", "semi-monthly", "monthly", "fixed", "15th"];
@@ -555,7 +556,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <?php
             $servername = "localhost";
             $username = "root";
-            $password = "cvsuOJT@2025";
+            // $password = "cvsuOJT@2025";
+            $password = "juan1234";
             $dbname = "mathipms";
 
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
