@@ -2,7 +2,7 @@
 // enter_payroll.php
 $host = "localhost";
 $username = "root";
-$password = "argonza@@@"; // Change this if you have a password; password:cvsuOJT@2025
+$password = "cvsuOJT@2025"; // Change this if you have a password; password:cvsuOJT@2025
 $dbname = "mathipms";
 
 

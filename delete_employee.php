@@ -8,6 +8,19 @@ if (!isset($_SESSION['user']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+// Log activity
+$username = $_SESSION['user'];
+$activity = "Delete an employee";
+$page = basename(__FILE__);
+$ip_address = $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP';
+$timestamp = date('Y-m-d H:i:s');
+$stmt = $conn->prepare("INSERT INTO activity_logs (username, activity, page, ip_address, timestamp) VALUES (?, ?, ?, ?, ?)");
+if ($stmt) {
+    $stmt->bind_param("sssss", $username, $activity, $page, $ip_address, $timestamp);
+    $stmt->execute();
+    $stmt->close();
+}
+
 if (isset($_GET['id'])) {
     $employee_id = $_GET['id'];
 

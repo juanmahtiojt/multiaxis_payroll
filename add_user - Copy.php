@@ -29,7 +29,7 @@ $daily_rate_query = "SELECT dr.id_no, dr.name, dr.department, dr.daily_rate, dr.
                     COALESCE(e.leave_with_pay, 0) as leave_with_pay,
                     COALESCE(e.leave_without_pay, 0) as leave_without_pay,
                     COALESCE(e.available_leave, 0) as available_leave
-                    FROM multiaxis_payroll_system.daily_rate dr
+                    FROM mathipms.daily_rate dr
                     LEFT JOIN employees e ON dr.id_no = e.id_no";
 $daily_rate_result = mysqli_query($conn, $daily_rate_query);
 

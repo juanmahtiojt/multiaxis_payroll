@@ -444,8 +444,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <?php
                         $servername = "localhost";
                         $username = "root";
-                        // $password = "cvsuOJT@2025";
-                        $password = "juan1234";
+                        $password = "cvsuOJT@2025";
+                        // $password = "juan1234";
                         $dbname = "mathipms";
 
                         $allowed_periods = ["hourly", "daily", "weekly", "semi-monthly", "monthly", "fixed", "15th"];
@@ -556,8 +556,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <?php
             $servername = "localhost";
             $username = "root";
-            // $password = "cvsuOJT@2025";
-            $password = "juan1234";
+            $password = "cvsuOJT@2025";
+            // $password = "juan1234";
             $dbname = "mathipms";
 
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {

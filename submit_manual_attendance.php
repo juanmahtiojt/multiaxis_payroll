@@ -4,6 +4,20 @@ session_start();
 include 'config.php';
 include 'functions.php';
 
+// Log activity
+$username = $_SESSION['user'];
+$activity = "Submit manual attendance to payroll";
+$page = basename(__FILE__);
+$ip_address = $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP';
+$timestamp = date('Y-m-d H:i:s');
+
+$stmt = $conn->prepare("INSERT INTO activity_logs (username, activity, page, ip_address, timestamp) VALUES (?, ?, ?, ?, ?)");
+if ($stmt) {
+    $stmt->bind_param("sssss", $username, $activity, $page, $ip_address, $timestamp);
+    $stmt->execute();
+    $stmt->close();
+}
+
 
 $id = $_POST['id'] ?? 0;
 
@@ -188,7 +202,8 @@ $overtimePayTotal = $otNormalTotal + $sundayOtPay;
 
 
 // DEBUG OUTPUT (REMOVE AFTER TESTING)
-// juannamary :)
+
+
 // echo "<pre>";
 // echo "Work Days: $work_days_count\n";
 // echo "Daily Rate: $daily_rate\n";
@@ -313,3 +328,4 @@ if ($stmt->execute()) {
 
 
 $conn->close();
+// juannamary :)

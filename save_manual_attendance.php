@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $totalOvertime  = 0;
     $totalUndertime = 0;
 
+
     foreach ($_POST['work_dates'] as $workDate) {
         $isSunday = ($_POST['isSunday'][$workDate] ?? 0) == 1;
 
@@ -54,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $otHours = (float)($_POST['ot_hours'][$workDate] ?? 0);
         $utHours = (float)($_POST['ut_hours'][$workDate] ?? 0);
-        
+
         $daily_rate = getEmployeeRate($conn, $id_no, $pay_schedule);
 
         // Salary computation
