@@ -184,17 +184,19 @@ $result = $conn->query($sql);
     }
 
     .custom-alert {
-    position: fixed;
-    margin-top: 15px;
-    right: 30px;
-    transform: translateX(-10%);
-    width: 400px; 
-    height: 80px;           /* Control size */
-    z-index: 1050;           /* Keeps it on top */
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    animation: fadeInDown 0.4s ease;
-}
+        position: fixed;
+        margin-top: 15px;
+        right: 30px;
+        transform: translateX(-10%);
+        width: 400px;
+        height: 80px;
+        /* Control size */
+        z-index: 1050;
+        /* Keeps it on top */
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        animation: fadeInDown 0.4s ease;
+    }
 
 
     @keyframes fadeInDown {
@@ -528,11 +530,16 @@ $result = $conn->query($sql);
                                 },
                                 body: `id=${deleteId}`
                             })
-                            .then(() => {
+                            .then(res => res.json())
+                            .then(data => {
                                 modal.hide();
-                                window.location.href = 'manual.php?msg=deleted';
-                            })
-                            .catch(err => console.error('Delete failed:', err));
+                                if (data.status === 'success') {
+                                    window.location.href = 'manual.php?msg=deleted';
+                                } else {
+                                    alert('Failed to delete record.');
+                                }
+                            });
+
                     }
                 });
             });

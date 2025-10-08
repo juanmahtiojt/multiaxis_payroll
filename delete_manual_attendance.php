@@ -1,34 +1,40 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ob_start();
+
+session_start();
 include 'config.php';
-// Log activity
-$username = $_SESSION['user'];
-$activity = "Permanently delete a manual attendance";
-$page = basename(__FILE__);
-$ip_address = $_SERVER['REMOTE_ADDR'] ?? 'Unknown IP';
-$timestamp = date('Y-m-d H:i:s');
-$stmt = $conn->prepare("INSERT INTO activity_logs (username, activity, page, ip_address, timestamp) VALUES (?, ?, ?, ?, ?)");
-if ($stmt) {
-    $stmt->bind_param("sssss", $username, $activity, $page, $ip_address, $timestamp);
-    $stmt->execute();
-    $stmt->close();
-}
+header('Content-Type: application/json');
+
+$response = [];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id = $_POST['id'] ?? 0;
+    $id = intval($_POST['id'] ?? 0);
 
     if ($id > 0) {
         $stmt = $conn->prepare("DELETE FROM manual_attendance WHERE id = ?");
-        $stmt->bind_param("i", $id);
-        if ($stmt->execute()) {
-            header("Location: manual.php?msg=deleted");
-            exit;
+        if ($stmt) {
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+
+            if ($stmt->affected_rows > 0) {
+                $response['status'] = 'success';
+            } else {
+                $response['status'] = 'not_found';
+            }
+
+            $stmt->close();
         } else {
-            header("Location: manual.php?msg=delete_error");
-            exit;
+            $response['status'] = 'prepare_failed';
         }
-        $stmt->close();
     } else {
-        header("Location: manual.php?msg=delete_error");
-        exit;
+        $response['status'] = 'invalid_id';
     }
+} else {
+    $response['status'] = 'invalid_request';
 }
-?>
+
+ob_end_clean();
+echo json_encode($response);
+exit;
