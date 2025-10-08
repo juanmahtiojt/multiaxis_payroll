@@ -11,6 +11,8 @@ if (!isset($_SESSION['user'])) {
 ini_set('memory_limit', '512M'); // or 1G if needed
 
 
+
+
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -26,24 +28,39 @@ $dompdf = new Dompdf($options);
 // Get parameters for archive generation
 $generation_date = $_GET['generation_date'] ?? '';
 $archived = $_GET['archived'] ?? 'all';
+$ids_param = $_GET['ids'] ?? ''; //  Added this line
 
 if (empty($generation_date)) {
     die('Missing generation date parameter');
 }
 
 try {
-    if ($archived === 'all') {
-        // Do not filter by archived
+    if (!empty($ids_param)) {
+        
+        $ids = array_map('intval', explode(',', $ids_param)); // sanitize to integers
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+        $types = str_repeat('i', count($ids));
+
+        $query = "SELECT * FROM payroll_records 
+                  WHERE id IN ($placeholders)
+                  ORDER BY name ASC";
+
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param($types, ...$ids);
+    } elseif ($archived === 'all') {
+        
         $query = "SELECT * FROM payroll_records 
                   WHERE DATE(COALESCE(created_ats, created_at)) = ?
                   ORDER BY name ASC";
         $stmt = $conn->prepare($query);
         $stmt->bind_param("s", $generation_date);
     } else {
-        // Filter by archived 0 or 1
-        $archived = (int)$archived; // ensure integer
+        
+        $archived = (int)$archived;
         $query = "SELECT * FROM payroll_records 
-                  WHERE DATE(COALESCE(created_ats, created_at)) = ? 
+                  WHERE DATE(COALESCE(created_ats, created_at)) = ?
                   AND archived = ?
                   ORDER BY name ASC";
         $stmt = $conn->prepare($query);

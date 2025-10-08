@@ -12,17 +12,17 @@ if (!isset($_SESSION['user'])) {
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
-    // Set up Dompdf options
-    $options = new Options();
-    $options->set('defaultFont', 'Helvetica');
-    $options->set('isHtml5ParserEnabled', true);
-    $options->set('isPhpEnabled', true);
-    $options->set('isRemoteEnabled', true);
-    $options->set('defaultCharset', 'UTF-8');
-    $options->set('isFontSubsettingEnabled', false);
-    
-    // Add font directory for better font support
-    $options->set('fontDir', __DIR__ . '/vendor/dompdf/dompdf/lib/fonts/');
+// Set up Dompdf options
+$options = new Options();
+$options->set('defaultFont', 'Helvetica');
+$options->set('isHtml5ParserEnabled', true);
+$options->set('isPhpEnabled', true);
+$options->set('isRemoteEnabled', true);
+$options->set('defaultCharset', 'UTF-8');
+$options->set('isFontSubsettingEnabled', false);
+
+// Add font directory for better font support
+$options->set('fontDir', __DIR__ . '/vendor/dompdf/dompdf/lib/fonts/');
 
 $dompdf = new Dompdf($options);
 
@@ -40,7 +40,7 @@ try {
     $username = "root";
     $password = "cvsuOJT@2025";
     $dbname = "mathipms";
-    
+
     $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -275,7 +275,7 @@ table.grid td {
 <body>
 ';
 
-       $count = 0;
+        $count = 0;
         $totalPayslips = count($payslip_result);
 
         $html .= '<table class="grid" style="width:100%; border-spacing:5mm;">'; // Start first page
@@ -286,8 +286,9 @@ table.grid td {
                 $html .= '<tr>'; // Start new row every 2 payslips
             }
 
-            // Calculate overtime & totals
-            $overtimePay = $row['overtime_pay'];
+            $regularOtDay = isset($_GET['regular_ot_day']) ? $_GET['regular_ot_day'] : 0;
+            $overtimePay = $row['overtime_pay'] + $regularOtDay;
+
             if ((empty($overtimePay) || $overtimePay == 0) && $row['overtime_hours'] > 0 && $row['overtime_rate'] > 0) {
                 $overtimePay = $row['overtime_hours'] * $row['overtime_rate'];
             }
@@ -332,7 +333,7 @@ table.grid td {
                 $html .= '<tr><td>Overtime (' . $row['overtime_hours'] . ' hrs)</td><td>P' . number_format($overtimePay, 2) . '</td></tr>';
             }
 
-            $html .= '<tr><td><strong>Total Earnings</strong></td><td><strong>P' . number_format($totalEarnings, 2) . '</strong></td></tr>
+            $html .= '<tr><td><strong>Total Earnings</strong></td><td><strong>P' . number_format((float)($row['total_earnings'] ?? 0), 2) . '</strong></td></tr>
                 </table>
             </div>  
 
@@ -358,11 +359,11 @@ table.grid td {
                 }
             }
 
-            $html .= '<tr><td><strong>Total Deductions</strong></td><td><strong>P' . number_format($totalDeductions, 2) . '</strong></td></tr>
+            $html .= '<tr><td><strong>Total Deductions</strong></td><td><strong>P' . number_format((float)($row['total_deductions'] ?? 0), 2) . '</strong></td></tr>
                 </table>
             </div>
 
-            <p><strong>NET PAY: P' . number_format($netPay, 2) . '</strong></p>
+            <p><strong>NET PAY: P' . number_format((float)($row['net_pay'] ?? 0), 2) . '</strong></p>
         </div>
         <div class="signature-section">
             <p>This is a computer-generated payslip.</p>
@@ -411,8 +412,6 @@ table.grid td {
     } else {
         echo 'No payslip found for the selected criteria.';
     }
-
 } catch (PDOException $e) {
     echo 'Error: ' . $e->getMessage();
 }
-?>

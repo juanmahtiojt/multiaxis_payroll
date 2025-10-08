@@ -371,7 +371,7 @@ unset($_SESSION['upload_error']);
         <!-- ATTENDANCE -->
         <div class="nav-section">
             <div class="nav-section-title">Attendance</div>
-            <a href="upload_excel_monthly.php" class="<?= in_array($current_page, ['employee_attendace.php', 'employee_attendace_monthly.php', 'employee_attendace_semi-monthly.php']) ? 'active' : '' ?>">
+            <a href="upload_excel_monthly.php" class="<?= in_array($current_page, ['employee_attendance.php', 'employee_attendance_monthly.php', 'employee_attendance_semi-monthly.php']) ? 'active' : '' ?>">
                 <i class="fas fa-calendar-alt"></i> Upload Attendance
             </a>
             <a href="manual.php" class="<?= ($current_page == 'manual.php') ? 'active' : '' ?>">

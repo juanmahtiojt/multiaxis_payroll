@@ -157,7 +157,7 @@ function getPayslipsByDate($conn, $date, $archived = 0)
             z-index: 1030;
         }
 
-                .sidebar-header {
+        .sidebar-header {
             padding: 20px 15px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -387,12 +387,12 @@ function getPayslipsByDate($conn, $date, $archived = 0)
 
     <!-- Sidebar Overlay for Mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+
     <!-- Mobile Menu Toggle Button -->
     <button class="menu-toggle" id="menuToggle">
         <i class="fas fa-bars"></i>
     </button>
-    
+
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <img src="my_project/images/MULTI-removebg-preview.png" class="sidebar-logo" alt="Company Logo">
@@ -430,7 +430,7 @@ function getPayslipsByDate($conn, $date, $archived = 0)
         <div class="nav-section">
             <div class="nav-section-title">Payroll</div>
             <a href="payroll.php"
-                class="<?= in_array($current_page, ['payroll.php', 'enter_payroll.php', 'weekly_employees.php', 'semi-monthly_employees.php', 'enter_weekly_payroll.php', 'enter_payroll.php','enter_semimonthly_payroll.php']) ? 'active' : '' ?>">
+                class="<?= in_array($current_page, ['payroll.php', 'enter_payroll.php', 'weekly_employees.php', 'semi-monthly_employees.php', 'enter_weekly_payroll.php', 'enter_payroll.php', 'enter_semimonthly_payroll.php']) ? 'active' : '' ?>">
                 <i class="fas fa-money-bill-wave"></i> Payroll
             </a>
             <a href="reports.php" class="<?php echo ($current_page == 'reports.php') ? 'active' : ''; ?>">
@@ -512,17 +512,17 @@ function getPayslipsByDate($conn, $date, $archived = 0)
                     <?php if (mysqli_num_rows($active_result) > 0): ?>
                         <?php while ($date_group = mysqli_fetch_assoc($active_result)): ?>
                             <?php
-                            // Define safe formatted date for group
                             $formatted_date = !empty($date_group['generation_date'])
                                 ? date('F j, Y', strtotime($date_group['generation_date']))
                                 : "N/A";
                             ?>
-                            <div class="mb-4">
+                            <div class="mb-4" id="group-<?= preg_replace('/[^a-zA-Z0-9]/', '', $date_group['generation_date']); ?>">
                                 <h5 class="text-primary mb-3">
                                     <i class="fas fa-calendar-alt"></i>
                                     Generated on: <?= $formatted_date ?>
                                     <span class="badge bg-secondary ms-2"><?= $date_group['payslip_count']; ?> payslips</span>
                                 </h5>
+
 
                                 <form method="POST" action="">
                                     <input type="hidden" name="action" value="archive">
@@ -530,21 +530,23 @@ function getPayslipsByDate($conn, $date, $archived = 0)
                                         <div class="checkbox-group mb-2">
                                             <input type="checkbox"
                                                 id="selectAllActive<?= $date_group['generation_date']; ?>"
-                                                onchange="selectAll(this, 'payslip_ids[]')">
+                                                onchange="selectAllDate(this)">
                                             <label for="selectAllActive<?= $date_group['generation_date']; ?>" class="fw-bold">
                                                 <i class="fas fa-check-square"></i> Select All for This Date
                                             </label>
                                         </div>
+
                                         <button type="submit"
                                             class="btn btn-primary btn-sm"
-                                            onclick="return confirm('Archive all payslips for <?= $formatted_date ?>?')">
-                                            <i class="fas fa-archive"></i> Archive All for This Date
+                                            onclick="return confirm('Archive selected payslips for <?= $formatted_date ?>?')">
+                                            <i class="fas fa-archive"></i> Archive Selected
                                         </button>
-                                        <a href="generate_archive_payslip_pdf.php?generation_date=<?= $date_group['generation_date']; ?>&archived=0"
-                                            class="btn btn-success btn-sm" target="_blank"
-                                            onclick="logPrintAction('batch', '<?= $date_group['generation_date']; ?>', <?= $date_group['payslip_count']; ?>)">
-                                            <i class="fas fa-file-pdf"></i> Generate PDF Report
-                                        </a>
+
+                                        <a href="#"
+    class="btn btn-success btn-sm"
+    onclick="return openSelectedPayslipsPDF('<?= $date_group['generation_date']; ?>', 0)">
+    <i class="fas fa-file-pdf"></i> Generate PDF Report (Selected)
+</a>
 
 
                                         <div class="row">
@@ -555,7 +557,11 @@ function getPayslipsByDate($conn, $date, $archived = 0)
                                                 <div class="col-md-6 col-lg-4 mb-3">
                                                     <div class="payslip-card">
                                                         <div class="checkbox-group">
-                                                            <input type="checkbox" name="payslip_ids[]" value="<?= $payslip['id']; ?>">
+                                                            <input type="checkbox"
+                                                                name="payslip_ids[]"
+                                                                value="<?= $payslip['id']; ?>"
+                                                                class="payslip-checkbox"
+                                                                onchange="updateSelectAllState(this)">
                                                             <label>Select <?= htmlspecialchars($payslip['name']); ?></label>
                                                         </div>
 
@@ -572,10 +578,11 @@ function getPayslipsByDate($conn, $date, $archived = 0)
                                                                 <?= date('M d, Y', strtotime($payslip['end_date'])); ?>
                                                             </div>
                                                             <div class="info-item">
-                                                                <strong>Net Pay:</strong> ₱<?= number_format(
-                                                                                                $payslip['total_earnings'] - $payslip['total_deductions'],
-                                                                                                2
-                                                                                            ); ?>
+                                                                <strong>Net Pay:</strong>
+                                                                ₱<?= number_format(
+                                                                        $payslip['total_earnings'] - $payslip['total_deductions'],
+                                                                        2
+                                                                    ); ?>
                                                             </div>
                                                             <div class="info-item">
                                                                 <strong>Created:</strong> <?= $payslip['formatted_date']; ?>
@@ -623,7 +630,7 @@ function getPayslipsByDate($conn, $date, $archived = 0)
 
                                 <form method="POST" action="">
                                     <div class="mb-3 date-group">
-                                        
+
 
                                         <button type="submit" name="action" value="restore" class="btn btn-warning btn-sm" onclick="return confirm('Restore payslips for <?php echo $date_group['formatted_date']; ?>?')">
                                             <i class="fas fa-undo"></i> Restore / Restore All
@@ -645,75 +652,105 @@ function getPayslipsByDate($conn, $date, $archived = 0)
                                                 <i class="fas fa-check-square"></i> Select All for This Date
                                             </label>
                                         </div>
-                                    
 
-                                    <div class="row">
-                                        <?php
-                                        $payslips_for_date = getPayslipsByDate($conn, $date_group['generation_date'], 1);
-                                        while ($payslip = mysqli_fetch_assoc($payslips_for_date)):
-                                        ?>
-                                            <div class="col-md-6 col-lg-4 mb-3">
-                                                <div class="payslip-card">
-                                                    <div class="checkbox-group">
-                                                        <input type="checkbox" name="payslip_ids[]" value="<?php echo $payslip['id']; ?>">
-                                                        <label>Select <?php echo htmlspecialchars($payslip['name']); ?></label>
-                                                    </div>
 
-                                                    <div class="payslip-info">
-                                                        <div class="info-item">
-                                                            <strong>Employee:</strong> <?php echo htmlspecialchars($payslip['name']); ?>
+                                        <div class="row">
+                                            <?php
+                                            $payslips_for_date = getPayslipsByDate($conn, $date_group['generation_date'], 1);
+                                            while ($payslip = mysqli_fetch_assoc($payslips_for_date)):
+                                            ?>
+                                                <div class="col-md-6 col-lg-4 mb-3">
+                                                    <div class="payslip-card">
+                                                        <div class="checkbox-group">
+                                                            <input type="checkbox" name="payslip_ids[]" value="<?php echo $payslip['id']; ?>">
+                                                            <label>Select <?php echo htmlspecialchars($payslip['name']); ?></label>
                                                         </div>
-                                                        <div class="info-item">
-                                                            <strong>Period:</strong> <?php echo ucfirst(htmlspecialchars($payslip['pay_period'])); ?>
-                                                        </div>
-                                                        <div class="info-item">
-                                                            <strong>Date Range:</strong> <?php echo date('M d, Y', strtotime($payslip['start_date'])); ?> - <?php echo date('M d, Y', strtotime($payslip['end_date'])); ?>
-                                                        </div>
-                                                        <div class="info-item">
+
+                                                        <div class="payslip-info">
+                                                            <div class="info-item">
+                                                                <strong>Employee:</strong> <?php echo htmlspecialchars($payslip['name']); ?>
+                                                            </div>
+                                                            <div class="info-item">
+                                                                <strong>Period:</strong> <?php echo ucfirst(htmlspecialchars($payslip['pay_period'])); ?>
+                                                            </div>
+                                                            <div class="info-item">
+                                                                <strong>Date Range:</strong> <?php echo date('M d, Y', strtotime($payslip['start_date'])); ?> - <?php echo date('M d, Y', strtotime($payslip['end_date'])); ?>
+                                                            </div>
+                                                            <div class="info-item">
                                                                 <strong>Net Pay:</strong> ₱<?= number_format(
                                                                                                 $payslip['total_earnings'] - $payslip['total_deductions'],
                                                                                                 2
                                                                                             ); ?>
                                                             </div>
-                                                        <div class="info-item">
-                                                            <strong>Archived:</strong> <?php echo $payslip['formatted_date']; ?>
+                                                            <div class="info-item">
+                                                                <strong>Archived:</strong> <?php echo $payslip['formatted_date']; ?>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="action-buttons">
+                                                            <a href="generate_individual_payslip_pdf.php?id=<?php echo $payslip['id']; ?>"
+                                                                class="btn btn-outline-success btn-sm" target="_blank">
+                                                                <i class="fas fa-file-pdf"></i> Individual PDF
+                                                            </a>
                                                         </div>
                                                     </div>
-
-                                                    <div class="action-buttons">
-                                                        <a href="generate_individual_payslip_pdf.php?id=<?php echo $payslip['id']; ?>"
-                                                            class="btn btn-outline-success btn-sm" target="_blank">
-                                                            <i class="fas fa-file-pdf"></i> Individual PDF
-                                                        </a>
-                                                    </div>
                                                 </div>
-                                            </div>
-                                        <?php endwhile; ?>
+                                            <?php endwhile; ?>
+                                        </div>
                                     </div>
+                                </form>
                             </div>
-                            </form>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <div class="empty-state">
+                            <i class="fas fa-archive"></i>
+                            <p>No archived payslips found</p>
+                        </div>
+                    <?php endif; ?>
                 </div>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <div class="empty-state">
-                <i class="fas fa-archive"></i>
-                <p>No archived payslips found</p>
-            </div>
-        <?php endif; ?>
             </div>
         </div>
-    </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Select all checkboxes
-        function selectAll(source, name) {
-            let container = source.closest('.date-group');
-            let checkboxes = container.querySelectorAll(`input[name="${name}"]`);
+        function selectAllDate(source) {
+            const group = source.closest('.date-group');
+            if (!group) return;
+            const checkboxes = group.querySelectorAll('input.payslip-checkbox');
             checkboxes.forEach(cb => cb.checked = source.checked);
         }
 
+        function updateSelectAllState(checkbox) {
+            const group = checkbox.closest('.date-group');
+            if (!group) return;
+            const allCheckboxes = group.querySelectorAll('input.payslip-checkbox');
+            const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
+            const selectAllBox = group.querySelector('input[id^="selectAllActive"]');
+            if (selectAllBox) selectAllBox.checked = allChecked;
+        }
+
+        function openSelectedPayslipsPDF(generationDate, archivedStatus = 0) {
+            const dateGroup = document.getElementById('group-' + generationDate.replace(/[^a-zA-Z0-9]/g, ''));
+            if (!dateGroup) {
+                alert("Error: date group not found.");
+                return false;
+            }
+
+            // collect selected payslips only inside this date group
+            const selected = Array.from(dateGroup.querySelectorAll('input[name="payslip_ids[]"]:checked'))
+                .map(cb => cb.value);
+
+            if (selected.length === 0) {
+                alert("Please select at least one payslip to generate PDF.");
+                return false;
+            }
+
+            const ids = selected.join(',');
+            const url = `generate_archive_payslip_pdf.php?generation_date=${encodeURIComponent(generationDate)}&archived=${archivedStatus}&ids=${encodeURIComponent(ids)}`;
+            window.open(url, '_blank');
+            return false;
+        }
 
 
         // Log print actions

@@ -18,11 +18,11 @@ $uploadError = $_SESSION['upload_error'] ?? null;
 unset($_SESSION['upload_error']);
 
 $payPeriods = [];
-$sql = "SELECT id, pay_schedule FROM daily_rate";
+$sql = "SELECT id_no, pay_schedule FROM daily_rate";
 $result = $conn->query($sql);
 
 while ($row = $result->fetch_assoc()) {
-    $payPeriods[$row['id']] = strtolower($row['pay_schedule']);
+    $payPeriods[$row['id_no']] = strtolower($row['pay_schedule']);
 }
 
 
@@ -371,7 +371,7 @@ while ($row = $result->fetch_assoc()) {
         <!-- ATTENDANCE -->
         <div class="nav-section">
             <div class="nav-section-title">Attendance</div>
-            <a href="upload_excel_monthly.php" class="<?= in_array($current_page, ['employee_attendace.php', 'employee_attendace_monthly.php', 'employee_attendace_semi-monthly.php']) ? 'active' : '' ?>">
+            <a href="upload_excel_monthly.php" class="<?= in_array($current_page, ['employee_attendance.php', 'employee_attendance_monthly.php', 'employee_attendance_semi-monthly.php']) ? 'active' : '' ?>">
                 <i class="fas fa-calendar-alt"></i> Upload Attendance
             </a>
             <a href="manual.php" class="<?= ($current_page == 'manual.php') ? 'active' : '' ?>">

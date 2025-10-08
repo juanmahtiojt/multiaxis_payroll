@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['holiday_date'])) {
         header("Location: add_holiday.php");
         exit();
     } else {
-        echo "❌ Error deleting holiday: " . $stmt->error;
+        echo "Error deleting holiday: " . $stmt->error;
     }
 
     $stmt->close();
