@@ -89,12 +89,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     if ($id_no && $name && $work_days_count > 0) {
-        $check = $conn->prepare("SELECT id FROM manual_attendance WHERE id_no = ?");
-        $check->bind_param("s", $id_no);
+
+        
+        $check = $conn->prepare("
+        SELECT id 
+        FROM manual_attendance 
+        WHERE id_no = ? AND start_date = ? AND end_date = ?
+    ");
+        $check->bind_param("sss", $id_no, $start_date, $end_date);
         $check->execute();
         $check->store_result();
 
         if ($check->num_rows > 0) {
+
             $check->close();
             $conn->close();
             header("Location: manual.php?msg=duplicate");
@@ -103,10 +110,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $check->close();
 
         $stmt = $conn->prepare("
-            INSERT INTO manual_attendance 
-            (id_no, department, name, pay_schedule, start_date, end_date, work_days_count, ot_hours, ut_hours, attendance_data) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
+        INSERT INTO manual_attendance 
+        (id_no, department, name, pay_schedule, start_date, end_date, work_days_count, ot_hours, ut_hours, attendance_data) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
 
         $stmt->bind_param(
             "ssssssiiis",

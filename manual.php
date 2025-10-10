@@ -358,7 +358,7 @@ $result = $conn->query($sql);
                     $alerts = [
                         'success'      => ['class' => 'success', 'icon' => 'bi-check-circle-fill', 'text' => 'Data saved successfully!'],
                         'error'        => ['class' => 'danger',  'icon' => 'bi-exclamation-triangle-fill', 'text' => 'Error: Please fill in all required fields.'],
-                        'duplicate'    => ['class' => 'warning', 'icon' => 'bi-exclamation-circle-fill', 'text' => 'Duplicate Entry: This ID Number already exists.'],
+                        'duplicate'    => ['class' => 'warning', 'icon' => 'bi-exclamation-circle-fill', 'text' => 'Duplicate Entry: This ID Number already exists or already submitted to payroll.'],
                         'updated'      => ['class' => 'info',    'icon' => 'bi-pencil-square', 'text' => 'Attendance successfully updated.'],
                         'deleted'      => ['class' => 'danger',  'icon' => 'bi-trash-fill', 'text' => 'Record permanently deleted.'],
                         'delete_error' => ['class' => 'warning', 'icon' => 'bi-x-circle-fill', 'text' => 'Failed to delete record. Please try again.'],
